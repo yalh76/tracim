@@ -11,3 +11,8 @@ class ConfigException(Exception):
 
     def __init__(self, message: str):
         self.message = message
+
+class IntegrityException(Exception):
+
+    def __init__(self, message: str):
+        self.message = message

@@ -18,25 +18,27 @@ class Service(object):
         BaseModel.metadata.create_all(engine)
         self.config = ConfigParser().load_config_from_file()
 
-    def main(self):
+    def main(self) -> None:
         for label, params in self.config.INSTANCES.items():
             try:
-                last_revision_id = session\
-                    .query(func.max(ContentModel.revision_id))\
-                    .filter(ContentModel.instance_label == label)\
-                    .scalar() or 0
-                instance = InstanceAdapter(label, params, last_revision_id)
-                synchronizer = Synchronizer(instance)
-                synchronizer.detect_changes()
-                synchronizer.update_db()
+                self._update_db_for_intance(label, params)
             except ConnectionException as ex:
                 print(ex)
-
         try:
-            file_manager = FileManager()
+            file_manager = FileManager(self.config)
             file_manager.update_local_files()
         except ConnectionException as ex:
             print(ex)
+
+    def _update_db_for_intance(self, label, params) -> None:
+        last_revision_id = session\
+            .query(func.max(ContentModel.revision_id))\
+            .filter(ContentModel.instance_label == label)\
+            .scalar() or 0
+        instance = InstanceAdapter(label, params, last_revision_id)
+        synchronizer = Synchronizer(instance)
+        synchronizer.detect_changes()
+        synchronizer.update_db()
 
 
 if __name__ == "__main__":

@@ -1,25 +1,23 @@
 # coding: utf-8
 import os
-import requests
-
-from config import ConfigParser
-from db import session
-from models import ContentModel
-from models import Flag
-from url_normalize import url_normalize
 import shutil
 
+import requests
+from url_normalize import url_normalize
 
-config = ConfigParser().load_config_from_file()
-url = '{remote}/api/v2/workspaces/{workspace_id}/files/{content_id}/revisions/{revision_id}/raw/{filename}'
+from config import Config
+from db import session
+from enums import Flag
+from enums import ContentType
+from models import ContentModel
 
 class FileManager(object):
 
-    def __init__(self):
-        self.create_base()
+    def __init__(self, config: Config):
         self.config = config
+        self.create_base()
 
-    def create_base(self):
+    def create_base(self) -> None:
         dirs = session.query(
             ContentModel.instance_label,
             ContentModel.workspace_label
@@ -27,14 +25,14 @@ class FileManager(object):
         for dir_ in dirs:
             self.create_dirs(os.path.join(*dir_))
 
-    def update_local_files(self):
+    def update_local_files(self) -> None:
         self.move_contents()
         self.delete_contents()
         self.update_files()
         self.create_contents()
         session.commit()
 
-    def delete_contents(self):
+    def delete_contents(self) -> None:
         contents = self.get_contents_by_flag(Flag.DELETED)
 
         for content in contents:
@@ -43,14 +41,14 @@ class FileManager(object):
             session.delete(content)
             session.commit()
 
-    def delete_content(self, content):
+    def delete_content(self, content: ContentModel) -> None:
         absolute_path = self.get_absolute_path(content)
         if content.content_type == 'folder':
             shutil.rmtree(absolute_path)
         else:
             os.remove(absolute_path)
 
-    def move_contents(self):
+    def move_contents(self) -> None:
         contents = self.get_contents_by_flag(Flag.MOVED)
 
         for content in contents:
@@ -64,7 +62,7 @@ class FileManager(object):
                 session.merge(sub_content)
             session.commit()
 
-    def move_content(self, content):
+    def move_content(self, content: ContentModel) -> None:
         old_absolute_path = self.get_absolute_path(content)
         content.set_relative_path()
         new_absolute_path = self.get_absolute_path(content)
@@ -75,7 +73,7 @@ class FileManager(object):
         )
         shutil.move(old_absolute_path, new_absolute_path)
 
-    def update_files(self):
+    def update_files(self) -> None:
         contents = self.get_contents_by_flag(Flag.CHANGED)
         for content in contents:
             self.create_or_update_file(content)
@@ -83,7 +81,7 @@ class FileManager(object):
             session.merge(content)
         
 
-    def create_contents(self):
+    def create_contents(self) -> None:
         contents = self.get_contents_by_flag(Flag.NEW)
 
         for content in contents:
@@ -96,20 +94,20 @@ class FileManager(object):
             except requests.exceptions.ConnectionError:
                 print('Could not download {}'.format(content.filename))
 
-    def create_content(self, content):
+    def create_content(self, content: ContentModel) -> None:
         if content.content_type == 'folder':
             self.create_dirs(content.relative_path)
         else:
             self.create_or_update_file(content)
 
-    def get_contents_by_flag(self, flag: Flag):
+    def get_contents_by_flag(self, flag: Flag) -> list:
         return session\
             .query(ContentModel)\
             .filter(ContentModel.flag == flag)\
             .order_by(ContentModel.remote_id)\
             .all()
 
-    def create_or_update_file(self, content):
+    def create_or_update_file(self, content: ContentModel) -> None:
         instance_params= self.config.get_instance(content.instance_label)
         normalized_url = self.get_download_url(content)
         request = requests.get(
@@ -125,23 +123,22 @@ class FileManager(object):
             request.raw.decode_content = True
             shutil.copyfileobj(request.raw, file_)
 
-
-
-    def create_dirs(self, dir_path):
+    def create_dirs(self, dir_path: str) -> None:
+        import ipdb; ipdb.set_trace()
         os.makedirs(
-            os.path.join(config.BASE_FOLDER, dir_path),
+            os.path.join(self.config.BASE_FOLDER, dir_path),
             exist_ok=True
         )
 
-    def get_absolute_path(self, content):
+    def get_absolute_path(self, content: ContentModel) -> None:
         return os.path.join(
             self.config.BASE_FOLDER,
             content.relative_path
         )
             
-    def get_download_url(self, content):
-        return url_normalize(os.path.join(
+    def get_download_url(self, content: ContentModel) -> str:
+        url = os.path.join(
             self.config.get_instance(content.instance_label)['webdav']['url'],
             content.relative_path[len(content.instance_label) + 1 :]
-            )
         )
+        return url_normalize(url)

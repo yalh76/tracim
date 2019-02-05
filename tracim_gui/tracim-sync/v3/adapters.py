@@ -1,32 +1,11 @@
 # coding: utf-8
 
 import json
-
-from enum import Enum
 import requests
 
-
+from enums import Url
+from enums import ContentType
 from tracim_sync_exceptions import ConnectionException
-
-
-class ContentType(Enum):
-
-    FOLDER = 'folder'
-    DOCUMENT = 'html-document'
-    THREAD = 'thread'
-    FILE = 'file'
-    COMMENT = 'comment'
-
-
-class Url(Enum):
-
-    WORKSPACE = "{remote}/api/v2/workspaces"
-    CONTENT = "{remote}/api/v2/workspaces/{workspace_id}/contents/extended?show_deleted=1&show_archived=1&after_revision_id={revision_id}"
-    FOLDER = "{remote}/api/v2/workspaces/{workspace_id}/folders/{content_id}"
-    FILE = "{remote}/api/v2/workspaces/{workspace_id}/files/{content_id}"
-    THREAD = "{remote}/api/v2/workspaces/{workspace_id}/threads/{content_id}"  # nopep8
-    DOCUMENT = "{remote}/api/v2/workspaces/{workspace_id}/html-documents/{content_id}"  # nopep8
-    WEBDAV_FILE = "{webdav}/{file_path}/"
 
 
 class ContentAdapter(object):
@@ -118,18 +97,18 @@ class WorkspaceAdapter(object):
         self.workspace = workspace
 
     @property
-    def workspace_id(self):
+    def workspace_id(self) -> int:
         return self.workspace.get('workspace_id')
 
     @property
-    def remote_id(self):
+    def remote_id(self) -> int:
         return self.workspace_id
 
     @property
-    def label(self):
+    def label(self) -> int:
         return self.workspace.get('label')
 
-    def get_path(self):
+    def get_path(self) -> str:
         return self.label
 
 
@@ -152,7 +131,7 @@ class InstanceAdapter(object):
         self.excluded_workspaces = instance_params.get('excluded_workspaces')
         self.excluded_folders = instance_params.get('excluded_folders')
 
-    def load_all_contents(self):
+    def load_all_contents(self) -> list:
 
         workspaces = self.load_workspaces()
         contents = list()
@@ -160,7 +139,7 @@ class InstanceAdapter(object):
             contents += self.load_workspace_contents(workspace)
         return contents
 
-    def load_workspaces(self):
+    def load_workspaces(self) -> list:
         if self.workspaces:
             return self.workspaces
         try:
@@ -185,7 +164,7 @@ class InstanceAdapter(object):
         self.workspaces = workspaces
         return self.workspaces
 
-    def load_workspace_contents(self, workspace: WorkspaceAdapter):
+    def load_workspace_contents(self, workspace: WorkspaceAdapter) -> list:
         workspace_id = workspace.workspace_id
         url = Url.CONTENT.value.format(
             remote=self.remote_url,
