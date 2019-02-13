@@ -2,10 +2,10 @@
 
 import os
 
-from tracim_sync_exceptions import ConfigException
-
 from yaml import load as yaml_load
 from yaml import YAMLError
+
+from tracim_sync_exceptions import ConfigException
 
 BASE_FOLDER_KEY = 'base_folder'
 DB_PATH_key = 'db_path'
@@ -14,26 +14,13 @@ INSTANCES_key = 'instances'
 
 class Config(object):
 
-    BASE_FOLDER = "/tmp/tracim-sync"
-    DB_PATH = "/tmp/test.sqlite"
-    INSTANCES = {
-        "tracim": {
-            "url": "http://localhost:6543",
-            "login": "admin@admin.admin",
-            "password": "admin@admin.admin",
-            "webdav": {
-                "url": "http://localhost:3030"
-            },
-            'excluded_workspaces': [],
-            'excluded_folders': [],
-        }
-    }
+    def __init__(self, config_as_dict: dict):
+        self.BASE_FOLDER = config_as_dict.get('base_folder')
+        self.DB_PATH = config_as_dict.get('db_path')
+        self.INSTANCES = config_as_dict.get('instances')
 
     def get_instance(self, instance_label: str):
         return self.INSTANCES[instance_label]
-
-    def __init__(self, config_as_dict: dict):
-        self.BASE_FOLDER = config_as_dict.get('base_folder')
 
 
 class ConfigParser(object):

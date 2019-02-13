@@ -43,7 +43,7 @@ class ContentAdapter(object):
 
     @property
     def content_type(self):
-        return self.content.get('content_type')
+        return ContentType(self.content.get('content_type'))
 
     @property
     def workspace_id(self):
