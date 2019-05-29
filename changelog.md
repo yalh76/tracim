@@ -1,4 +1,17 @@
 
+## 2.2.1 / 2019-xx-xx
+
+### Fixed issues 
+
+- Agenda: #1811
+- Content: #1818
+
+### Others
+
+- After migration from 2.1.0 to 2.2.0 or 2.2.1, if you use docker image you need to look this [docker documentation](https://github.com/tracim/tracim/tree/develop/tools_docker) about use caldav (agenda) in tracim.
+Activate agenda in tracim by adding `-e START_CALDAV=1` at your `docker run` command. 
+
+
 ## 2.2.0 / 2019-05-27
 
 ### New Features
