@@ -2,6 +2,7 @@ import os
 
 import sys
 from setuptools import setup, find_packages
+from setuptools_scm import get_version
 
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md')) as f:
@@ -103,10 +104,16 @@ postgresql_require = [
 if sys.version_info < (3, 5):
     requires.append('typing')
 
-
+version = get_version(
+    root='..',
+    relative_to=__file__,
+    tag_regex=r'^(?P<prefix>release_)?(?P<version>[0-9]+\.[0-9]+\.[0-9]+(_rc[1-9]+)?)(?P<suffix>)?$',
+    write_to="version.txt",
+)
 setup(
     name='tracim_backend',
-    version='1.9.1',
+    version=version,
+    setup_requires=['setuptools_scm'],
     description='Rest API (Back-end) of Tracim v2',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
