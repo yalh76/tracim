@@ -17,9 +17,9 @@ class SystemApi(object):
         # TODO - G.M - 2018-09-26 - Set version correctly
         return AboutModel(
             name="Tracim",
-            version=None,
+            version=self._config.version,
             datetime=datetime.datetime.now(),
-            website="https://www.tracim.fr",
+            website=self._config.WEBSITE__BASE_URL,
         )
 
     def get_config(self) -> ConfigModel:

@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 
 from depot.manager import DepotManager
 from paste.deploy.converters import asbool
+from pkg_resources import get_distribution
 
 from tracim_backend.app_models.applications import Application
 from tracim_backend.app_models.contents import content_status_list
@@ -60,6 +61,7 @@ class CFG(object):
 
     def __init__(self, settings: typing.Dict[str, typing.Any]):
         self.settings = settings
+        self.version = get_distribution("tracim_backend").version
         self.config_naming = []  # type: typing.List[ConfigParam]
         logger.debug(self, "CONFIG_PROCESS:1: load config from settings")
         self.load_config()
