@@ -142,9 +142,9 @@ class TestAboutEndpoint(FunctionalTest):
         self.testapp.authorization = ("Basic", ("admin@admin.admin", "admin@admin.admin"))
         res = self.testapp.get("/api/v2/system/about", status=200)
         assert res.json_body["name"] == "Tracim"
-        assert res.json_body["version"] is None
+        assert res.json_body["version"] == self.app_config.version
         assert res.json_body["datetime"]
-        assert res.json_body["website"] == "https://www.tracim.fr"
+        assert res.json_body["website"] == self.app_config.WEBSITE__BASE_URL
 
     def test_api__get_about__err_401__unregistered_user(self):
         """
