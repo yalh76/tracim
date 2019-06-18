@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
 import datetime
-import os
 import re
 import traceback
 import typing
@@ -54,6 +53,7 @@ from tracim_backend.lib.utils.logger import logger
 from tracim_backend.lib.utils.sanitizer import HtmlSanitizer
 from tracim_backend.lib.utils.sanitizer import HtmlSanitizerConfig
 from tracim_backend.lib.utils.translation import Translator
+from tracim_backend.lib.utils.utils import Filename
 from tracim_backend.lib.utils.utils import cmp_to_key
 from tracim_backend.lib.utils.utils import current_date_for_filename
 from tracim_backend.lib.utils.utils import preview_manager_page_format
@@ -401,7 +401,6 @@ class ContentApi(object):
         # with empty filename like comment.
         assert filename
         assert workspace
-        label, file_extension = os.path.splitext(filename)
         query = self.get_base_query(workspace)
 
         if parent:
@@ -516,8 +515,7 @@ class ContentApi(object):
             # TODO - G.M - 2018-10-15 - Set file extension and label
             # explicitly instead of filename in order to have correct
             # label/file-extension separation.
-            content.label = label
-            content.file_extension = file_extension
+            content.file_name = filename
         elif filename:
             self._is_filename_available_or_raise(filename, workspace, parent)
             # INFO - G.M - 2018-07-04 - File_name setting automatically
@@ -771,7 +769,9 @@ class ContentApi(object):
         parent_id = content_parent.content_id if content_parent else None
         query = query.filter(Content.parent_id == parent_id)
 
-        file_name, file_extension = os.path.splitext(content_label)
+        filenameobj = Filename.from_filename(content_label)
+        file_name = filenameobj.label
+        file_extension = filenameobj.file_extension
 
         # TODO - G.M - 2018-09-04 - If this method is needed, it should be
         # rewritten in order to avoid content_type hardcoded code there
@@ -1793,7 +1793,7 @@ class ContentApi(object):
             )
         if self._user:
             item.owner = self._user
-        item.label = new_label
+        item.file_name = filename
         item.description = (
             new_content if new_content else item.description
         )  # TODO: convert urls into links

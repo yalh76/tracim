@@ -31,6 +31,7 @@ from tracim_backend.lib.utils.authorization import is_contributor
 from tracim_backend.lib.utils.authorization import is_reader
 from tracim_backend.lib.utils.authorization import is_trusted_user
 from tracim_backend.lib.utils.authorization import is_user
+from tracim_backend.lib.utils.utils import Filename
 from tracim_backend.lib.utils.utils import add_trailing_slash
 from tracim_backend.lib.utils.utils import normpath
 from tracim_backend.lib.utils.utils import webdav_convert_file_name_to_bdd
@@ -821,15 +822,9 @@ class FileResource(DAVNonCollection):
                 if basename(destpath) != self.getDisplayName():
 
                     new_filename = webdav_convert_file_name_to_bdd(basename(destpath))
-                    regex_file_extension = re.compile(
-                        "(?P<label>.*){}".format(re.escape(self.content.file_extension))
-                    )
-                    same_extension = regex_file_extension.match(new_filename)
-                    if same_extension:
-                        new_label = same_extension.group("label")
-                        new_file_extension = self.content.file_extension
-                    else:
-                        new_label, new_file_extension = os.path.splitext(new_filename)
+                    filenameobj = Filename.from_filename(new_filename)
+                    new_label = filenameobj.label
+                    new_file_extension = filenameobj.file_extension
 
                     self.content_api.update_content(self.content, new_label=new_label)
                     self.content.file_extension = new_file_extension
@@ -875,15 +870,9 @@ class FileResource(DAVNonCollection):
             raise DAVError(HTTP_FORBIDDEN)
 
         new_filename = webdav_convert_file_name_to_bdd(basename(destpath))
-        regex_file_extension = re.compile(
-            "(?P<label>.*){}".format(re.escape(self.content.file_extension))
-        )
-        same_extension = regex_file_extension.match(new_filename)
-        if same_extension:
-            new_label = same_extension.group("label")
-            new_file_extension = self.content.file_extension
-        else:
-            new_label, new_file_extension = os.path.splitext(new_filename)
+        filenameobj = Filename.from_filename(new_filename)
+        new_label = filenameobj.label
+        new_file_extension = filenameobj.file_extension
 
         self.tracim_context.set_destpath(destpath)
         destination_workspace = self.tracim_context.candidate_workspace

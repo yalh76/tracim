@@ -347,3 +347,22 @@ def is_dir_readable(path: str) -> bool:
     ):
         raise NotReadableDirectory("{} is not a writable directory".format(path))
     return True
+
+
+class Filename(object):
+
+    SUPPORTED_DOUBLE_EXTENSION_FILE = [".thread.html", ".document.html"]
+
+    def __init__(self, label: str, file_extension: str):
+        self.label = label
+        self.file_extension = file_extension
+
+    @classmethod
+    def from_filename(self, filename: str):
+        label, file_extension = os.path.splitext(filename)
+        for double_file_extension in self.SUPPORTED_DOUBLE_EXTENSION_FILE:
+            if filename.endswith(double_file_extension):
+                label = filename.split(double_file_extension)[0]
+                file_extension = double_file_extension
+                break
+        return Filename(label=label, file_extension=file_extension)

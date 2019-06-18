@@ -3,7 +3,6 @@ import datetime as datetime_root
 from datetime import datetime
 from datetime import timedelta
 import json
-import os
 import typing
 
 from babel.dates import format_timedelta
@@ -39,6 +38,7 @@ from tracim_backend.exceptions import ContentStatusNotExist
 from tracim_backend.exceptions import CopyRevisionAbortedDepotCorrupted
 from tracim_backend.exceptions import NewRevisionAbortedDepotCorrupted
 from tracim_backend.lib.utils.translation import get_locale
+from tracim_backend.lib.utils.utils import Filename
 from tracim_backend.models.auth import User
 from tracim_backend.models.meta import DeclarativeBase
 from tracim_backend.models.roles import WorkspaceRoles
@@ -664,9 +664,9 @@ class ContentRevisionRO(DeclarativeBase):
 
     @file_name.setter
     def file_name(self, value: str) -> None:
-        file_name, file_extension = os.path.splitext(value)
-        self.label = file_name
-        self.file_extension = file_extension
+        filename = Filename.from_filename(value)
+        self.label = filename.label
+        self.file_extension = filename.file_extension
 
     @file_name.expression
     def file_name(cls) -> InstrumentedAttribute:
@@ -930,9 +930,9 @@ class Content(DeclarativeBase):
 
     @file_name.setter
     def file_name(self, value: str) -> None:
-        file_name, file_extension = os.path.splitext(value)
-        self.label = file_name
-        self.file_extension = file_extension
+        filename = Filename.from_filename(value)
+        self.label = filename.label
+        self.file_extension = filename.file_extension
 
     @file_name.expression
     def file_name(cls) -> InstrumentedAttribute:
