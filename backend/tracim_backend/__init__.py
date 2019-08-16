@@ -60,6 +60,7 @@ from tracim_backend.views.contents_api.folder_controller import FolderController
 from tracim_backend.views.contents_api.html_document_controller import HTMLDocumentController
 from tracim_backend.views.contents_api.threads_controller import ThreadController
 from tracim_backend.views.core_api.account_controller import AccountController
+from tracim_backend.views.core_api.content_lock_controller import ContentLockController
 from tracim_backend.views.core_api.reset_password_controller import ResetPasswordController
 from tracim_backend.views.core_api.session_controller import SessionController
 from tracim_backend.views.core_api.system_controller import SystemController
@@ -193,6 +194,7 @@ def web(global_config: OrderedDict, **local_settings) -> Router:
     thread_controller = ThreadController()
     file_controller = FileController()
     folder_controller = FolderController()
+    content_lock_controller = ContentLockController()
     configurator.include(session_controller.bind, route_prefix=BASE_API_V2)
     configurator.include(system_controller.bind, route_prefix=BASE_API_V2)
     configurator.include(user_controller.bind, route_prefix=BASE_API_V2)
@@ -204,7 +206,7 @@ def web(global_config: OrderedDict, **local_settings) -> Router:
     configurator.include(thread_controller.bind, route_prefix=BASE_API_V2)
     configurator.include(file_controller.bind, route_prefix=BASE_API_V2)
     configurator.include(folder_controller.bind, route_prefix=BASE_API_V2)
-
+    configurator.include(content_lock_controller.bind, route_prefix=BASE_API_V2)
     # INFO - G.M - 2019-08-08 - import app here instead of top of file,
     # to make thing easier later
     # when app will be load dynamycally.

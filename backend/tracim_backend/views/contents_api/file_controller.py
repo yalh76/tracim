@@ -10,6 +10,7 @@ from tracim_backend.app_models.contents import FILE_TYPE
 from tracim_backend.app_models.contents import content_type_list
 from tracim_backend.config import CFG
 from tracim_backend.exceptions import ContentFilenameAlreadyUsedInFolder
+from tracim_backend.exceptions import ContentLocked
 from tracim_backend.exceptions import ContentNotFound
 from tracim_backend.exceptions import ContentStatusException
 from tracim_backend.exceptions import EmptyLabelNotAllowed
@@ -25,6 +26,7 @@ from tracim_backend.lib.core.content import ContentApi
 from tracim_backend.lib.utils.authorization import ContentTypeChecker
 from tracim_backend.lib.utils.authorization import ContentTypeCreationChecker
 from tracim_backend.lib.utils.authorization import check_right
+from tracim_backend.lib.utils.authorization import content_not_locked
 from tracim_backend.lib.utils.authorization import is_contributor
 from tracim_backend.lib.utils.authorization import is_reader
 from tracim_backend.lib.utils.request import TracimRequest
@@ -128,7 +130,9 @@ class FileController(Controller):
     @hapic.with_api_doc(tags=[SWAGGER_TAG__CONTENT_FILE_ENDPOINTS])
     @check_right(is_contributor)
     @check_right(is_file_content)
+    @check_right(content_not_locked)
     @hapic.handle_exception(ContentFilenameAlreadyUsedInFolder, HTTPStatus.BAD_REQUEST)
+    @hapic.handle_exception(ContentLocked, HTTPStatus.BAD_REQUEST)
     @hapic.input_path(FilePathSchema())
     @hapic.input_files(SimpleFileSchema())
     @hapic.output_body(NoContentSchema(), default_http_code=HTTPStatus.NO_CONTENT)

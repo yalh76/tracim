@@ -42,6 +42,7 @@ from tracim_backend.models.context_models import FileQuery
 from tracim_backend.models.context_models import FileRevisionPath
 from tracim_backend.models.context_models import FolderContentUpdate
 from tracim_backend.models.context_models import KnownMemberQuery
+from tracim_backend.models.context_models import LockTokenBody
 from tracim_backend.models.context_models import LoginCredentials
 from tracim_backend.models.context_models import MoveParams
 from tracim_backend.models.context_models import PageQuery
@@ -364,6 +365,14 @@ class WorkspaceAndContentIdPathSchema(WorkspaceIdPathSchema, ContentIdPathSchema
     @post_load
     def make_path_object(self, data: typing.Dict[str, typing.Any]) -> object:
         return WorkspaceAndContentPath(**data)
+
+
+class LockTokenBodySchema(marshmallow.Schema):
+    lock_token = marshmallow.fields.String()
+
+    @post_load
+    def make_body_object(self, data: typing.Dict[str, typing.Any]) -> object:
+        return LockTokenBody(**data)
 
 
 class FilenamePathSchema(marshmallow.Schema):

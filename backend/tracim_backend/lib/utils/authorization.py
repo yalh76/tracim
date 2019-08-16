@@ -8,12 +8,14 @@ from zope.interface import implementer
 
 from tracim_backend.app_models.contents import ContentTypeList
 from tracim_backend.app_models.contents import content_type_list
+from tracim_backend.exceptions import ContentLocked
 from tracim_backend.exceptions import ContentTypeNotAllowed
 from tracim_backend.exceptions import InsufficientUserProfile
 from tracim_backend.exceptions import InsufficientUserRoleInWorkspace
 from tracim_backend.exceptions import TracimException
 from tracim_backend.exceptions import UserGivenIsNotTheSameAsAuthenticated
 from tracim_backend.exceptions import UserIsNotContentOwner
+from tracim_backend.lib.core.upload_content_lock import UploadContentLockLib
 from tracim_backend.lib.utils.request import TracimContext
 from tracim_backend.models.auth import Group
 from tracim_backend.models.roles import WorkspaceRoles
@@ -175,6 +177,24 @@ class ContentTypeChecker(AuthorizationChecker):
         raise ContentTypeNotAllowed()
 
 
+class ContentNotLocked(AuthorizationChecker):
+    """
+    Check if content is locked or not
+    """
+
+    def check(self, tracim_context: TracimContext):
+        locklib = UploadContentLockLib(
+            config=tracim_context.app_config,
+            current_user=tracim_context.current_user,
+            session=tracim_context.dbsession,
+        )
+        if locklib.can_upload_content(
+            lock_token=None, content_id=tracim_context.current_content.content_id
+        ):
+            return True
+        raise ContentLocked()
+
+
 class ContentTypeCreationChecker(AuthorizationChecker):
     """
     Check if user can create content of this type
@@ -285,11 +305,13 @@ can_move_content = AndAuthorizationChecker(
     is_content_manager, CandidateWorkspaceRoleChecker(WorkspaceRoles.CONTENT_MANAGER.level)
 )
 can_create_content = ContentTypeCreationChecker(content_type_list)
+content_not_locked = ContentNotLocked()
 # comments
 is_comment_owner = CommentOwnerChecker()
 can_delete_comment = OrAuthorizationChecker(
     AndAuthorizationChecker(is_contributor, is_comment_owner), is_workspace_manager
 )
+
 
 ###
 # Authorization decorators for views

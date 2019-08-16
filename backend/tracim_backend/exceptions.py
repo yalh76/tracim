@@ -150,6 +150,14 @@ class ContentShareNotFound(NotFound):
     error_code = ErrorCode.CONTENT_SHARE_NOT_FOUND
 
 
+class ContentLockNotFound(NotFound):
+    error_code = ErrorCode.CONTENT_LOCK_NOT_FOUND
+
+
+class ContentLocked(TracimException):
+    error_code = ErrorCode.CONTENT_LOCKED
+
+
 class WorkspaceNotFoundInTracimRequest(NotFound):
     error_code = ErrorCode.WORKSPACE_NOT_IN_TRACIM_REQUEST
 

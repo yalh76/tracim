@@ -218,6 +218,11 @@ class WorkspaceAndContentPath(object):
         self.workspace_id = workspace_id
 
 
+class LockTokenBody(object):
+    def __init__(self, lock_token: str) -> None:
+        self.lock_token = lock_token
+
+
 class WorkspaceAndContentRevisionPath(object):
     """
     Paths params with workspace id and content_id model
