@@ -257,20 +257,9 @@ def core_convert_file_name_to_display(string: str) -> str:
     return string
 
 
-def wopi_convert_file_name_to_display(string: str) -> str:
+def convert_file_name_to_display(string: str) -> str:
     """
-    Hack to support all file_name name for collaborative edition
-    """
-    REPLACE_CHARS = {"/": "⧸", "?": "ʔ"}
-
-    for key, value in REPLACE_CHARS.items():
-        string = string.replace(key, value)
-
-    return string
-
-
-def webdav_convert_file_name_to_display(string: str) -> str:
-    """
+    Adapt character for webdav and wopi
     As characters that Windows does not support may have been inserted
     through Tracim in names, before displaying information we update path
     so that all these forbidden characters are replaced with similar
@@ -286,7 +275,7 @@ def webdav_convert_file_name_to_display(string: str) -> str:
     return string
 
 
-def webdav_convert_file_name_to_bdd(string: str) -> str:
+def convert_file_name_to_bdd(string: str) -> str:
     """
     Called before sending request to the database to recover the right names
     """
