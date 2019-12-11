@@ -44,7 +44,7 @@ class Gallery extends React.Component {
       content: props.data ? props.data.content : debug.content,
       breadcrumbsList: [],
       appMounted: false,
-      folderId: qs.parse(props.data.config.history.location.search).folder_ids || 0,
+      folderId: qs.parse(props.data.config.history.location.search).folder_ids,
       imagesPreviews: [],
       fileCurrentPage: 1,
       fileName: '',
@@ -445,7 +445,7 @@ class Gallery extends React.Component {
                 handleClickShowImageRaw={this.handleClickShowImageRaw}
                 loggedUser={state.loggedUser}
                 disableAnimation={state.displayLightbox}
-                isWorkspaceRoot={state.folderId === 0}
+                isWorkspaceRoot={!state.folderId}
               />
             ) : (
               <div className='gallery__loader'>
