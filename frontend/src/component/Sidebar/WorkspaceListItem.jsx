@@ -54,6 +54,20 @@ class WorkspaceListItem extends React.Component {
     return props.label.substring(0, 2).toUpperCase()
   }
 
+  isDropAllowed = () => {
+    const { props } = this
+
+    const isDropActive = props.canDrop && props.isCurrentWorkspace
+
+    if (isDropActive) {
+      const isDropAllowed = props.userRoleIdInWorkspace >= ROLE_OBJECT.contributor.id
+      const isDropAllowedOnWorkspaceRoot = props.draggedItem && (props.draggedItem.workspaceId !== props.workspaceId || props.draggedItem.parentId !== 0)
+
+      if (isDropAllowed && isDropAllowedOnWorkspaceRoot) return true
+      return false
+    }
+  }
+
   render () {
     const { props } = this
     return (
@@ -88,35 +102,48 @@ class WorkspaceListItem extends React.Component {
           </div>
         </div>
 
-        <AnimateHeight duration={500} height={props.isOpenInSidebar ? 'auto' : 0}>
-          <ul className='sidebar__content__navigation__workspace__item__submenu'>
-            {props.allowedAppList.map(allowedApp =>
-              <li
-                data-cy={`sidebar_subdropdown-${allowedApp.slug}`}
-                key={allowedApp.slug}
+          <>
+            <AnimateHeight duration={500} height={this.isDropAllowed() ? 'auto' : 0}>
+              <div
+                className='sidebar__content__navigation__workspace__item__dropZone'
+                style={{ border: `2px dashed ${GLOBAL_primaryColor}`, background: props.isOver ? 'rgba(147, 147, 147, 0.2)' : null }}
               >
-                <Link to={this.buildLink(allowedApp.route, props.location.search, props.workspaceId, props.activeWorkspaceId)}>
-                  <div className={classnames(
-                    'sidebar__content__navigation__workspace__item__submenu__dropdown',
-                    { 'activeFilter': this.shouldDisplayAsActive(props.location, props.workspaceId, props.activeWorkspaceId, allowedApp) }
-                  )}>
-                    <div className='dropdown__icon' style={{ backgroundColor: allowedApp.hexcolor }}>
-                      <i className={classnames(`fa fa-${allowedApp.faIcon}`)} />
-                    </div>
+                <div className='sidebar__content__navigation__workspace__item__dropZone__label'>
+                  {props.t('Move to root')}
+                </div>
+              </div>
+            </AnimateHeight>
 
-                    <div className='sidebar__content__navigation__workspace__item__submenu__dropdown__showdropdown'>
-                      <div className='dropdown__title' id='navbarDropdown'>
-                        <div className='dropdown__title__text'>
-                          {props.t(allowedApp.label)}
+            <AnimateHeight duration={500} height={props.isOpenInSidebar ? 'auto' : 0}>
+              <ul className='sidebar__content__navigation__workspace__item__submenu'>
+                {props.allowedAppList.map(allowedApp =>
+                  <li
+                    data-cy={`sidebar_subdropdown-${allowedApp.slug}`}
+                    key={allowedApp.slug}
+                  >
+                    <Link to={this.buildLink(allowedApp.route, props.location.search, props.workspaceId, props.activeWorkspaceId)}>
+                      <div className={classnames(
+                        'sidebar__content__navigation__workspace__item__submenu__dropdown',
+                        { 'activeFilter': this.shouldDisplayAsActive(props.location, props.workspaceId, props.activeWorkspaceId, allowedApp) }
+                      )}>
+                        <div className='dropdown__icon' style={{ backgroundColor: allowedApp.hexcolor }}>
+                          <i className={classnames(`fa fa-${allowedApp.faIcon}`)} />
+                        </div>
+
+                        <div className='sidebar__content__navigation__workspace__item__submenu__dropdown__showdropdown'>
+                          <div className='dropdown__title' id='navbarDropdown'>
+                            <div className='dropdown__title__text'>
+                              {props.t(allowedApp.label)}
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </Link>
-              </li>
-            )}
-          </ul>
-        </AnimateHeight>
+                    </Link>
+                  </li>
+                )}
+              </ul>
+            </AnimateHeight>
+          </>
       </li>
     )
   }

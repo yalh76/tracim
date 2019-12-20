@@ -115,6 +115,7 @@ class Sidebar extends React.Component {
                     isOpenInSidebar={ws.isOpenInSidebar}
                     onClickTitle={() => this.handleClickWorkspace(ws.id, !ws.isOpenInSidebar)}
                     onClickAllContent={this.handleClickAllContent}
+                    isCurrentWorkspace={ws.id === this.props.currentWorkspace.id}
                     key={ws.id}
                   />
                 )}
@@ -151,5 +152,5 @@ class Sidebar extends React.Component {
   }
 }
 
-const mapStateToProps = ({ user, workspaceList, system }) => ({ user, workspaceList, system })
+const mapStateToProps = ({ user, workspaceList, system, currentWorkspace }) => ({ user, workspaceList, system, currentWorkspace })
 export default withRouter(connect(mapStateToProps)(appFactory(translate()(Sidebar))))

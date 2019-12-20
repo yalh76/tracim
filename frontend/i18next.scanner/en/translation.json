@@ -245,5 +245,6 @@
   "Gallery": "Gallery",
   "The file is larger than the maximum file size allowed": "The file is larger than the maximum file size allowed",
   "Error, the shared space exceed its maximum size": "Error, the shared space exceed its maximum size",
-  "Upload impossible, the destination storage capacity has been reached": "Upload impossible, the destination storage capacity has been reached"
+  "Upload impossible, the destination storage capacity has been reached": "Upload impossible, the destination storage capacity has been reached",
+  "Move to root": "Move to root"
 }
