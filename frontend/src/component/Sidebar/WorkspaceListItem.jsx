@@ -109,7 +109,7 @@ class WorkspaceListItem extends React.Component {
                 style={{ border: `2px dashed ${GLOBAL_primaryColor}`, background: props.isOver ? 'rgba(147, 147, 147, 0.2)' : null }}
               >
                 <div className='sidebar__content__navigation__workspace__item__dropZone__icon'>
-                  <i className='fa fa-arrow-circle-down' style={{ transform: props.isOver ? 'translateY(3px)' : null }}/>
+                  <i className='fa fa-arrow-circle-down' style={{ transform: props.isOver ? 'translateY(3px)' : null }} />
                 </div>
                 <div className='sidebar__content__navigation__workspace__item__dropZone__label'>
                   {props.t('Move to root')}
