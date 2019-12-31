@@ -100,11 +100,16 @@ sidebarColorDarken = darken(sidebarColor, 15%)
               background-color sidebarColorDarken // #1168
           &__dropZone
             margin 2px
-            display flex
-            height 50px
+            padding 4px
             borderRadius 10px
+            &__icon
+              text-align center
+              font-size 30px
+              color #FFFFFF
+              & i
+                transition-duration 200ms
             &__label
-              margin auto
+              text-align center
               color #FFFFFF
           &__number
             display flex
