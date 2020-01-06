@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM algoo/tracim:stretch
 MAINTAINER contact@tracim.fr
 
 ARG TAG=""
@@ -24,47 +24,8 @@ RUN \
     else git clone https://github.com/tracim/tracim.git tracim; \
     fi \
     } \
-# Install required packages
-    && apt update && apt upgrade -qy \
-    && apt install -qy \
-    apache2 \
-    build-essential \
-    curl \
-    ghostscript \
-    git \
-    gnupg \
-    imagemagick \
-    inkscape \
-    libapache2-mod-wsgi-py3 \
-    libfile-mimeinfo-perl \
-    libimage-exiftool-perl \
-    libjpeg-dev \
-    libmagickwand-dev \
-    libpq-dev \
-    libreoffice \
-    locales \
-    mysql-client \
-    poppler-utils \
-    postgresql-client \
-    python3 \
-    python3-dev \
-    python3-pip \
-    python3-venv \
-    qpdf \
-    ufraw-batch \
-    ffmpeg \
-    redis-server \
-    supervisor \
-    uwsgi \
-    uwsgi-plugin-python3 \
-    vim \
-    zlib1g-dev \
-# Install nodejs
-    && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
-    && apt update \
-    && apt install -qy nodejs \
 # clone repo
-    && get_source_from_github $TAG $BRANCH \
+    get_source_from_github $TAG $BRANCH \
 # Go in repo folder
     && cd /tracim/ \
 # install frontend
