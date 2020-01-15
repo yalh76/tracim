@@ -57,6 +57,8 @@ import {
   setWorkspaceDetail
 } from '../action-creator.sync.js'
 import uniq from 'lodash/uniq'
+import { DRAG_AND_DROP } from '../helper'
+import { DropTarget } from 'react-dnd'
 
 const qs = require('query-string')
 
@@ -601,6 +603,20 @@ class WorkspaceContent extends React.Component {
     if (document.getElementById(contentToScrollTo)) document.getElementById(contentToScrollTo).scrollIntoView()
   }
 
+  isDropAllowed = () => {
+    const { props } = this
+
+    const isDropActive = props.canDrop
+
+    if (isDropActive) {
+      const isDropAllowed = findUserRoleIdInWorkspace(props.user.user_id, props.currentWorkspace.memberList, ROLE) >= ROLE_OBJECT.contributor.id
+      const isDropAllowedOnWorkspaceRoot = props.draggedItem && (props.draggedItem.workspaceId !== props.workspaceId || props.draggedItem.parentId !== 0)
+
+      if (isDropAllowed && isDropAllowedOnWorkspaceRoot) return true
+      return false
+    }
+  }
+
   render () {
     const { breadcrumbs, user, currentWorkspace, workspaceContentList, workspaceShareFolderContentList, contentType, location, t } = this.props
     const { state, props } = this
@@ -684,6 +700,11 @@ class WorkspaceContent extends React.Component {
             </PageTitle>
 
             <PageContent parentClass='workspace__content'>
+              {this.isDropAllowed() && (
+                <div style={{ background: 'red' }} ref={props.connectDropTarget}>
+                  MOVE TO ROOT
+                </div>
+              )}
               <div className='workspace__content__fileandfolder folder__content active'>
                 <ContentItemHeader />
 
@@ -799,7 +820,20 @@ class WorkspaceContent extends React.Component {
   }
 }
 
+const dragAndDropTarget = {
+  drop: (props, monitor) => {
+    return { workspaceId: monitor.getItem().workspaceId, parentId: 0 }
+    }
+}
+
+const dragAndDropTargetCollect = (connect, monitor) => ({
+  connectDropTarget: connect.dropTarget(),
+  isOver: monitor.isOver(),
+  canDrop: monitor.canDrop(),
+  draggedItem: monitor.getItem()
+})
+
 const mapStateToProps = ({ breadcrumbs, user, currentWorkspace, workspaceContentList, workspaceShareFolderContentList, workspaceList, contentType }) => ({
   breadcrumbs, user, currentWorkspace, workspaceContentList, workspaceShareFolderContentList, workspaceList, contentType
 })
-export default withRouter(connect(mapStateToProps)(appFactory(translate()(WorkspaceContent))))
+export default DropTarget(DRAG_AND_DROP.CONTENT_ITEM, dragAndDropTarget, dragAndDropTargetCollect)(withRouter(connect(mapStateToProps)(appFactory(translate()(WorkspaceContent)))))
