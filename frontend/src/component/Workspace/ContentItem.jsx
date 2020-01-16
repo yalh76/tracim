@@ -2,7 +2,7 @@ import React from 'react'
 import { translate } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { DragSource } from 'react-dnd'
+import { DragSource, DropTarget } from 'react-dnd'
 import { ROLE_OBJECT, DRAG_AND_DROP } from '../../helper.js'
 import BtnExtandedAction from './BtnExtandedAction.jsx'
 import DragHandle from '../DragHandle.jsx'
@@ -34,6 +34,7 @@ class ContentItem extends React.Component {
         isLast={props.isLast}
         key={props.id}
         id={props.contentId}
+        customRef={props.connectDropTarget}
       >
         {props.userRoleIdInWorkspace >= ROLE_OBJECT.contentManager.id && (
           <DragHandle
@@ -146,7 +147,26 @@ const contentItemDragAndDropSourceCollect = (connect, monitor) => ({
   isDragging: monitor.isDragging()
 })
 
-export default DragSource(DRAG_AND_DROP.CONTENT_ITEM, contentItemDragAndDropSource, contentItemDragAndDropSourceCollect)(translate()(ContentItem))
+const contentItemDragAndDropTarget = {
+  drop: props => ({
+    workspaceId: props.workspaceId,
+    contentId: props.contentId,
+    parentId: props.parentId || 0,
+    isFolder: false
+  })
+}
+
+const contentItemDragAndDropTargetCollect = (connect, monitor) => {
+  return {
+    connectDropTarget: connect.dropTarget(),
+    canDrop: monitor.canDrop(),
+    isOver: monitor.isOver({ shallow: false }),
+    draggedItem: monitor.getItem()
+  }
+}
+
+export default DragSource(DRAG_AND_DROP.CONTENT_ITEM, contentItemDragAndDropSource, contentItemDragAndDropSourceCollect)
+(DropTarget(DRAG_AND_DROP.CONTENT_ITEM, contentItemDragAndDropTarget, contentItemDragAndDropTargetCollect)(translate()(ContentItem)))
 
 ContentItem.propTypes = {
   statusSlug: PropTypes.string.isRequired,

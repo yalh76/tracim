@@ -6,6 +6,8 @@ import classnames from 'classnames'
 import ContentItem from './ContentItem.jsx'
 import Folder from './Folder.jsx'
 import { PAGE, SHARE_FOLDER_ID } from '../../helper.js'
+import { DRAG_AND_DROP } from '../../helper'
+import { DropTarget } from 'react-dnd'
 
 require('./Folder.styl')
 
@@ -42,6 +44,7 @@ class ShareFolder extends React.Component {
         })}
         data-cy={SHARE_FOLDER_ID}
         id={SHARE_FOLDER_ID}
+        ref={props.connectDropTarget}
       >
         <div
           className='folder__header align-items-center primaryColorBgLightenHover'
@@ -165,7 +168,27 @@ class ShareFolder extends React.Component {
   }
 }
 
-export default translate()(withRouter(ShareFolder))
+const shareFolderDragAndDropTarget = {
+  drop: props => {
+    return {
+      workspaceId: props.workspaceId,
+      contentId: props.contentId,
+      parentId: props.parentId || 0,
+      isFolder: false
+    }
+  }
+}
+
+const shareFolderDragAndDropTargetCollect = (connect, monitor) => {
+  return {
+    connectDropTarget: connect.dropTarget(),
+    canDrop: monitor.canDrop(),
+    isOver: monitor.isOver({ shallow: false }),
+    draggedItem: monitor.getItem()
+  }
+}
+
+export default DropTarget(DRAG_AND_DROP.CONTENT_ITEM, shareFolderDragAndDropTarget, shareFolderDragAndDropTargetCollect)(translate()(withRouter(ShareFolder)))
 
 ShareFolder.propTypes = {
   folderData: PropTypes.object,

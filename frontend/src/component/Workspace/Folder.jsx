@@ -242,13 +242,12 @@ class Folder extends React.Component {
 }
 
 const folderDragAndDropTarget = {
-  drop: props => {
-    return {
-      workspaceId: props.folderData.workspaceId,
-      contentId: props.folderData.id,
-      parentId: props.folderData.parentId
-    }
-  }
+  drop: props => ({
+    workspaceId: props.folderData.workspaceId,
+    contentId: props.folderData.id,
+    parentId: props.folderData.parentId,
+    isFolder: true
+  })
 }
 
 const folderDragAndDropTargetCollect = (connect, monitor) => {

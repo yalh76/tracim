@@ -450,7 +450,7 @@ class WorkspaceContent extends React.Component {
   handleDropMoveContent = async (source, destination) => {
     const { props, state } = this
 
-    if (source.contentId === destination.contentId) return
+    if (source.contentId === destination.contentId || !destination.isFolder) return
 
     if (destination.id === SHARE_FOLDER_ID || destination.parentId === SHARE_FOLDER_ID) return
 
@@ -610,8 +610,7 @@ class WorkspaceContent extends React.Component {
 
     if (isDropActive) {
       const isDropAllowed = findUserRoleIdInWorkspace(props.user.user_id, props.currentWorkspace.memberList, ROLE) >= ROLE_OBJECT.contributor.id
-      const isDropAllowedOnWorkspaceRoot = props.draggedItem && (props.draggedItem.workspaceId !== props.workspaceId || props.draggedItem.parentId !== 0)
-
+      const isDropAllowedOnWorkspaceRoot = props.draggedItem && (props.draggedItem.workspaceId !== props.currentWorkspace.id || props.draggedItem.parentId !== 0)
       if (isDropAllowed && isDropAllowedOnWorkspaceRoot) return true
       return false
     }
@@ -647,6 +646,8 @@ class WorkspaceContent extends React.Component {
 
     const isWorkspaceEmpty = workspaceContentList.length === 0
     const isFilteredWorkspaceEmpty = rootContentList.length === 0
+
+    const dropAllowed = this.isDropAllowed()
 
     return (
       <div className='tracim__content-scrollview fullWidthFullHeight'>
@@ -700,12 +701,20 @@ class WorkspaceContent extends React.Component {
             </PageTitle>
 
             <PageContent parentClass='workspace__content'>
-              {this.isDropAllowed() && (
-                <div style={{ background: 'red' }} ref={props.connectDropTarget}>
-                  MOVE TO ROOT
+              <div
+                className='workspace__content__fileandfolder folder__content active'
+                ref={props.connectDropTarget}
+                style={{
+                  backgroundColor: props.isOver && dropAllowed ? 'rgba(147, 147, 147, 0.2)' : null,
+                  paddingBottom: userRoleIdInWorkspace >= 2 && workspaceContentList.length >= 10 ? '1px' : '30px'
+                }}
+              >
+                <div className='workspace__content__dropZone' style={{ opacity: props.isOver && dropAllowed ? 1 : 0 }}>
+                  <div className='workspace__content__dropZone__label' >
+                    {props.t('Move to root')}
+                  </div>
                 </div>
-              )}
-              <div className='workspace__content__fileandfolder folder__content active'>
+
                 <ContentItemHeader />
 
                 {currentWorkspace.uploadEnabled &&
@@ -811,6 +820,9 @@ class WorkspaceContent extends React.Component {
                     availableApp={createContentAvailableApp}
                   />
                 )}
+                <div>
+
+                </div>
               </div>
             </PageContent>
           </PageWrapper>
@@ -822,14 +834,19 @@ class WorkspaceContent extends React.Component {
 
 const dragAndDropTarget = {
   drop: (props, monitor) => {
-    return { workspaceId: monitor.getItem().workspaceId, parentId: 0 }
+    if(monitor.didDrop()) return
+    return {
+      workspaceId: monitor.getItem().workspaceId,
+      parentId: 0,
+      isFolder: true
     }
+  }
 }
 
 const dragAndDropTargetCollect = (connect, monitor) => ({
   connectDropTarget: connect.dropTarget(),
-  isOver: monitor.isOver(),
-  canDrop: monitor.canDrop(),
+  isOver: monitor.isOver() && monitor.isOver({ shallow: true }),
+  canDrop: monitor.canDrop() && !monitor.didDrop(),
   draggedItem: monitor.getItem()
 })
 

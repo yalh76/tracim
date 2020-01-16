@@ -155,7 +155,8 @@ class WorkspaceListItem extends React.Component {
 const dragAndDropTarget = {
   drop: props => ({
     workspaceId: props.workspaceId,
-    parentId: 0 // INFO - CH - 2019-06-05 - moving content to a different workspace is always at the root of it
+    parentId: 0, // INFO - CH - 2019-06-05 - moving content to a different workspace is always at the root of it
+    isFolder: true
   })
 }
 

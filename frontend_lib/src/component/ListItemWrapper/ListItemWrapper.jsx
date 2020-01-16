@@ -12,6 +12,7 @@ const ListItemWrapper = props => {
       }
       title={props.label}
       id={props.id}
+      ref={props.customRef}
     >
       {props.children}
     </div>
