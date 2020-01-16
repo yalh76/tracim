@@ -11,7 +11,8 @@ import {
   ROLE_OBJECT,
   CONTENT_TYPE,
   sortWorkspaceContents,
-  SHARE_FOLDER_ID
+  SHARE_FOLDER_ID,
+  DRAG_AND_DROP
 } from '../helper.js'
 import Folder from '../component/Workspace/Folder.jsx'
 import ShareFolder from '../component/Workspace/ShareFolder.jsx'
@@ -57,7 +58,6 @@ import {
   setWorkspaceDetail
 } from '../action-creator.sync.js'
 import uniq from 'lodash/uniq'
-import { DRAG_AND_DROP } from '../helper'
 import { DropTarget } from 'react-dnd'
 
 const qs = require('query-string')
@@ -820,9 +820,6 @@ class WorkspaceContent extends React.Component {
                     availableApp={createContentAvailableApp}
                   />
                 )}
-                <div>
-
-                </div>
               </div>
             </PageContent>
           </PageWrapper>
@@ -834,7 +831,7 @@ class WorkspaceContent extends React.Component {
 
 const dragAndDropTarget = {
   drop: (props, monitor) => {
-    if(monitor.didDrop()) return
+    if (monitor.didDrop()) return
     return {
       workspaceId: monitor.getItem().workspaceId,
       parentId: 0,

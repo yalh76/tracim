@@ -5,8 +5,7 @@ import { translate } from 'react-i18next'
 import classnames from 'classnames'
 import ContentItem from './ContentItem.jsx'
 import Folder from './Folder.jsx'
-import { PAGE, SHARE_FOLDER_ID } from '../../helper.js'
-import { DRAG_AND_DROP } from '../../helper'
+import { PAGE, SHARE_FOLDER_ID, DRAG_AND_DROP } from '../../helper.js'
 import { DropTarget } from 'react-dnd'
 
 require('./Folder.styl')

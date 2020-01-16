@@ -106,7 +106,7 @@ class WorkspaceListItem extends React.Component {
             <AnimateHeight duration={500} height={this.isDropAllowed() ? 'auto' : 0}>
               <div
                 className='sidebar__content__navigation__workspace__item__dropZone'
-                style={{ border: `2px dashed ${GLOBAL_primaryColor}`, background: props.isOver ? 'rgba(147, 147, 147, 0.2)' : null }}
+                style={{ border: `2px dashed`, borderColor: GLOBAL_primaryColor, background: props.isOver ? 'rgba(147, 147, 147, 0.2)' : null }}
               >
                 <div className='sidebar__content__navigation__workspace__item__dropZone__icon'>
                   <i className='fa fa-arrow-circle-down' style={{ transform: props.isOver ? 'translateY(3px)' : null }} />

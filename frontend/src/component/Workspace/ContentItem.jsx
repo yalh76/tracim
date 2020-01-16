@@ -165,8 +165,11 @@ const contentItemDragAndDropTargetCollect = (connect, monitor) => {
   }
 }
 
-export default DragSource(DRAG_AND_DROP.CONTENT_ITEM, contentItemDragAndDropSource, contentItemDragAndDropSourceCollect)
-(DropTarget(DRAG_AND_DROP.CONTENT_ITEM, contentItemDragAndDropTarget, contentItemDragAndDropTargetCollect)(translate()(ContentItem)))
+export default DragSource(DRAG_AND_DROP.CONTENT_ITEM, contentItemDragAndDropSource, contentItemDragAndDropSourceCollect)(
+  DropTarget(DRAG_AND_DROP.CONTENT_ITEM, contentItemDragAndDropTarget, contentItemDragAndDropTargetCollect)(
+    translate()(ContentItem)
+  )
+)
 
 ContentItem.propTypes = {
   statusSlug: PropTypes.string.isRequired,
