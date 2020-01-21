@@ -5,6 +5,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.client import IngestClient
 from elasticsearch_dsl import Index
 from elasticsearch_dsl import Search
+from elasticsearch_dsl.serializer import serializer
 from sqlalchemy.orm import Session
 
 from tracim_backend import CFG
@@ -337,6 +338,7 @@ class ESSearchApi(SearchApi):
         show_deleted: bool = False,
         show_archived: bool = False,
         show_active: bool = True,
+        explain: bool = False,
     ) -> ContentSearchResponse:
         """
         Search content into elastic search server:
@@ -397,7 +399,14 @@ class ESSearchApi(SearchApi):
             search = search.filter("terms", workspace_id=filtered_workspace_ids)
         if content_types:
             search = search.filter("terms", content_type=content_types)
+        if explain:
+            search = search.extra(explain=True)
         res = search.execute()
+        logger.debug(self, 'Search "{}"'.format(search_string))
+        logger.debug(self, "ElasticSearch Query:")
+        logger.debug(self, serializer.dumps(res._search.to_dict()))
+        logger.debug(self, "Elasticsearch Response:")
+        logger.debug(self, serializer.dumps(res._response))
         return res
 
     def _create_ingest_pipeline(self) -> None:

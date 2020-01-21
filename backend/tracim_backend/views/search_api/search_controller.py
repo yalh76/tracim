@@ -35,6 +35,7 @@ class SearchController(Controller):
             show_archived=hapic_data.query.show_archived,
             show_active=hapic_data.query.show_active,
             content_types=hapic_data.query.content_types,
+            explain=app_config.DEBUG,
         )
         return search
 
