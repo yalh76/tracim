@@ -148,6 +148,7 @@ class SimpleSearchApi(SearchApi):
         show_deleted: bool = False,
         show_archived: bool = False,
         show_active: bool = True,
+        explain: bool = False,
     ) -> ContentSearchResponse:
         """
         Search content with sql
