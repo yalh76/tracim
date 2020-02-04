@@ -126,19 +126,19 @@ class RoleApi(object):
     def update_role(
         self,
         user_role_in_workspace: UserRoleInWorkspace,
-        role_level: int,
+        role: WorkspaceRoles,
         with_notif: typing.Optional[bool] = None,
         save_now: bool = False,
     ):
         """
         Update role of user in this workspace
         :param user_role_in_workspace: UserRoleInWorkspace object
-        :param role_level: level of new role wanted
+        :param role: new role wanted
         :param with_notif: is user notification enabled in this workspace ?
         :param save_now: database flush
         :return: updated role
         """
-        user_role_in_workspace.role = role_level
+        user_role_in_workspace.role = role
         if with_notif is not None:
             user_role_in_workspace.do_notify = with_notif
         if save_now:

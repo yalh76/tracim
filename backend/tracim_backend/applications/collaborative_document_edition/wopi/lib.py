@@ -27,7 +27,7 @@ class WopiLib(object):
         if content.depot_file.file:
             size = content.depot_file.file.content_length
         user_can_write = bool(
-            content.workspace.get_user_role(self._user) >= WorkspaceRoles.CONTRIBUTOR.level
+            content.workspace.get_user_role(self._user).level >= WorkspaceRoles.CONTRIBUTOR.level
         )
         return WopiCheckFileInfo(
             last_modified_time=content.updated,

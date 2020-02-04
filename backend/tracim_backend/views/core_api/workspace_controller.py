@@ -290,7 +290,7 @@ class WorkspaceController(Controller):
             user_id=hapic_data.path.user_id, workspace_id=hapic_data.path.workspace_id
         )
         workspace_role = WorkspaceRoles.get_role_from_slug(hapic_data.body.role)
-        role = rapi.update_role(role, role_level=workspace_role.level)
+        role = rapi.update_role(role, role=workspace_role)
         return rapi.get_user_role_workspace_with_context(role)
 
     @hapic.with_api_doc(tags=[SWAGGER_TAG__WORKSPACE_MEMBERS_ENDPOINTS])
@@ -384,7 +384,7 @@ class WorkspaceController(Controller):
         role = rapi.create_one(
             user=user,
             workspace=request.current_workspace,
-            role=WorkspaceRoles.get_role_from_slug(hapic_data.body.role).level,
+            role=WorkspaceRoles.get_role_from_slug(hapic_data.body.role),
             with_notif=app_config.EMAIL__NOTIFICATION__ENABLED_ON_INVITATION,
             flush=True,
         )
