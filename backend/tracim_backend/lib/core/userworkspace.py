@@ -14,6 +14,7 @@ from tracim_backend.models.auth import User
 from tracim_backend.models.context_models import UserRoleWorkspaceInContext
 from tracim_backend.models.data import UserRoleInWorkspace
 from tracim_backend.models.data import Workspace
+from tracim_backend.models.roles import WorkspaceRoles
 
 __author__ = "damien"
 
@@ -29,25 +30,25 @@ class RoleApi(object):
     # Dict containing readable members roles for given role
     # members_read_rights = {
     #     UserRoleInWorkspace.NOT_APPLICABLE: [],
-    #     UserRoleInWorkspace.READER: [
-    #         UserRoleInWorkspace.WORKSPACE_MANAGER,
+    #     WorkspaceRoles.READER: [
+    #         WorkspaceRoles.WORKSPACE_MANAGER,
     #     ],
-    #     UserRoleInWorkspace.CONTRIBUTOR: [
-    #         UserRoleInWorkspace.WORKSPACE_MANAGER,
-    #         UserRoleInWorkspace.CONTENT_MANAGER,
-    #         UserRoleInWorkspace.CONTRIBUTOR,
+    #     WorkspaceRoles.CONTRIBUTOR: [
+    #         WorkspaceRoles.WORKSPACE_MANAGER,
+    #         WorkspaceRoles.CONTENT_MANAGER,
+    #         WorkspaceRoles.CONTRIBUTOR,
     #     ],
-    #     UserRoleInWorkspace.CONTENT_MANAGER: [
-    #         UserRoleInWorkspace.WORKSPACE_MANAGER,
-    #         UserRoleInWorkspace.CONTENT_MANAGER,
-    #         UserRoleInWorkspace.CONTRIBUTOR,
-    #         UserRoleInWorkspace.READER,
+    #     WorkspaceRoles.CONTENT_MANAGER: [
+    #         WorkspaceRoles.WORKSPACE_MANAGER,
+    #         WorkspaceRoles.CONTENT_MANAGER,
+    #         WorkspaceRoles.CONTRIBUTOR,
+    #         WorkspaceRoles.READER,
     #     ],
-    #     UserRoleInWorkspace.WORKSPACE_MANAGER: [
-    #         UserRoleInWorkspace.WORKSPACE_MANAGER,
-    #         UserRoleInWorkspace.CONTENT_MANAGER,
-    #         UserRoleInWorkspace.CONTRIBUTOR,
-    #         UserRoleInWorkspace.READER,
+    #     WorkspaceRoles.WORKSPACE_MANAGER: [
+    #         WorkspaceRoles.WORKSPACE_MANAGER,
+    #         WorkspaceRoles.CONTENT_MANAGER,
+    #         WorkspaceRoles.CONTRIBUTOR,
+    #         WorkspaceRoles.READER,
     #     ],
     # }
 
@@ -64,12 +65,15 @@ class RoleApi(object):
     #         return tested_role in cls.members_read_rights[reader_role]
     #     return False
 
-    def get_user_workspaces_ids(self, user_id: int, min_role: int) -> typing.List[int]:
+    def get_user_workspaces_ids(self, user_id: int, min_role: WorkspaceRoles) -> typing.List[int]:
         assert self._user.profile == Profile.ADMIN or self._user.user_id == user_id
+        roles = [
+            role for role in WorkspaceRoles.get_all_valid_role() if role.level >= min_role.level
+        ]
         workspaces_ids_tuples = (
             self._session.query(UserRoleInWorkspace.workspace_id)
             .filter(UserRoleInWorkspace.user_id == user_id)
-            .filter(UserRoleInWorkspace.role >= min_role)
+            .filter(UserRoleInWorkspace.role.in_(roles))
             .join(Workspace)
             .filter(Workspace.is_deleted == False)  # noqa: E711
             .all()
@@ -87,7 +91,7 @@ class RoleApi(object):
         """
         assert self._config
         workspace = UserRoleWorkspaceInContext(
-            user_role=user_role,
+            user_role_in_workspace=user_role,
             dbsession=self._session,
             config=self._config,
             newly_created=newly_created,
@@ -121,32 +125,32 @@ class RoleApi(object):
 
     def update_role(
         self,
-        role: UserRoleInWorkspace,
+        user_role_in_workspace: UserRoleInWorkspace,
         role_level: int,
         with_notif: typing.Optional[bool] = None,
         save_now: bool = False,
     ):
         """
         Update role of user in this workspace
-        :param role: UserRoleInWorkspace object
+        :param user_role_in_workspace: UserRoleInWorkspace object
         :param role_level: level of new role wanted
         :param with_notif: is user notification enabled in this workspace ?
         :param save_now: database flush
         :return: updated role
         """
-        role.role = role_level
+        user_role_in_workspace.role = role_level
         if with_notif is not None:
-            role.do_notify = with_notif
+            user_role_in_workspace.do_notify = with_notif
         if save_now:
-            self.save(role)
+            self.save(user_role_in_workspace)
 
-        return role
+        return user_role_in_workspace
 
     def create_one(
         self,
         user: User,
         workspace: Workspace,
-        role_level: int,
+        role: WorkspaceRoles,
         with_notif: bool,
         flush: bool = True,
     ) -> UserRoleInWorkspace:
@@ -159,14 +163,14 @@ class RoleApi(object):
                     user.user_id, workspace.workspace_id
                 )
             )
-        role = UserRoleInWorkspace()
-        role.user_id = user.user_id
-        role.workspace = workspace
-        role.role = role_level
-        role.do_notify = with_notif
+        user_role_in_workspace = UserRoleInWorkspace()
+        user_role_in_workspace.user_id = user.user_id
+        user_role_in_workspace.workspace = workspace
+        user_role_in_workspace.role = role
+        user_role_in_workspace.do_notify = with_notif
         if flush:
             self._session.flush()
-        return role
+        return user_role_in_workspace
 
     def delete_one(self, user_id: int, workspace_id: int, flush=True) -> None:
         if self._user and self._user.user_id == user_id:

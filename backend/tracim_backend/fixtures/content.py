@@ -9,8 +9,8 @@ from tracim_backend.lib.core.content import ContentApi
 from tracim_backend.lib.core.userworkspace import RoleApi
 from tracim_backend.lib.core.workspace import WorkspaceApi
 from tracim_backend.models.auth import User
-from tracim_backend.models.data import UserRoleInWorkspace
 from tracim_backend.models.revision_protection import new_revision
+from tracim_backend.models.roles import WorkspaceRoles
 
 
 class Content(Fixture):
@@ -51,13 +51,13 @@ class Content(Fixture):
         role_api.create_one(
             user=bob,
             workspace=recipe_workspace,
-            role_level=UserRoleInWorkspace.CONTENT_MANAGER,
+            role=WorkspaceRoles.CONTENT_MANAGER,
             with_notif=False,
         )
         role_api.create_one(
             user=john_the_reader,
             workspace=recipe_workspace,
-            role_level=UserRoleInWorkspace.READER,
+            role=WorkspaceRoles.READER,
             with_notif=False,
         )
         # Folders

@@ -22,8 +22,8 @@ from tracim_backend.models.auth import Profile
 from tracim_backend.models.data import Content
 from tracim_backend.models.data import ContentRevisionRO
 from tracim_backend.models.data import User
-from tracim_backend.models.data import UserRoleInWorkspace
 from tracim_backend.models.data import Workspace
+from tracim_backend.models.roles import WorkspaceRoles
 from tracim_backend.tests.fixtures import *  # noqa: F403,F401
 from tracim_backend.tests.utils import TEST_CONFIG_FILE_PATH
 
@@ -681,10 +681,7 @@ class TestCommands(object):
         )
         role_api = role_api_factory.get(current_user=test_user)
         role_api.create_one(
-            test_user,
-            test_workspace,
-            role_level=UserRoleInWorkspace.CONTENT_MANAGER,
-            with_notif=False,
+            test_user, test_workspace, role=WorkspaceRoles.CONTENT_MANAGER, with_notif=False
         )
         content_api = content_api_factory.get(
             show_deleted=True, show_active=True, show_archived=True, current_user=test_user
@@ -778,10 +775,7 @@ class TestCommands(object):
 
         role_api = role_api_factory.get(current_user=test_user)
         role_api.create_one(
-            test_user,
-            admin_workspace,
-            role_level=UserRoleInWorkspace.CONTENT_MANAGER,
-            with_notif=False,
+            test_user, admin_workspace, role=WorkspaceRoles.CONTENT_MANAGER, with_notif=False
         )
         session.add(admin_workspace)
         session.add(user_workspace)
@@ -890,10 +884,7 @@ class TestCommands(object):
 
         role_api = role_api_factory.get(current_user=test_user)
         role_api.create_one(
-            test_user,
-            admin_workspace,
-            role_level=UserRoleInWorkspace.CONTENT_MANAGER,
-            with_notif=False,
+            test_user, admin_workspace, role=WorkspaceRoles.CONTENT_MANAGER, with_notif=False
         )
         session.add(admin_workspace)
         session.add(user_workspace)
@@ -1001,10 +992,7 @@ class TestCommands(object):
         )
         role_api = role_api_factory.get(current_user=test_user)
         role_api.create_one(
-            test_user,
-            test_workspace,
-            role_level=UserRoleInWorkspace.CONTENT_MANAGER,
-            with_notif=False,
+            test_user, test_workspace, role=WorkspaceRoles.CONTENT_MANAGER, with_notif=False
         )
         content_api = content_api_factory.get(
             show_deleted=True, show_active=True, show_archived=True, current_user=test_user

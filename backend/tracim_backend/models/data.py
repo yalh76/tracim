@@ -116,11 +116,11 @@ class Workspace(DeclarativeBase):
                 size += revision.depot_file.file.content_length
         return size
 
-    def get_user_role(self, user: User) -> int:
-        for role in user.roles:
-            if role.workspace.workspace_id == self.workspace_id:
-                return role.role
-        return UserRoleInWorkspace.NOT_APPLICABLE
+    def get_user_role(self, user: User) -> WorkspaceRoles:
+        for user_role_in_workspace in user.user_roles_in_workspace:
+            if user_role_in_workspace.workspace.workspace_id == self.workspace_id:
+                return user_role_in_workspace.role
+        return WorkspaceRoles.NOT_APPLICABLE
 
     def get_label(self):
         """ this method is for interoperability with Content class"""
@@ -158,99 +158,21 @@ class UserRoleInWorkspace(DeclarativeBase):
         default=None,
         primary_key=True,
     )
-    role = Column(Integer, nullable=False, default=0, primary_key=False)
+    role = Column(
+        Enum(WorkspaceRoles),
+        nullable=False,
+        server_default=WorkspaceRoles.NOT_APPLICABLE.name,
+        primary_key=False,
+    )
     do_notify = Column(Boolean, unique=False, nullable=False, default=False)
 
     workspace = relationship(
-        "Workspace", remote_side=[Workspace.workspace_id], backref="roles", lazy="joined"
+        "Workspace",
+        remote_side=[Workspace.workspace_id],
+        backref="user_roles_in_workspace",
+        lazy="joined",
     )
-    user = relationship("User", remote_side=[User.user_id], backref="roles")
-
-    NOT_APPLICABLE = WorkspaceRoles.NOT_APPLICABLE.level
-    READER = WorkspaceRoles.READER.level
-    CONTRIBUTOR = WorkspaceRoles.CONTRIBUTOR.level
-    CONTENT_MANAGER = WorkspaceRoles.CONTENT_MANAGER.level
-    WORKSPACE_MANAGER = WorkspaceRoles.WORKSPACE_MANAGER.level
-
-    # TODO - G.M - 10-04-2018 - [Cleanup] Drop this
-    # SLUG = {
-    #     NOT_APPLICABLE: 'not-applicable',
-    #     READER: 'reader',
-    #     CONTRIBUTOR: 'contributor',
-    #     CONTENT_MANAGER: 'content-manager',
-    #     WORKSPACE_MANAGER: 'workspace-manager',
-    # }
-
-    # LABEL = dict()
-    # LABEL[0] = l_('N/A')
-    # LABEL[1] = l_('Reader')
-    # LABEL[2] = l_('Contributor')
-    # LABEL[4] = l_('Content Manager')
-    # LABEL[8] = l_('Workspace Manager')
-    # TODO - G.M - 10-04-2018 - [Cleanup] Drop this
-    #
-    # STYLE = dict()
-    # STYLE[0] = ''
-    # STYLE[1] = 'color: #1fdb11;'
-    # STYLE[2] = 'color: #759ac5;'
-    # STYLE[4] = 'color: #ea983d;'
-    # STYLE[8] = 'color: #F00;'
-    #
-    # ICON = dict()
-    # ICON[0] = ''
-    # ICON[1] = 'fa-eye'
-    # ICON[2] = 'fa-pencil'
-    # ICON[4] = 'fa-graduation-cap'
-    # ICON[8] = 'fa-legal'
-    #
-    #
-    # @property
-    # def fa_icon(self):
-    #     return UserRoleInWorkspace.ICON[self.role]
-    #
-    # @property
-    # def style(self):
-    #     return UserRoleInWorkspace.STYLE[self.role]
-    #
-
-    def role_object(self):
-        return WorkspaceRoles.get_role_from_level(level=self.role)
-
-    def role_as_label(self):
-        return self.role_object().label
-
-    @classmethod
-    def get_all_role_values(cls) -> typing.List[int]:
-        """
-        Return all valid role value
-        """
-        return [role.level for role in WorkspaceRoles.get_all_valid_role()]
-
-    @classmethod
-    def get_all_role_slug(cls) -> typing.List[str]:
-        """
-        Return all valid role slug
-        """
-        # INFO - G.M - 25-05-2018 - Be carefull, as long as this method
-        # and get_all_role_values are both used for API, this method should
-        # return item in the same order as get_all_role_values
-        return [role.slug for role in WorkspaceRoles.get_all_valid_role()]
-
-
-# TODO - G.M - 10-04-2018 - [Cleanup] Drop this
-# class RoleType(object):
-#     def __init__(self, role_id):
-#         self.role_type_id = role_id
-# self.fa_icon = UserRoleInWorkspace.ICON[role_id]
-# self.role_label = UserRoleInWorkspace.LABEL[role_id]
-# self.css_style = UserRoleInWorkspace.STYLE[role_id]
-
-
-# TODO - G.M - 09-04-2018 [Cleanup] It this items really needed ?
-# class LinkItem(object):
-#     def __init__(self, href, label):
-#         self.href = href
-#        self.label = label
+    user = relationship("User", remote_side=[User.user_id], backref="user_roles_in_workspace")
 
 
 class ActionDescription(object):

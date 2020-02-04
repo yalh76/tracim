@@ -60,3 +60,20 @@ class WorkspaceRoles(Enum):
         if len(roles) != 1:
             raise RoleDoesNotExist()
         return roles[0]
+
+    @classmethod
+    def get_all_role_values(cls) -> typing.List[int]:
+        """
+        Return all valid role value
+        """
+        return [role.level for role in WorkspaceRoles.get_all_valid_role()]
+
+    @classmethod
+    def get_all_role_slug(cls) -> typing.List[str]:
+        """
+        Return all valid role slug
+        """
+        # INFO - G.M - 25-05-2018 - Be carefull, as long as this method
+        # and get_all_role_values are both used for API, this method should
+        # return item in the same order as get_all_role_values
+        return [role.slug for role in WorkspaceRoles.get_all_valid_role()]

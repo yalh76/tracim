@@ -32,10 +32,10 @@ from tracim_backend.exceptions import ExpiredResetPasswordToken
 from tracim_backend.exceptions import ProfileDoesNotExist
 from tracim_backend.exceptions import UnvalidResetPasswordToken
 from tracim_backend.models.meta import DeclarativeBase
+from tracim_backend.models.roles import WorkspaceRoles
 
 if TYPE_CHECKING:
     from tracim_backend.models.data import Workspace
-    from tracim_backend.models.data import UserRoleInWorkspace
 __all__ = ["User"]
 
 
@@ -211,22 +211,22 @@ class User(DeclarativeBase):
                 return self.email[0:at_pos]
             return self.email
 
-    def get_role(self, workspace: "Workspace") -> int:
-        for role in self.roles:
-            if role.workspace == workspace:
-                return role.role
+    def get_role(self, workspace: "Workspace") -> WorkspaceRoles:
+        for user_role_in_workspace in self.user_roles_in_workspace:
+            if user_role_in_workspace.workspace == workspace:
+                return user_role_in_workspace.role
 
-        return UserRoleInWorkspace.NOT_APPLICABLE
+        return WorkspaceRoles.NOT_APPLICABLE
 
-    def get_active_roles(self) -> ["UserRoleInWorkspace"]:
+    def get_active_user_role_in_workspace(self) -> ["UserRoleInWorkspace"]:
         """
         :return: list of roles of the user for all not-deleted workspaces
         """
-        roles = []
-        for role in self.roles:
-            if not role.workspace.is_deleted:
-                roles.append(role)
-        return roles
+        user_role_in_workspace = []
+        for user_role_in_workspace in self.user_roles_in_workspace:
+            if not user_role_in_workspace.workspace.is_deleted:
+                user_role_in_workspace.append(user_role_in_workspace)
+        return user_role_in_workspace
 
     # Tokens ###
 

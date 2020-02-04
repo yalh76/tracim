@@ -10,6 +10,7 @@ from tracim_backend.lib.core.userworkspace import RoleApi
 from tracim_backend.lib.utils.logger import logger
 from tracim_backend.models.auth import User
 from tracim_backend.models.context_models import ContentInContext
+from tracim_backend.models.roles import WorkspaceRoles
 
 
 class IndexedContentsResults(object):
@@ -102,7 +103,9 @@ class SearchApi(ABC):
                 errored_indexed_contents_ids.append(content_in_context.content_id)
         return IndexedContentsResults(content_ids_to_index, errored_indexed_contents_ids)
 
-    def _get_user_workspaces_id(self, min_role: int) -> typing.Optional[typing.List[int]]:
+    def _get_user_workspaces_id(
+        self, min_role: WorkspaceRoles
+    ) -> typing.Optional[typing.List[int]]:
         """
         Get user workspace list or None if no user set
         """

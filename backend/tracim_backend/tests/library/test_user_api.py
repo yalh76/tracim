@@ -16,7 +16,7 @@ from tracim_backend.models.auth import AuthType
 from tracim_backend.models.auth import Profile
 from tracim_backend.models.auth import User
 from tracim_backend.models.context_models import UserInContext
-from tracim_backend.models.data import UserRoleInWorkspace
+from tracim_backend.models.roles import WorkspaceRoles
 from tracim_backend.tests.fixtures import *  # noqa: F403,F40
 
 
@@ -379,9 +379,9 @@ class TestUserApi(object):
         wapi = workspace_api_factory.get()
         workspace = wapi.create_workspace("test workspace n°1", save_now=True)
         role_api = role_api_factory.get()
-        role_api.create_one(u1, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u2, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u3, workspace, UserRoleInWorkspace.READER, False)
+        role_api.create_one(u1, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(u2, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(u3, workspace, WorkspaceRoles.READER, False)
         api2 = UserApi(current_user=u1, session=session, config=app_config)
         users = api2.get_known_user("name")
         assert len(users) == 2
@@ -402,10 +402,10 @@ class TestUserApi(object):
         wapi = workspace_api_factory.get()
         workspace_2 = wapi.create_workspace("test workspace n°2", save_now=True)
         role_api = role_api_factory.get()
-        role_api.create_one(u1, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u2, workspace_2, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u3, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u3, workspace_2, UserRoleInWorkspace.READER, False)
+        role_api.create_one(u1, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(u2, workspace_2, WorkspaceRoles.READER, False)
+        role_api.create_one(u3, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(u3, workspace_2, WorkspaceRoles.READER, False)
         api2 = UserApi(current_user=u3, session=session, config=app_config)
         users = api2.get_known_user("name", exclude_workspace_ids=[workspace.workspace_id])
         assert len(users) == 1
@@ -426,11 +426,11 @@ class TestUserApi(object):
         wapi = workspace_api_factory.get()
         workspace_2 = wapi.create_workspace("test workspace n°2", save_now=True)
         role_api = role_api_factory.get()
-        role_api.create_one(u1, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u2, workspace_2, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u4, workspace_2, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u3, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u3, workspace_2, UserRoleInWorkspace.READER, False)
+        role_api.create_one(u1, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(u2, workspace_2, WorkspaceRoles.READER, False)
+        role_api.create_one(u4, workspace_2, WorkspaceRoles.READER, False)
+        role_api.create_one(u3, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(u3, workspace_2, WorkspaceRoles.READER, False)
         api2 = UserApi(current_user=u3, session=session, config=app_config)
         users = api2.get_known_user(
             "name", exclude_workspace_ids=[workspace.workspace_id], exclude_user_ids=[u4.user_id]
@@ -452,10 +452,10 @@ class TestUserApi(object):
         wapi = workspace_api_factory.get()
         workspace_2 = wapi.create_workspace("test workspace n°2", save_now=True)
         role_api = role_api_factory.get()
-        role_api.create_one(u1, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u2, workspace_2, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u3, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u3, workspace_2, UserRoleInWorkspace.READER, False)
+        role_api.create_one(u1, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(u2, workspace_2, WorkspaceRoles.READER, False)
+        role_api.create_one(u3, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(u3, workspace_2, WorkspaceRoles.READER, False)
         api2 = UserApi(current_user=u3, session=session, config=app_config)
         users = api2.get_known_user("name")
         assert len(users) == 2
@@ -474,9 +474,9 @@ class TestUserApi(object):
         wapi = workspace_api_factory.get()
         workspace = wapi.create_workspace("test workspace n°1", save_now=True)
         role_api = role_api_factory.get()
-        role_api.create_one(u1, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u2, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u3, workspace, UserRoleInWorkspace.READER, False)
+        role_api.create_one(u1, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(u2, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(u3, workspace, WorkspaceRoles.READER, False)
         api2 = UserApi(current_user=u1, session=session, config=app_config)
         users = api2.get_known_user("name", exclude_user_ids=[u1.user_id])
         assert len(users) == 1
@@ -494,9 +494,9 @@ class TestUserApi(object):
         wapi = workspace_api_factory.get()
         workspace = wapi.create_workspace("test workspace n°1", save_now=True)
         role_api = role_api_factory.get()
-        role_api.create_one(u1, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u2, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(u3, workspace, UserRoleInWorkspace.READER, False)
+        role_api.create_one(u1, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(u2, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(u3, workspace, WorkspaceRoles.READER, False)
         api2 = UserApi(current_user=u1, session=session, config=app_config)
         users = api2.get_known_user("email")
         assert len(users) == 2

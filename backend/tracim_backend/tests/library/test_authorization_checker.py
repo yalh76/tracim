@@ -90,7 +90,7 @@ class TestAuthorizationChecker(object):
         current_user = User(user_id=2, email="toto@toto.toto")
         current_user.profile = Profile.TRUSTED_USER
         current_workspace = Workspace(workspace_id=3, owner=current_user)
-        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=5)
+        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=WorkspaceRoles.WORKSPACE_MANAGER)
         session.add(current_user)
         session.add(current_workspace)
         session.add(role)
@@ -106,15 +106,15 @@ class TestAuthorizationChecker(object):
             def current_workspace(self):
                 return current_workspace
 
-        assert RoleChecker(1).check(FakeBaseFakeTracimContext())
-        assert RoleChecker(2).check(FakeBaseFakeTracimContext())
+        assert RoleChecker(WorkspaceRoles.CONTRIBUTOR).check(FakeBaseFakeTracimContext())
+        assert RoleChecker(WorkspaceRoles.CONTENT_MANAGER).check(FakeBaseFakeTracimContext())
 
     def test__unit__RoleChecker__err_role_insufficient(self, session):
 
         current_user = User(user_id=2, email="toto@toto.toto")
         current_user.profile = Profile.TRUSTED_USER
         current_workspace = Workspace(workspace_id=3, owner=current_user)
-        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=2)
+        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=WorkspaceRoles.READER)
         session.add(current_user)
         session.add(current_workspace)
         session.add(role)
@@ -130,11 +130,11 @@ class TestAuthorizationChecker(object):
             def current_workspace(self):
                 return current_workspace
 
-        assert RoleChecker(2).check(FakeBaseFakeTracimContext())
+        assert RoleChecker(WorkspaceRoles.READER).check(FakeBaseFakeTracimContext())
         with pytest.raises(InsufficientUserRoleInWorkspace):
-            RoleChecker(3).check(FakeBaseFakeTracimContext())
+            RoleChecker(WorkspaceRoles.CONTRIBUTOR).check(FakeBaseFakeTracimContext())
         with pytest.raises(InsufficientUserRoleInWorkspace):
-            RoleChecker(4).check(FakeBaseFakeTracimContext())
+            RoleChecker(WorkspaceRoles.CONTENT_MANAGER).check(FakeBaseFakeTracimContext())
 
     def test__unit__RoleChecker__err_no_role_in_workspace(self, session):
 
@@ -155,22 +155,22 @@ class TestAuthorizationChecker(object):
             def current_workspace(self):
                 return current_workspace
 
-        assert RoleChecker(0).check(FakeBaseFakeTracimContext())
+        assert RoleChecker(WorkspaceRoles.NOT_APPLICABLE).check(FakeBaseFakeTracimContext())
         with pytest.raises(InsufficientUserRoleInWorkspace):
-            RoleChecker(1).check(FakeBaseFakeTracimContext())
+            RoleChecker(WorkspaceRoles.READER).check(FakeBaseFakeTracimContext())
         with pytest.raises(InsufficientUserRoleInWorkspace):
-            RoleChecker(2).check(FakeBaseFakeTracimContext())
+            RoleChecker(WorkspaceRoles.CONTRIBUTOR).check(FakeBaseFakeTracimContext())
         with pytest.raises(InsufficientUserRoleInWorkspace):
-            RoleChecker(3).check(FakeBaseFakeTracimContext())
+            RoleChecker(WorkspaceRoles.CONTENT_MANAGER).check(FakeBaseFakeTracimContext())
         with pytest.raises(InsufficientUserRoleInWorkspace):
-            RoleChecker(4).check(FakeBaseFakeTracimContext())
+            RoleChecker(WorkspaceRoles.WORKSPACE_MANAGER).check(FakeBaseFakeTracimContext())
 
     def test__unit__CandidateWorkspaceRoleChecker__ok__nominal_case(self, session):
 
         current_user = User(user_id=2, email="toto@toto.toto")
         current_user.profile = Profile.TRUSTED_USER
         candidate_workspace = Workspace(workspace_id=3, owner=current_user)
-        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=5)
+        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=WorkspaceRoles.WORKSPACE_MANAGER)
         session.add(current_user)
         session.add(candidate_workspace)
         session.add(role)
@@ -186,15 +186,19 @@ class TestAuthorizationChecker(object):
             def candidate_workspace(self):
                 return candidate_workspace
 
-        assert CandidateWorkspaceRoleChecker(1).check(FakeBaseFakeTracimContext())
-        assert CandidateWorkspaceRoleChecker(2).check(FakeBaseFakeTracimContext())
+        assert CandidateWorkspaceRoleChecker(WorkspaceRoles.READER).check(
+            FakeBaseFakeTracimContext()
+        )
+        assert CandidateWorkspaceRoleChecker(WorkspaceRoles.CONTRIBUTOR).check(
+            FakeBaseFakeTracimContext()
+        )
 
     def test__unit__CandidateWorkspaceRoleChecker__err_role_insufficient(self, session):
 
         current_user = User(user_id=2, email="toto@toto.toto")
         current_user.profile = Profile.TRUSTED_USER
         candidate_workspace = Workspace(workspace_id=3, owner=current_user)
-        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=2)
+        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=WorkspaceRoles.CONTRIBUTOR)
         session.add(current_user)
         session.add(candidate_workspace)
         session.add(role)
@@ -210,11 +214,17 @@ class TestAuthorizationChecker(object):
             def candidate_workspace(self):
                 return candidate_workspace
 
-        assert CandidateWorkspaceRoleChecker(2).check(FakeBaseFakeTracimContext())
+        assert CandidateWorkspaceRoleChecker(WorkspaceRoles.CONTRIBUTOR).check(
+            FakeBaseFakeTracimContext()
+        )
         with pytest.raises(InsufficientUserRoleInWorkspace):
-            CandidateWorkspaceRoleChecker(3).check(FakeBaseFakeTracimContext())
+            CandidateWorkspaceRoleChecker(WorkspaceRoles.CONTENT_MANAGER).check(
+                FakeBaseFakeTracimContext()
+            )
         with pytest.raises(InsufficientUserRoleInWorkspace):
-            CandidateWorkspaceRoleChecker(4).check(FakeBaseFakeTracimContext())
+            CandidateWorkspaceRoleChecker(WorkspaceRoles.WORKSPACE_MANAGER).check(
+                FakeBaseFakeTracimContext()
+            )
 
     def test__unit__CandidateWorkspaceRoleChecker__err_no_role_in_workspace(self, session):
 
@@ -235,15 +245,23 @@ class TestAuthorizationChecker(object):
             def candidate_workspace(self):
                 return candidate_workspace
 
-        assert CandidateWorkspaceRoleChecker(0).check(FakeBaseFakeTracimContext())
+        assert CandidateWorkspaceRoleChecker(WorkspaceRoles.NOT_APPLICABLE).check(
+            FakeBaseFakeTracimContext()
+        )
         with pytest.raises(InsufficientUserRoleInWorkspace):
-            CandidateWorkspaceRoleChecker(1).check(FakeBaseFakeTracimContext())
+            CandidateWorkspaceRoleChecker(WorkspaceRoles.READER).check(FakeBaseFakeTracimContext())
         with pytest.raises(InsufficientUserRoleInWorkspace):
-            CandidateWorkspaceRoleChecker(2).check(FakeBaseFakeTracimContext())
+            CandidateWorkspaceRoleChecker(WorkspaceRoles.CONTRIBUTOR).check(
+                FakeBaseFakeTracimContext()
+            )
         with pytest.raises(InsufficientUserRoleInWorkspace):
-            CandidateWorkspaceRoleChecker(3).check(FakeBaseFakeTracimContext())
+            CandidateWorkspaceRoleChecker(WorkspaceRoles.CONTENT_MANAGER).check(
+                FakeBaseFakeTracimContext()
+            )
         with pytest.raises(InsufficientUserRoleInWorkspace):
-            CandidateWorkspaceRoleChecker(4).check(FakeBaseFakeTracimContext())
+            CandidateWorkspaceRoleChecker(WorkspaceRoles.WORKSPACE_MANAGER).check(
+                FakeBaseFakeTracimContext()
+            )
 
     def test__unit__ContentTypeChecker__ok_nominal_test(self, content_type_list):
         class FakeBaseFakeTracimContext(BaseFakeTracimContext):
@@ -498,9 +516,7 @@ class TestAuthorizationChecker(object):
             available_statuses=[],
             minimal_role_content_creation=WorkspaceRoles.CONTENT_MANAGER,
         )
-        role = UserRoleInWorkspace(
-            user_id=2, workspace_id=3, role=WorkspaceRoles.CONTENT_MANAGER.level
-        )
+        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=WorkspaceRoles.CONTENT_MANAGER)
         session.add(current_user)
         session.add(current_workspace)
         session.add(role)
@@ -539,9 +555,7 @@ class TestAuthorizationChecker(object):
             available_statuses=[],
             minimal_role_content_creation=WorkspaceRoles.CONTENT_MANAGER,
         )
-        role = UserRoleInWorkspace(
-            user_id=2, workspace_id=3, role=WorkspaceRoles.CONTENT_MANAGER.level
-        )
+        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=WorkspaceRoles.CONTENT_MANAGER)
         session.add(current_user)
         session.add(current_workspace)
         session.add(role)
@@ -580,7 +594,7 @@ class TestAuthorizationChecker(object):
             available_statuses=[],
             minimal_role_content_creation=WorkspaceRoles.CONTENT_MANAGER,
         )
-        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=WorkspaceRoles.CONTRIBUTOR.level)
+        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=WorkspaceRoles.CONTRIBUTOR)
         session.add(current_user)
         session.add(current_workspace)
         session.add(role)
@@ -616,7 +630,7 @@ class TestAuthorizationChecker(object):
         current_user = User(user_id=2, email="toto@toto.toto")
         current_user.profile = Profile.TRUSTED_USER
         current_workspace = Workspace(workspace_id=3, owner=current_user)
-        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=WorkspaceRoles.CONTRIBUTOR.level)
+        role = UserRoleInWorkspace(user_id=2, workspace_id=3, role=WorkspaceRoles.CONTRIBUTOR)
         candidate_content_type = TracimContentType(
             slug="test",
             fa_icon="",

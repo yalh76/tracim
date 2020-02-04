@@ -225,7 +225,7 @@ class EmailManager(object):
         main_content = content.parent if content.type == content_type_list.Comment.slug else content
         notifiable_roles = WorkspaceApi(
             current_user=user, session=self.session, config=self.config
-        ).get_notifiable_roles(content.workspace)
+        ).get_notifiable_user_roles_in_workspace(content.workspace)
 
         if len(notifiable_roles) <= 0:
             logger.info(
@@ -456,7 +456,7 @@ class EmailManager(object):
 
     def _build_context_for_content_update(
         self,
-        role: UserRoleInWorkspace,
+        user_role_in_workspace: UserRoleInWorkspace,
         content_in_context: ContentInContext,
         parent_in_context: typing.Optional[ContentInContext],
         workspace_in_context: WorkspaceInContext,
@@ -470,7 +470,7 @@ class EmailManager(object):
         previous_revision = content.get_previous_revision()
         new_status = _(content.get_status().label)
         workspace_url = workspace_in_context.frontend_url
-        role_label = role.role_as_label()
+        role_label = user_role_in_workspace.role.label
         logo_url = get_email_logo_frontend_url(self.config)
 
         # FIXME: remove/readapt assert to debug easily broken case
@@ -485,10 +485,10 @@ class EmailManager(object):
         # assert logo_url
 
         return {
-            "user": role.user,
+            "user": user_role_in_workspace.user,
             "actor": actor,
             "action": action,
-            "workspace": role.workspace,
+            "workspace": user_role_in_workspace.workspace,
             "ActionDescription": ActionDescription,
             "parent_in_context": parent_in_context,
             "content_in_context": content_in_context,
@@ -502,7 +502,7 @@ class EmailManager(object):
     def _build_email_body_for_content(
         self,
         mako_template_filepath: str,
-        role: UserRoleInWorkspace,
+        user_role_in_workspace: UserRoleInWorkspace,
         content_in_context: ContentInContext,
         parent_in_context: typing.Optional[ContentInContext],
         workspace_in_context: WorkspaceInContext,
@@ -513,7 +513,7 @@ class EmailManager(object):
         Build an email body and return it as a string
         :param mako_template_filepath: the absolute path to the mako template
         to be used for email body building
-        :param role: the role related to user to whom the email must be sent.
+        :param user_role_in_workspace: the role related to user to whom the email must be sent.
         The role is required (and not the user only) in order to show in the
          mail why the user receive the notification
         :param content_in_context: the content item related to the notification
@@ -528,7 +528,7 @@ class EmailManager(object):
             self, "Building email content from MAKO template {}".format(mako_template_filepath)
         )
         context = self._build_context_for_content_update(
-            role=role,
+            user_role_in_workspace=user_role_in_workspace,
             content_in_context=content_in_context,
             parent_in_context=parent_in_context,
             workspace_in_context=workspace_in_context,

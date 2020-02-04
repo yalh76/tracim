@@ -6,7 +6,7 @@ from requests.exceptions import ConnectionError
 import transaction
 
 from tracim_backend.models.auth import Profile
-from tracim_backend.models.data import UserRoleInWorkspace
+from tracim_backend.models.roles import WorkspaceRoles
 from tracim_backend.tests.fixtures import *  # noqa: F403,F40
 
 VALID_CALDAV_BODY_PUT_EVENT = """
@@ -160,7 +160,7 @@ class TestCaldavRadicaleProxyEndpoints(object):
         workspace = workspace_api.create_workspace("test", save_now=True)
         workspace.agenda_enabled = True
         rapi = role_api_factory.get()
-        rapi.create_one(user, workspace, UserRoleInWorkspace.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace, WorkspaceRoles.CONTENT_MANAGER, False)
         transaction.commit()
         web_testapp.authorization = ("Basic", ("test@test.test", "test@test.test"))
         web_testapp.get("/agenda/workspace/{}/".format(workspace.workspace_id), status=404)
@@ -225,9 +225,9 @@ class TestAgendaApi(object):
         secret_workspace = workspace_api.create_workspace("secret", save_now=True)
         secret_workspace.agenda_enabled = True
         rapi = role_api_factory.get()
-        rapi.create_one(user, workspace, UserRoleInWorkspace.CONTRIBUTOR, False)
-        rapi.create_one(user, workspace2, UserRoleInWorkspace.READER, False)
-        rapi.create_one(user, workspace3, UserRoleInWorkspace.READER, False)
+        rapi.create_one(user, workspace, WorkspaceRoles.CONTRIBUTOR, False)
+        rapi.create_one(user, workspace2, WorkspaceRoles.READER, False)
+        rapi.create_one(user, workspace3, WorkspaceRoles.READER, False)
         transaction.commit()
         web_testapp.authorization = ("Basic", ("test@test.test", "test@test.test"))
         result = web_testapp.get("/api/v2/users/{}/agenda".format(user.user_id), status=200)
@@ -269,9 +269,9 @@ class TestAgendaApi(object):
         workspace3 = workspace_api.create_workspace("wp3", save_now=True)
         workspace3.agenda_enabled = True
         rapi = role_api_factory.get()
-        rapi.create_one(user, workspace, UserRoleInWorkspace.CONTRIBUTOR, False)
-        rapi.create_one(user, workspace2, UserRoleInWorkspace.READER, False)
-        rapi.create_one(user, workspace3, UserRoleInWorkspace.READER, False)
+        rapi.create_one(user, workspace, WorkspaceRoles.CONTRIBUTOR, False)
+        rapi.create_one(user, workspace2, WorkspaceRoles.READER, False)
+        rapi.create_one(user, workspace3, WorkspaceRoles.READER, False)
         transaction.commit()
         web_testapp.authorization = ("Basic", ("test@test.test", "test@test.test"))
         params = {

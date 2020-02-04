@@ -26,6 +26,7 @@ from tracim_backend.models.auth import User
 from tracim_backend.models.context_models import WorkspaceInContext
 from tracim_backend.models.data import UserRoleInWorkspace
 from tracim_backend.models.data import Workspace
+from tracim_backend.models.roles import WorkspaceRoles
 
 __author__ = "damien"
 
@@ -67,7 +68,7 @@ class WorkspaceApi(object):
             return self._base_query_without_roles()
 
         query = self._base_query_without_roles()
-        query = query.join(Workspace.roles).filter(
+        query = query.join(Workspace.user_roles_in_workspace).filter(
             UserRoleInWorkspace.user_id == self._user.user_id
         )
         return query
@@ -114,7 +115,7 @@ class WorkspaceApi(object):
         role_api = RoleApi(session=self._session, current_user=self._user, config=self._config)
 
         role = role_api.create_one(
-            self._user, workspace, UserRoleInWorkspace.WORKSPACE_MANAGER, with_notif=True
+            self._user, workspace, WorkspaceRoles.WORKSPACE_MANAGER, with_notif=True
         )
 
         self._session.add(workspace)
@@ -236,9 +237,7 @@ class WorkspaceApi(object):
         rapi = RoleApi(session=self._session, current_user=self._user, config=self._config)
         if include_with_role:
             workspace_ids.extend(
-                rapi.get_user_workspaces_ids(
-                    user_id=user.user_id, min_role=UserRoleInWorkspace.READER
-                )
+                rapi.get_user_workspaces_ids(user_id=user.user_id, min_role=WorkspaceRoles.READER)
             )
         if include_owned:
             owned_workspaces = self._get_workspaces_owned_by_user(user.user_id)
@@ -256,7 +255,7 @@ class WorkspaceApi(object):
         elif self._user.profile.id == Profile.TRUSTED_USER.id:
             workspaces = (
                 self._base_query()
-                .filter(UserRoleInWorkspace.role == UserRoleInWorkspace.WORKSPACE_MANAGER)
+                .filter(UserRoleInWorkspace.role == WorkspaceRoles.WORKSPACE_MANAGER)
                 .order_by(Workspace.label)
                 .all()
             )
@@ -272,20 +271,20 @@ class WorkspaceApi(object):
             if role.workspace == workspace:
                 role.do_notify = True
 
-    def get_notifiable_roles(
+    def get_notifiable_user_roles_in_workspace(
         self, workspace: Workspace, force_notify: bool = False
     ) -> [UserRoleInWorkspace]:
-        roles = []
-        for role in workspace.roles:
+        user_roles_in_workspace = []
+        for user_role_in_workspace in workspace.user_roles_in_workspace:
             if (
-                (force_notify or role.do_notify is True)
-                and (not self._user or role.user != self._user)
-                and role.user.is_active
-                and not role.user.is_deleted
-                and role.user.auth_type != AuthType.UNKNOWN
+                (force_notify or user_role_in_workspace.do_notify is True)
+                and (not self._user or user_role_in_workspace.user != self._user)
+                and user_role_in_workspace.user.is_active
+                and not user_role_in_workspace.user.is_deleted
+                and user_role_in_workspace.user.auth_type != AuthType.UNKNOWN
             ):
-                roles.append(role)
-        return roles
+                user_roles_in_workspace.append(user_role_in_workspace)
+        return user_roles_in_workspace
 
     def save(self, workspace: Workspace):
         self._session.flush()

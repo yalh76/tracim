@@ -5,7 +5,7 @@ import transaction
 
 from tracim_backend.models.auth import AuthType
 from tracim_backend.models.auth import Profile
-from tracim_backend.models.data import UserRoleInWorkspace
+from tracim_backend.models.roles import WorkspaceRoles
 from tracim_backend.tests.fixtures import *  # noqa: F403,F40
 
 
@@ -167,7 +167,7 @@ class TestFunctionalWebdavGet(object):
         workspace_api = workspace_api_factory.get(current_user=admin_user, show_deleted=True)
         workspace = workspace_api.create_workspace(workspace_label, save_now=True)
         rapi = role_api_factory.get()
-        rapi.create_one(user, workspace, UserRoleInWorkspace.READER, False)
+        rapi.create_one(user, workspace, WorkspaceRoles.READER, False)
         transaction.commit()
 
         webdav_testapp.authorization = ("Basic", ("test@test.test", "test@test.test"))
@@ -478,7 +478,7 @@ class TestFunctionalWebdavMoveSimpleFile(object):
         workspace_api = workspace_api_factory.get(current_user=admin_user, show_deleted=True)
         workspace = workspace_api.create_workspace(workspace_label, save_now=True)
         rapi = role_api_factory.get()
-        rapi.create_one(user, workspace, UserRoleInWorkspace.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace, WorkspaceRoles.CONTENT_MANAGER, False)
         api = content_api_factory.get()
         dir1_folder = api.create(
             content_type_list.Folder.slug,
@@ -672,8 +672,8 @@ class TestFunctionalWebdavMoveSimpleFile(object):
         workspace = workspace_api.create_workspace(workspace_label, save_now=True)
         workspace2 = workspace_api.create_workspace(workspace2_label, save_now=True)
         rapi = role_api_factory.get()
-        rapi.create_one(user, workspace, UserRoleInWorkspace.CONTENT_MANAGER, False)
-        rapi.create_one(user, workspace2, UserRoleInWorkspace.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace, WorkspaceRoles.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace2, WorkspaceRoles.CONTENT_MANAGER, False)
         api = content_api_factory.get()
         example_folder = api.create(
             content_type_list.Folder.slug,
@@ -845,7 +845,7 @@ class TestFunctionalWebdavMoveSimpleFile(object):
         workspace_api = workspace_api_factory.get(current_user=admin_user, show_deleted=True)
         workspace = workspace_api.create_workspace(workspace_label, save_now=True)
         rapi = role_api_factory.get()
-        rapi.create_one(user, workspace, UserRoleInWorkspace.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace, WorkspaceRoles.CONTENT_MANAGER, False)
         api = content_api_factory.get()
         api.create(
             content_type_list.Folder.slug,
@@ -1015,8 +1015,8 @@ class TestFunctionalWebdavMoveSimpleFile(object):
         workspace = workspace_api.create_workspace(workspace_label, save_now=True)
         workspace2 = workspace_api.create_workspace(workspace2_label, save_now=True)
         rapi = role_api_factory.get()
-        rapi.create_one(user, workspace, UserRoleInWorkspace.CONTENT_MANAGER, False)
-        rapi.create_one(user, workspace2, UserRoleInWorkspace.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace, WorkspaceRoles.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace2, WorkspaceRoles.CONTENT_MANAGER, False)
         api = content_api_factory.get()
         api.create(
             content_type_list.Folder.slug,
@@ -1164,7 +1164,7 @@ class TestFunctionalWebdavMoveSimpleFile(object):
         workspace_api = workspace_api_factory.get(current_user=admin_user, show_deleted=True)
         workspace = workspace_api.create_workspace(workspace_label, save_now=True)
         rapi = role_api_factory.get()
-        rapi.create_one(user, workspace, UserRoleInWorkspace.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace, WorkspaceRoles.CONTENT_MANAGER, False)
         api = content_api_factory.get()
         example_folder = api.create(
             content_type_list.Folder.slug,
@@ -1330,8 +1330,8 @@ class TestFunctionalWebdavMoveSimpleFile(object):
         workspace = workspace_api.create_workspace(workspace_label, save_now=True)
         workspace2 = workspace_api.create_workspace(workspace2_label, save_now=True)
         rapi = role_api_factory.get()
-        rapi.create_one(user, workspace, UserRoleInWorkspace.CONTENT_MANAGER, False)
-        rapi.create_one(user, workspace2, UserRoleInWorkspace.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace, WorkspaceRoles.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace2, WorkspaceRoles.CONTENT_MANAGER, False)
         api = content_api_factory.get()
         example_folder = api.create(
             content_type_list.Folder.slug,
@@ -1477,7 +1477,7 @@ class TestFunctionalWebdavMoveSimpleFile(object):
         workspace_api = workspace_api_factory.get(current_user=admin_user, show_deleted=True)
         workspace = workspace_api.create_workspace(workspace_label, save_now=True)
         rapi = role_api_factory.get()
-        rapi.create_one(user, workspace, UserRoleInWorkspace.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace, WorkspaceRoles.CONTENT_MANAGER, False)
         api = content_api_factory.get()
         with session.no_autoflush:
             file = api.create(
@@ -1608,8 +1608,8 @@ class TestFunctionalWebdavMoveSimpleFile(object):
         workspace = workspace_api.create_workspace(workspace_label, save_now=True)
         workspace2 = workspace_api.create_workspace(workspace2_label, save_now=True)
         rapi = role_api_factory.get()
-        rapi.create_one(user, workspace, UserRoleInWorkspace.CONTENT_MANAGER, False)
-        rapi.create_one(user, workspace2, UserRoleInWorkspace.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace, WorkspaceRoles.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace2, WorkspaceRoles.CONTENT_MANAGER, False)
         api = content_api_factory.get()
         with session.no_autoflush:
             file = api.create(

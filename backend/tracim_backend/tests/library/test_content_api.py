@@ -17,8 +17,8 @@ from tracim_backend.models.auth import User
 from tracim_backend.models.data import ActionDescription
 from tracim_backend.models.data import Content
 from tracim_backend.models.data import ContentNamespaces
-from tracim_backend.models.data import UserRoleInWorkspace
 from tracim_backend.models.revision_protection import new_revision
+from tracim_backend.models.roles import WorkspaceRoles
 from tracim_backend.tests.fixtures import *  # noqa F403,F401
 from tracim_backend.tests.utils import eq_
 
@@ -943,7 +943,7 @@ class TestContentApi(object):
             "test workspace", save_now=True
         )
         rapi = role_api_factory.get(current_user=user2)
-        rapi.create_one(user, workspace, UserRoleInWorkspace.CONTENT_MANAGER, False)
+        rapi.create_one(user, workspace, WorkspaceRoles.CONTENT_MANAGER, False)
         api2 = ContentApi(current_user=user2, session=session, config=app_config)
         c = api2.create(content_type_list.Folder.slug, workspace, None, "parent", "", True)
         assert c.owner_id == user2.user_id
@@ -1040,7 +1040,7 @@ class TestContentApi(object):
             "test workspace", save_now=True
         )
         role_api_factory.get().create_one(
-            user2, workspace, UserRoleInWorkspace.WORKSPACE_MANAGER, with_notif=False
+            user2, workspace, WorkspaceRoles.WORKSPACE_MANAGER, with_notif=False
         )
         api = ContentApi(current_user=user, session=session, config=app_config)
         foldera = api.create(content_type_list.Folder.slug, workspace, None, "folder a", "", True)
@@ -1093,7 +1093,7 @@ class TestContentApi(object):
             "test workspace", save_now=True
         )
         role_api_factory.get().create_one(
-            user2, workspace, UserRoleInWorkspace.WORKSPACE_MANAGER, with_notif=False
+            user2, workspace, WorkspaceRoles.WORKSPACE_MANAGER, with_notif=False
         )
         api = ContentApi(current_user=user, session=session, config=app_config)
         foldera = api.create(content_type_list.Folder.slug, workspace, None, "folder a", "", True)
@@ -1154,7 +1154,7 @@ class TestContentApi(object):
             "test workspace", save_now=True
         )
         role_api_factory.get().create_one(
-            user2, workspace, UserRoleInWorkspace.WORKSPACE_MANAGER, with_notif=False
+            user2, workspace, WorkspaceRoles.WORKSPACE_MANAGER, with_notif=False
         )
         api = ContentApi(current_user=user, session=session, config=app_config)
         foldera = api.create(
@@ -1233,7 +1233,7 @@ class TestContentApi(object):
             "test workspace", save_now=True
         )
         role_api_factory.get().create_one(
-            user2, workspace, UserRoleInWorkspace.WORKSPACE_MANAGER, with_notif=False
+            user2, workspace, WorkspaceRoles.WORKSPACE_MANAGER, with_notif=False
         )
         api = ContentApi(current_user=user, session=session, config=app_config)
         foldera = api.create(
@@ -1308,7 +1308,7 @@ class TestContentApi(object):
             "test workspace", save_now=True
         )
         role_api_factory.get().create_one(
-            user2, workspace, UserRoleInWorkspace.WORKSPACE_MANAGER, with_notif=False
+            user2, workspace, WorkspaceRoles.WORKSPACE_MANAGER, with_notif=False
         )
         api = ContentApi(current_user=user, session=session, config=app_config)
         with session.no_autoflush:
@@ -1372,7 +1372,7 @@ class TestContentApi(object):
             "test workspace", save_now=True
         )
         role_api_factory.get().create_one(
-            user2, workspace, UserRoleInWorkspace.WORKSPACE_MANAGER, with_notif=False
+            user2, workspace, WorkspaceRoles.WORKSPACE_MANAGER, with_notif=False
         )
         api = ContentApi(current_user=user, session=session, config=app_config)
         foldera = api.create(content_type_list.Folder.slug, workspace, None, "folder a", "", True)
@@ -1454,7 +1454,7 @@ class TestContentApi(object):
             "test workspace", save_now=True
         )
         role_api_factory.get().create_one(
-            user2, workspace, UserRoleInWorkspace.WORKSPACE_MANAGER, with_notif=False
+            user2, workspace, WorkspaceRoles.WORKSPACE_MANAGER, with_notif=False
         )
         api = ContentApi(current_user=user, session=session, config=app_config)
         foldera = api.create(content_type_list.Folder.slug, workspace, None, "folder a", "", True)
@@ -1501,7 +1501,7 @@ class TestContentApi(object):
             "test workspace", save_now=True
         )
         role_api_factory.get().create_one(
-            user2, workspace, UserRoleInWorkspace.WORKSPACE_MANAGER, with_notif=False
+            user2, workspace, WorkspaceRoles.WORKSPACE_MANAGER, with_notif=False
         )
         api = ContentApi(current_user=user, session=session, config=app_config)
         foldera = api.create(content_type_list.Folder.slug, workspace, None, "folder a", "", True)
@@ -1560,7 +1560,7 @@ class TestContentApi(object):
             "test workspace", save_now=True
         )
         role_api_factory.get().create_one(
-            user2, workspace, UserRoleInWorkspace.WORKSPACE_MANAGER, with_notif=False
+            user2, workspace, WorkspaceRoles.WORKSPACE_MANAGER, with_notif=False
         )
         api = ContentApi(current_user=user, session=session, config=app_config)
         foldera = api.create(content_type_list.Folder.slug, workspace, None, "folder a", "", True)
@@ -1620,7 +1620,7 @@ class TestContentApi(object):
             "test workspace", save_now=True
         )
         role_api_factory.get().create_one(
-            user2, workspace, UserRoleInWorkspace.WORKSPACE_MANAGER, with_notif=False
+            user2, workspace, WorkspaceRoles.WORKSPACE_MANAGER, with_notif=False
         )
         api = ContentApi(current_user=user, session=session, config=app_config)
         foldera = api.create(content_type_list.Folder.slug, workspace, None, "folder a", "", True)
@@ -1662,7 +1662,7 @@ class TestContentApi(object):
             "test workspace", save_now=True
         )
         role_api_factory.get().create_one(
-            user2, workspace, UserRoleInWorkspace.WORKSPACE_MANAGER, with_notif=False
+            user2, workspace, WorkspaceRoles.WORKSPACE_MANAGER, with_notif=False
         )
         api = ContentApi(current_user=user, session=session, config=app_config)
         foldera = api.create(content_type_list.Folder.slug, workspace, None, "folder a", "", True)
@@ -1713,10 +1713,10 @@ class TestContentApi(object):
         workspace2 = wapi.create_workspace("test workspace n°2", save_now=True)
 
         role_api1 = role_api_factory.get(current_user=user_a)
-        role_api1.create_one(user_b, workspace1, UserRoleInWorkspace.READER, False)
+        role_api1.create_one(user_b, workspace1, WorkspaceRoles.READER, False)
 
         role_api2 = role_api_factory.get(current_user=user_b)
-        role_api2.create_one(user_b, workspace2, UserRoleInWorkspace.READER, False)
+        role_api2.create_one(user_b, workspace2, WorkspaceRoles.READER, False)
 
         cont_api_a = ContentApi(current_user=user_a, session=session, config=app_config)
         cont_api_b = ContentApi(current_user=user_b, session=session, config=app_config)
@@ -1791,7 +1791,7 @@ class TestContentApi(object):
         workspace = wapi.create_workspace("test workspace", save_now=True)
 
         role_api = role_api_factory.get(current_user=user_a)
-        role_api.create_one(user_b, workspace, UserRoleInWorkspace.READER, False)
+        role_api.create_one(user_b, workspace, WorkspaceRoles.READER, False)
         cont_api_a = ContentApi(current_user=user_a, session=session, config=app_config)
         cont_api_b = ContentApi(current_user=user_b, session=session, config=app_config)
 
@@ -1829,7 +1829,7 @@ class TestContentApi(object):
         workspace = wapi.create_workspace("test workspace", save_now=True)
 
         role_api = role_api_factory.get(current_user=user_a)
-        role_api.create_one(user_b, workspace, UserRoleInWorkspace.READER, False)
+        role_api.create_one(user_b, workspace, WorkspaceRoles.READER, False)
         cont_api_a = ContentApi(current_user=user_a, session=session, config=app_config)
         cont_api_b = ContentApi(current_user=user_b, session=session, config=app_config)
 
@@ -1887,7 +1887,7 @@ class TestContentApi(object):
         uapi.save(user2)
 
         role_api_factory.get(current_user=user1).create_one(
-            user2, workspace, UserRoleInWorkspace.CONTENT_MANAGER, with_notif=False, flush=True
+            user2, workspace, WorkspaceRoles.CONTENT_MANAGER, with_notif=False, flush=True
         )
 
         # Test starts here
@@ -1965,7 +1965,7 @@ class TestContentApi(object):
         uapi.save(user2)
 
         role_api_factory.get(current_user=user1).create_one(
-            user2, workspace, UserRoleInWorkspace.CONTENT_MANAGER, with_notif=False, flush=True
+            user2, workspace, WorkspaceRoles.CONTENT_MANAGER, with_notif=False, flush=True
         )
 
         # Test starts here
@@ -2032,7 +2032,7 @@ class TestContentApi(object):
         uapi.save(user2)
 
         role_api_factory.get(current_user=user1).create_one(
-            user2, workspace, UserRoleInWorkspace.CONTENT_MANAGER, with_notif=False, flush=True
+            user2, workspace, WorkspaceRoles.CONTENT_MANAGER, with_notif=False, flush=True
         )
 
         # Test starts here
@@ -2105,7 +2105,7 @@ class TestContentApi(object):
         uapi.save(user2)
 
         role_api_factory.get(current_user=user1).create_one(
-            user2, workspace, UserRoleInWorkspace.CONTENT_MANAGER, with_notif=False, flush=True
+            user2, workspace, WorkspaceRoles.CONTENT_MANAGER, with_notif=False, flush=True
         )
 
         # Test starts here
@@ -2177,7 +2177,7 @@ class TestContentApi(object):
         uapi.save(user2)
 
         role_api_factory.get(current_user=user1).create_one(
-            user2, workspace, UserRoleInWorkspace.CONTENT_MANAGER, with_notif=True, flush=True
+            user2, workspace, WorkspaceRoles.CONTENT_MANAGER, with_notif=True, flush=True
         )
 
         # Test starts here
@@ -2254,7 +2254,7 @@ class TestContentApi(object):
         uapi.save(user2)
 
         role_api_factory.get(current_user=user1).create_one(
-            user2, workspace, UserRoleInWorkspace.CONTENT_MANAGER, with_notif=True, flush=True
+            user2, workspace, WorkspaceRoles.CONTENT_MANAGER, with_notif=True, flush=True
         )
 
         # Test starts here
@@ -2323,7 +2323,7 @@ class TestContentApi(object):
         uapi.save(user2)
 
         role_api_factory.get(current_user=user1).create_one(
-            user2, workspace, UserRoleInWorkspace.CONTENT_MANAGER, with_notif=True, flush=True
+            user2, workspace, WorkspaceRoles.CONTENT_MANAGER, with_notif=True, flush=True
         )
 
         # Test starts here
@@ -2391,7 +2391,7 @@ class TestContentApi(object):
         user2 = uapi.create_minimal_user("this.is@another.user")
         uapi.save(user2)
         role_api_factory.get(current_user=user1).create_one(
-            user2, workspace, UserRoleInWorkspace.CONTENT_MANAGER, with_notif=True, flush=True
+            user2, workspace, WorkspaceRoles.CONTENT_MANAGER, with_notif=True, flush=True
         )
 
         # Test starts here
@@ -2460,7 +2460,7 @@ class TestContentApi(object):
         uapi.save(user2)
 
         role_api_factory.get(current_user=user1).create_one(
-            user2, workspace, UserRoleInWorkspace.CONTENT_MANAGER, with_notif=False, flush=True
+            user2, workspace, WorkspaceRoles.CONTENT_MANAGER, with_notif=False, flush=True
         )
         api = ContentApi(current_user=user1, session=session, config=app_config)
         with session.no_autoflush:
@@ -2512,7 +2512,7 @@ class TestContentApi(object):
         uapi.save(user2)
 
         role_api_factory.get(current_user=user1).create_one(
-            user2, workspace, UserRoleInWorkspace.CONTENT_MANAGER, with_notif=True, flush=True
+            user2, workspace, WorkspaceRoles.CONTENT_MANAGER, with_notif=True, flush=True
         )
 
         # show archived is used at the top end of the test
@@ -2601,7 +2601,7 @@ class TestContentApi(object):
         uapi.save(user2)
 
         role_api_factory.get(current_user=user1).create_one(
-            user2, workspace, UserRoleInWorkspace.CONTENT_MANAGER, with_notif=True, flush=True
+            user2, workspace, WorkspaceRoles.CONTENT_MANAGER, with_notif=True, flush=True
         )
 
         # show archived is used at the top end of the test

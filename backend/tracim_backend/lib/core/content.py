@@ -69,9 +69,9 @@ from tracim_backend.models.data import Content
 from tracim_backend.models.data import ContentNamespaces
 from tracim_backend.models.data import ContentRevisionRO
 from tracim_backend.models.data import NodeTreeItem
-from tracim_backend.models.data import UserRoleInWorkspace
 from tracim_backend.models.data import Workspace
 from tracim_backend.models.revision_protection import new_revision
+from tracim_backend.models.roles import WorkspaceRoles
 
 __author__ = "damien"
 
@@ -263,7 +263,7 @@ class ContentApi(object):
             # Filter according to user workspaces
             workspace_ids = RoleApi(
                 session=self._session, current_user=self._user, config=self._config
-            ).get_user_workspaces_ids(self._user_id, UserRoleInWorkspace.READER)
+            ).get_user_workspaces_ids(self._user_id, WorkspaceRoles.READER)
             result = result.filter(
                 or_(
                     Content.workspace_id.in_(workspace_ids),
@@ -310,9 +310,7 @@ class ContentApi(object):
         if self._user:
             user = self._session.query(User).get(self._user_id)
             # Filter according to user workspaces
-            workspace_ids = [
-                r.workspace_id for r in user.roles if r.role >= UserRoleInWorkspace.READER
-            ]
+            workspace_ids = [r.workspace_id for r in user.roles if r.role >= WorkspaceRoles.READER]
             result = result.filter(ContentRevisionRO.workspace_id.in_(workspace_ids))
 
         return result

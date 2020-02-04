@@ -35,7 +35,7 @@ class UploadPermissionEmailManager(EmailManager):
         )
         notifiable_roles = WorkspaceApi(
             current_user=None, session=self.session, config=self.config
-        ).get_notifiable_roles(workspace_in_context.workspace, force_notify=True)
+        ).get_notifiable_user_roles_in_workspace(workspace_in_context.workspace, force_notify=True)
 
         for role in notifiable_roles:
             logger.info(

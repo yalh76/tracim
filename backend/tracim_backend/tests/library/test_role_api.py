@@ -27,10 +27,7 @@ class TestRoleApi(object):
         bob = session.query(User).filter(User.email == "bob@fsf.local").one()
         rapi = RoleApi(current_user=admin_user, session=session, config=app_config)
         created_role = rapi.create_one(
-            user=bob,
-            workspace=workspace,
-            role_level=WorkspaceRoles.CONTENT_MANAGER.level,
-            with_notif=False,
+            user=bob, workspace=workspace, role=WorkspaceRoles.CONTENT_MANAGER, with_notif=False
         )
         obtain_role = rapi.get_one(bob.user_id, workspace.workspace_id)
         assert created_role == obtain_role
@@ -41,4 +38,4 @@ class TestRoleApi(object):
         roles = rapi.get_all_for_workspace(workspace)
         assert len(roles) == 1
         assert roles[0].user_id == admin_user.user_id
-        assert roles[0].role == WorkspaceRoles.WORKSPACE_MANAGER.level
+        assert roles[0].role == WorkspaceRoles.WORKSPACE_MANAGER

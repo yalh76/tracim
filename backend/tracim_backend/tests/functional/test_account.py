@@ -8,8 +8,8 @@ import transaction
 
 from tracim_backend.error import ErrorCode
 from tracim_backend.models.auth import Profile
-from tracim_backend.models.data import UserRoleInWorkspace
 from tracim_backend.models.revision_protection import new_revision
+from tracim_backend.models.roles import WorkspaceRoles
 from tracim_backend.tests.fixtures import *  # noqa: F403,F40
 from tracim_backend.tests.utils import create_1000px_png_test_image
 
@@ -51,7 +51,7 @@ class TestAccountRecentlyActiveContentEndpoint(object):
             do_notify=False,
         )
         rapi = role_api_factory.get()
-        rapi.create_one(test_user, workspace, UserRoleInWorkspace.READER, False)
+        rapi.create_one(test_user, workspace, WorkspaceRoles.READER, False)
         api = content_api_factory.get()
         main_folder_workspace2 = api.create(
             content_type_list.Folder.slug, workspace2, None, "Hepla", "", True
@@ -421,7 +421,7 @@ class TestUserReadStatusEndpoint(object):
             do_notify=False,
         )
         rapi = role_api_factory.get()
-        rapi.create_one(test_user, workspace, UserRoleInWorkspace.READER, False)
+        rapi.create_one(test_user, workspace, WorkspaceRoles.READER, False)
         api = content_api_factory.get()
         main_folder_workspace2 = api.create(
             content_type_list.Folder.slug, workspace2, None, "Hepla", "", True
@@ -558,7 +558,7 @@ class TestUserSetContentAsRead(object):
             do_notify=False,
         )
         rapi = role_api_factory.get()
-        rapi.create_one(test_user, workspace, UserRoleInWorkspace.READER, False)
+        rapi.create_one(test_user, workspace, WorkspaceRoles.READER, False)
         api = content_api_factory.get()
         api2 = content_api_factory.get(current_user=test_user)
         main_folder = api.create(
@@ -637,7 +637,7 @@ class TestUserSetContentAsUnread(object):
             do_notify=False,
         )
         rapi = role_api_factory.get()
-        rapi.create_one(test_user, workspace, UserRoleInWorkspace.READER, False)
+        rapi.create_one(test_user, workspace, WorkspaceRoles.READER, False)
         api = content_api_factory.get()
         api2 = content_api_factory.get(current_user=test_user)
         main_folder = api.create(
@@ -716,7 +716,7 @@ class TestUserSetWorkspaceAsRead(object):
             do_notify=False,
         )
         rapi = role_api_factory.get()
-        rapi.create_one(test_user, workspace, UserRoleInWorkspace.READER, False)
+        rapi.create_one(test_user, workspace, WorkspaceRoles.READER, False)
         api = content_api_factory.get()
         api2 = content_api_factory.get(current_user=test_user)
         main_folder = api.create(
@@ -797,7 +797,7 @@ class TestAccountEnableWorkspaceNotification(object):
             do_notify=False,
         )
         rapi = role_api_factory.get()
-        rapi.create_one(test_user, workspace, UserRoleInWorkspace.READER, with_notif=False)
+        rapi.create_one(test_user, workspace, WorkspaceRoles.READER, with_notif=False)
         transaction.commit()
         role = rapi.get_one(test_user.user_id, workspace.workspace_id)
         assert role.do_notify is False
@@ -848,7 +848,7 @@ class TestAccountDisableWorkspaceNotification(object):
             do_notify=False,
         )
         rapi = role_api_factory.get()
-        rapi.create_one(test_user, workspace, UserRoleInWorkspace.READER, with_notif=True)
+        rapi.create_one(test_user, workspace, WorkspaceRoles.READER, with_notif=True)
         transaction.commit()
         role = rapi.get_one(test_user.user_id, workspace.workspace_id)
         assert role.do_notify is True
@@ -904,10 +904,8 @@ class TestAccountWorkspaceEndpoint(object):
         workspace_api_test_user = workspace_api_factory.get(test_user)
         role_only_workspace = workspace_api_test_user.create_workspace(label="role_only")
         rapi = role_api_factory.get()
-        rapi.create_one(admin_user, role_only_workspace, UserRoleInWorkspace.READER, False)
-        rapi.create_one(
-            test_user, owned_only_workspace, UserRoleInWorkspace.WORKSPACE_MANAGER, False
-        )
+        rapi.create_one(admin_user, role_only_workspace, WorkspaceRoles.READER, False)
+        rapi.create_one(test_user, owned_only_workspace, WorkspaceRoles.WORKSPACE_MANAGER, False)
         transaction.commit()
         rapi_test_user = role_api_factory.get(test_user)
         rapi_test_user.delete_one(admin_user.user_id, owned_only_workspace.workspace_id)
@@ -1149,8 +1147,8 @@ class TestAccountKnownMembersEndpointKnownMembersFilterDisabled(object):
         uapi.save(test_user3)
         workspace = workspace_api_factory.get().create_workspace("test workspace", save_now=True)
         role_api = role_api_factory.get()
-        role_api.create_one(test_user, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(test_user2, workspace, UserRoleInWorkspace.READER, False)
+        role_api.create_one(test_user, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(test_user2, workspace, WorkspaceRoles.READER, False)
         transaction.commit()
         int(test_user.user_id)
 
@@ -1321,8 +1319,8 @@ class TestAccountKnownMembersEndpoint(object):
         workspace = workspace_api_factory.get().create_workspace("test workspace", save_now=True)
         workspace2 = workspace_api_factory.get().create_workspace("test workspace2", save_now=True)
         role_api = role_api_factory.get()
-        role_api.create_one(test_user, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(test_user2, workspace2, UserRoleInWorkspace.READER, False)
+        role_api.create_one(test_user, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(test_user2, workspace2, WorkspaceRoles.READER, False)
         uapi.save(test_user)
         uapi.save(test_user2)
         transaction.commit()
@@ -1385,9 +1383,9 @@ class TestAccountKnownMembersEndpoint(object):
         workspace = workspace_api_factory.get().create_workspace("test workspace", save_now=True)
         workspace2 = workspace_api_factory.get().create_workspace("test workspace2", save_now=True)
         role_api = role_api_factory.get()
-        role_api.create_one(test_user, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(test_user2, workspace2, UserRoleInWorkspace.READER, False)
-        role_api.create_one(test_user3, workspace, UserRoleInWorkspace.READER, False)
+        role_api.create_one(test_user, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(test_user2, workspace2, WorkspaceRoles.READER, False)
+        role_api.create_one(test_user3, workspace, WorkspaceRoles.READER, False)
         uapi.save(test_user)
         uapi.save(test_user2)
         transaction.commit()
@@ -1604,8 +1602,8 @@ class TestAccountKnownMembersEndpoint(object):
         uapi.save(test_user3)
         workspace = workspace_api_factory.get().create_workspace("test workspace", save_now=True)
         role_api = role_api_factory.get()
-        role_api.create_one(test_user, workspace, UserRoleInWorkspace.READER, False)
-        role_api.create_one(test_user2, workspace, UserRoleInWorkspace.READER, False)
+        role_api.create_one(test_user, workspace, WorkspaceRoles.READER, False)
+        role_api.create_one(test_user2, workspace, WorkspaceRoles.READER, False)
         transaction.commit()
         int(test_user.user_id)
 

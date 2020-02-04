@@ -17,7 +17,7 @@ from tracim_backend.exceptions import TracimValidationFailed
 from tracim_backend.models.auth import Profile
 from tracim_backend.models.auth import User
 from tracim_backend.models.data import ActionDescription
-from tracim_backend.models.data import UserRoleInWorkspace
+from tracim_backend.models.roles import WorkspaceRoles
 
 
 class TracimValidator(object):
@@ -100,7 +100,7 @@ user_public_name_validator = Length(
     min=User.MIN_PUBLIC_NAME_LENGTH, max=User.MAX_PUBLIC_NAME_LENGTH
 )
 user_lang_validator = Length(min=User.MIN_LANG_LENGTH, max=User.MAX_LANG_LENGTH)
-user_role_validator = OneOf(UserRoleInWorkspace.get_all_role_slug())
+user_role_validator = OneOf(WorkspaceRoles.get_all_role_slug())
 
 # Dynamic validator #
 all_content_types_validator = OneOf(choices=[])

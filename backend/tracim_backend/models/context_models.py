@@ -32,7 +32,6 @@ from tracim_backend.models.data import ContentNamespaces
 from tracim_backend.models.data import ContentRevisionRO
 from tracim_backend.models.data import UserRoleInWorkspace
 from tracim_backend.models.data import Workspace
-from tracim_backend.models.roles import WorkspaceRoles
 
 
 class AboutModel(object):
@@ -798,14 +797,14 @@ class UserRoleWorkspaceInContext(object):
 
     def __init__(
         self,
-        user_role: UserRoleInWorkspace,
+        user_role_in_workspace: UserRoleInWorkspace,
         dbsession: Session,
         config: CFG,
         # Extended params
         newly_created: bool = None,
         email_sent: bool = None,
     ) -> None:
-        self.user_role = user_role
+        self.user_role_in_workspace = user_role_in_workspace
         self.dbsession = dbsession
         self.config = config
         # Extended params
@@ -818,7 +817,7 @@ class UserRoleWorkspaceInContext(object):
         User who has the role has this id
         :return: user id as integer
         """
-        return self.user_role.user_id
+        return self.user_role_in_workspace.user_id
 
     @property
     def workspace_id(self) -> int:
@@ -826,7 +825,7 @@ class UserRoleWorkspaceInContext(object):
         This role apply only on the workspace with this workspace_id
         :return: workspace id as integer
         """
-        return self.user_role.workspace_id
+        return self.user_role_in_workspace.workspace_id
 
     # TODO - G.M - 23-05-2018 - Check the API spec for this this !
 
@@ -835,7 +834,7 @@ class UserRoleWorkspaceInContext(object):
         """
         role as int id, each value refer to a different role.
         """
-        return self.user_role.role
+        return self.user_role_in_workspace.role.level
 
     @property
     def role(self) -> str:
@@ -850,7 +849,7 @@ class UserRoleWorkspaceInContext(object):
         'contributor', 'content-manager', 'workspace-manager'
         :return: user workspace role as slug.
         """
-        return WorkspaceRoles.get_role_from_level(self.user_role.role).slug
+        return self.user_role_in_workspace.role.slug
 
     @property
     def is_active(self) -> bool:
@@ -858,7 +857,7 @@ class UserRoleWorkspaceInContext(object):
 
     @property
     def do_notify(self) -> bool:
-        return self.user_role.do_notify
+        return self.user_role_in_workspace.do_notify
 
     @property
     def user(self) -> UserInContext:
@@ -866,7 +865,7 @@ class UserRoleWorkspaceInContext(object):
         User who has this role, with context data
         :return: UserInContext object
         """
-        return UserInContext(self.user_role.user, self.dbsession, self.config)
+        return UserInContext(self.user_role_in_workspace.user, self.dbsession, self.config)
 
     @property
     def workspace(self) -> WorkspaceInContext:
@@ -874,7 +873,9 @@ class UserRoleWorkspaceInContext(object):
         Workspace related to this role, with his context data
         :return: WorkspaceInContext object
         """
-        return WorkspaceInContext(self.user_role.workspace, self.dbsession, self.config)
+        return WorkspaceInContext(
+            self.user_role_in_workspace.workspace, self.dbsession, self.config
+        )
 
 
 class ContentInContext(object):

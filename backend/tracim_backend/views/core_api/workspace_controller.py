@@ -384,7 +384,7 @@ class WorkspaceController(Controller):
         role = rapi.create_one(
             user=user,
             workspace=request.current_workspace,
-            role_level=WorkspaceRoles.get_role_from_slug(hapic_data.body.role).level,
+            role=WorkspaceRoles.get_role_from_slug(hapic_data.body.role).level,
             with_notif=app_config.EMAIL__NOTIFICATION__ENABLED_ON_INVITATION,
             flush=True,
         )

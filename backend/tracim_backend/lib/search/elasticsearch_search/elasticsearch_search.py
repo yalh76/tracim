@@ -17,7 +17,7 @@ from tracim_backend.lib.search.search_factory import ELASTICSEARCH__SEARCH_ENGIN
 from tracim_backend.lib.utils.logger import logger
 from tracim_backend.models.auth import User
 from tracim_backend.models.context_models import ContentInContext
-from tracim_backend.models.data import UserRoleInWorkspace
+from tracim_backend.models.roles import WorkspaceRoles
 
 
 class ESSearchApi(SearchApi):
@@ -348,7 +348,7 @@ class ESSearchApi(SearchApi):
 
         if not search_string:
             return EmptyContentSearchResponse()
-        filtered_workspace_ids = self._get_user_workspaces_id(min_role=UserRoleInWorkspace.READER)
+        filtered_workspace_ids = self._get_user_workspaces_id(min_role=WorkspaceRoles.READER)
         # INFO - G.M - 2019-05-31 - search using simple_query_string, which mean user-friendly
         # syntax to match complex case,
         # see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html

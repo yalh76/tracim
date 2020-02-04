@@ -112,16 +112,16 @@ class CandidateUserProfileChecker(AuthorizationChecker):
 class RoleChecker(AuthorizationChecker):
     """
     Check if current_user in current_workspace role
-    is as high as role level given
+    is as high as role given
     """
 
-    def __init__(self, role_level: int):
-        self.role_level = role_level
+    def __init__(self, role: WorkspaceRoles):
+        self.role = role
 
     def check(self, tracim_context: TracimContext) -> bool:
         if (
-            tracim_context.current_workspace.get_user_role(tracim_context.current_user)
-            >= self.role_level
+            tracim_context.current_workspace.get_user_role(tracim_context.current_user).level
+            >= self.role.level
         ):
             return True
         raise InsufficientUserRoleInWorkspace()
@@ -132,13 +132,15 @@ class CurrentContentRoleChecker(AuthorizationChecker):
     Check if current_user as correct role in workspace of current_content
     """
 
-    def __init__(self, role_level: int) -> None:
-        self.role_level = role_level
+    def __init__(self, role: WorkspaceRoles) -> None:
+        self.role = role
 
     def check(self, tracim_context: TracimContext) -> bool:
         if (
-            tracim_context.current_content.workspace.get_user_role(tracim_context.current_user)
-            >= self.role_level
+            tracim_context.current_content.workspace.get_user_role(
+                tracim_context.current_user
+            ).level
+            >= self.role.level
         ):
             return True
         raise InsufficientUserRoleInWorkspace()
@@ -150,13 +152,13 @@ class CandidateWorkspaceRoleChecker(AuthorizationChecker):
     is as high as role level given
     """
 
-    def __init__(self, role_level: int):
-        self.role_level = role_level
+    def __init__(self, role: WorkspaceRoles):
+        self.role = role
 
     def check(self, tracim_context: TracimContext) -> bool:
         if (
-            tracim_context.candidate_workspace.get_user_role(tracim_context.current_user)
-            >= self.role_level
+            tracim_context.candidate_workspace.get_user_role(tracim_context.current_user).level
+            >= self.role.level
         ):
             return True
         raise InsufficientUserRoleInWorkspace()
@@ -202,7 +204,7 @@ class ContentTypeCreationChecker(AuthorizationChecker):
             content_type = self.content_type_list.get_one_by_slug(self.content_type_slug)
         else:
             content_type = tracim_context.candidate_content_type
-        if user_role >= content_type.minimal_role_content_creation.level:
+        if user_role.level >= content_type.minimal_role_content_creation.level:
             return True
         raise InsufficientUserRoleInWorkspace()
 
@@ -265,12 +267,12 @@ is_administrator = ProfileChecker(Profile.ADMIN)
 is_trusted_user = ProfileChecker(Profile.TRUSTED_USER)
 is_user = ProfileChecker(Profile.USER)
 # role
-is_workspace_manager = RoleChecker(WorkspaceRoles.WORKSPACE_MANAGER.level)
-is_content_manager = RoleChecker(WorkspaceRoles.CONTENT_MANAGER.level)
-is_reader = RoleChecker(WorkspaceRoles.READER.level)
-is_current_content_reader = CurrentContentRoleChecker(WorkspaceRoles.READER.level)
-is_current_content_contributor = CurrentContentRoleChecker(WorkspaceRoles.CONTRIBUTOR.level)
-is_contributor = RoleChecker(WorkspaceRoles.CONTRIBUTOR.level)
+is_workspace_manager = RoleChecker(WorkspaceRoles.WORKSPACE_MANAGER)
+is_content_manager = RoleChecker(WorkspaceRoles.CONTENT_MANAGER)
+is_reader = RoleChecker(WorkspaceRoles.READER)
+is_current_content_reader = CurrentContentRoleChecker(WorkspaceRoles.READER)
+is_current_content_contributor = CurrentContentRoleChecker(WorkspaceRoles.CONTRIBUTOR)
+is_contributor = RoleChecker(WorkspaceRoles.CONTRIBUTOR)
 # personal_access
 has_personal_access = OrAuthorizationChecker(SameUserChecker(), is_administrator)
 # workspace
@@ -285,7 +287,7 @@ can_delete_workspace = OrAuthorizationChecker(
 )
 # content
 can_move_content = AndAuthorizationChecker(
-    is_content_manager, CandidateWorkspaceRoleChecker(WorkspaceRoles.CONTENT_MANAGER.level)
+    is_content_manager, CandidateWorkspaceRoleChecker(WorkspaceRoles.CONTENT_MANAGER)
 )
 can_create_content = ContentTypeCreationChecker(content_type_list)
 # comments
