@@ -310,7 +310,11 @@ class ContentApi(object):
         if self._user:
             user = self._session.query(User).get(self._user_id)
             # Filter according to user workspaces
-            workspace_ids = [r.workspace_id for r in user.roles if r.role >= WorkspaceRoles.READER]
+            workspace_ids = [
+                user_role_in_workspace.workspace_id
+                for user_role_in_workspace in user.user_roles_in_workspace
+                if user_role_in_workspace.role.level >= WorkspaceRoles.READER.level
+            ]
             result = result.filter(ContentRevisionRO.workspace_id.in_(workspace_ids))
 
         return result

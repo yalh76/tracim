@@ -262,14 +262,14 @@ class WorkspaceApi(object):
         return workspaces
 
     def disable_notifications(self, user: User, workspace: Workspace):
-        for role in user.roles:
-            if role.workspace == workspace:
-                role.do_notify = False
+        for user_role_in_workspace in user.user_roles_in_workspace:
+            if user_role_in_workspace.workspace == workspace:
+                user_role_in_workspace.do_notify = False
 
     def enable_notifications(self, user: User, workspace: Workspace):
-        for role in user.roles:
-            if role.workspace == workspace:
-                role.do_notify = True
+        for user_role_in_workspace in user.user_roles_in_workspace:
+            if user_role_in_workspace.workspace == workspace:
+                user_role_in_workspace.do_notify = True
 
     def get_notifiable_user_roles_in_workspace(
         self, workspace: Workspace, force_notify: bool = False
