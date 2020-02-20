@@ -423,6 +423,14 @@ class HtmlDocument extends React.Component {
 
     if (!state.isVisible) return null
 
+    const styleColorPrintBtn = {
+      backgroundColor: '#fdfdfd',
+      color: '#333',
+      ':hover': {
+        color: state.config.hexcolor
+      }
+    }
+
     return (
       <PopinFixed
         customClass={`${state.config.slug}`}
@@ -469,6 +477,22 @@ class HtmlDocument extends React.Component {
             </div>
 
             <div className='d-flex'>
+              <ReactToPrint
+                trigger={() => (
+                  <div className='html-document__header__print'>
+                    <button
+                      type='button'
+                      className='html-document__header__print__button btn iconBtn'
+                      title={props.t('Print')}
+                      style={styleColorPrintBtn}
+                    >
+                      <i className='fa fa-fw fa-print' />
+                    </button>
+                  </div>
+                )}
+                content={() => this.printRef}
+              />
+
               {state.loggedUser.userRoleIdInWorkspace >= ROLE.contributor.id && (
                 <SelectStatus
                   selectedStatus={state.config.availableStatuses.find(s => s.slug === state.content.status)}
@@ -486,21 +510,6 @@ class HtmlDocument extends React.Component {
                   disabled={state.mode === APP_FEATURE_MODE.REVISION || state.content.is_archived || state.content.is_deleted}
                 />
               )}
-
-              <ReactToPrint
-                trigger={() => (
-                  <div className='wsContentGeneric__option__menu__print'>
-                    <button
-                      type='button'
-                      className='wsContentGeneric__option__menu__print__button btn iconBtn'
-                      title={props.t('Print')}
-                    >
-                      <i className='fa fa-fw fa-print' />
-                    </button>
-                  </div>
-                )}
-                content={() => this.printRef}
-              />
             </div>
           </div>
         </PopinFixedOption>
@@ -567,4 +576,4 @@ class HtmlDocument extends React.Component {
   }
 }
 
-export default translate()(Radium(appContentFactory(HtmlDocument)))
+export default translate()(appContentFactory(Radium(HtmlDocument)))

@@ -60,7 +60,7 @@ export const HtmlDocument = props => {
               }
             </div>
             {/* need try to inject html in stateless component () => <span>{props.text}</span> */}
-            <div className='html-document__contentpage__textnote__text' dangerouslySetInnerHTML={{ __html: props.text }} ref={props.printRef}/>
+            <div className='html-document__contentpage__textnote__text' dangerouslySetInnerHTML={{ __html: props.text }} ref={props.printRef} />
           </div>
         )}
 
