@@ -32,6 +32,7 @@ import {
   putHtmlDocRead
 } from '../action.async.js'
 import Radium from 'radium'
+import ReactToPrint from 'react-to-print'
 
 class HtmlDocument extends React.Component {
   constructor (props) {
@@ -485,6 +486,21 @@ class HtmlDocument extends React.Component {
                   disabled={state.mode === APP_FEATURE_MODE.REVISION || state.content.is_archived || state.content.is_deleted}
                 />
               )}
+
+              <ReactToPrint
+                trigger={() => (
+                  <div className='wsContentGeneric__option__menu__print'>
+                    <button
+                      type='button'
+                      className='wsContentGeneric__option__menu__print__button btn iconBtn'
+                      title={props.t('Print')}
+                    >
+                      <i className='fa fa-fw fa-print' />
+                    </button>
+                  </div>
+                )}
+                content={() => this.printRef}
+              />
             </div>
           </div>
         </PopinFixedOption>
@@ -516,6 +532,7 @@ class HtmlDocument extends React.Component {
             onClickRestoreDeleted={this.handleClickRestoreDelete}
             onClickShowDraft={this.handleClickNewVersion}
             key={'html-document'}
+            printRef={el => (this.printRef = el)}
           />
 
           <PopinFixedRightPart
