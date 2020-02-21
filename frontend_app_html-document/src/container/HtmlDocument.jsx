@@ -423,7 +423,7 @@ class HtmlDocument extends React.Component {
 
     if (!state.isVisible) return null
 
-    const ReactToPrintButton = (props) => {
+    const ReactToPrintButton = translate()(Radium(props => {
       const styleColorPrintBtn = {
         backgroundColor: '#fdfdfd',
         color: '#333',
@@ -444,9 +444,7 @@ class HtmlDocument extends React.Component {
           </button>
         </div>
       )
-    }
-
-    const ReactToPrintButtonRad = translate()(Radium(ReactToPrintButton))
+    }))
 
     return (
       <PopinFixed
@@ -495,9 +493,7 @@ class HtmlDocument extends React.Component {
 
             <div className='d-flex'>
               <ReactToPrint
-                trigger={() => (
-                  <ReactToPrintButtonRad config={state.config} />
-                )}
+                trigger={() => <ReactToPrintButton config={state.config} />}
                 pageStyle={'@page { size: auto; margin: 20mm 10mm 25mm 10mm; }'}
                 content={() => this.printRef}
               />
