@@ -20,7 +20,8 @@ import {
   ROLE,
   CUSTOM_EVENT,
   APP_FEATURE_MODE,
-  buildHeadTitle
+  buildHeadTitle,
+  Print
 } from 'tracim_frontend_lib'
 import { initWysiwyg } from '../helper.js'
 import { debug } from '../debug.js'
@@ -32,7 +33,6 @@ import {
   putHtmlDocRead
 } from '../action.async.js'
 import Radium from 'radium'
-import ReactToPrint from 'react-to-print'
 
 class HtmlDocument extends React.Component {
   constructor (props) {
@@ -423,29 +423,6 @@ class HtmlDocument extends React.Component {
 
     if (!state.isVisible) return null
 
-    const ReactToPrintButton = translate()(Radium(props => {
-      const styleColorPrintBtn = {
-        backgroundColor: '#fdfdfd',
-        color: '#333',
-        ':hover': {
-          color: props.config.hexcolor
-        }
-      }
-      return (
-        <div className='html-document__header__print'>
-          <button
-            type='button'
-            className='html-document__header__print__button btn iconBtn'
-            title={props.t('Print')}
-            style={styleColorPrintBtn}
-            onClick={props.onClick}
-          >
-            <i className='fa fa-fw fa-print' />
-          </button>
-        </div>
-      )
-    }))
-
     return (
       <PopinFixed
         customClass={`${state.config.slug}`}
@@ -492,10 +469,9 @@ class HtmlDocument extends React.Component {
             </div>
 
             <div className='d-flex'>
-              <ReactToPrint
-                trigger={() => <ReactToPrintButton config={state.config} />}
-                pageStyle={'@page { size: auto; margin: 20mm 10mm 25mm 10mm; }'}
-                content={() => this.printRef}
+              <Print
+                content={state.content.raw_content}
+                hexcolor={state.config.hexcolor}
               />
 
               {state.loggedUser.userRoleIdInWorkspace >= ROLE.contributor.id && (

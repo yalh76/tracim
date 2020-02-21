@@ -40,6 +40,8 @@ import PopinFixedRightPart from './component/PopinFixed/PopinFixedRightPart.jsx'
 import Avatar from './component/Avatar/Avatar.jsx'
 import Badge from './component/Badge/Badge.jsx'
 
+import Print from './component/Print/Print.jsx'
+
 import Timeline from './component/Timeline/Timeline.jsx'
 
 import TextAreaApp from './component/Input/TextAreaApp/TextAreaApp.jsx'
@@ -154,5 +156,6 @@ export {
   ShareLink,
   ShareDownload,
   ProgressBar,
-  RadioBtnGroup
+  RadioBtnGroup,
+  Print
 }
