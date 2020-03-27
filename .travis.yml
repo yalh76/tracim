@@ -202,7 +202,7 @@ jobs:
       if: commit_message !~ /(\[skip ci pytest\])/
     # INFO - C.H - 2019-07-03 - Stage: Frontend unit  tests ###
     - stage: frontend
-      name: Frontend unit tests
+      name: Frontend unit tests and translation check
       install:
         - ./install_frontend_dependencies.sh root
         - ./build_full_frontend.sh root
@@ -211,26 +211,48 @@ jobs:
       script:
         - cd $TRAVIS_BUILD_DIR/frontend_lib
         - npm run test
+        - npm run build-translation
+        - (! grep -F '__NOT_TRANSLATED__' i18next.scanner/fr/translation.json)
         - cd $TRAVIS_BUILD_DIR/frontend
         - npm run test
+        - npm run build-translation
+        - (! grep -F '__NOT_TRANSLATED__' i18next.scanner/fr/translation.json)
         - cd $TRAVIS_BUILD_DIR/frontend_app_html-document
         - npm run test
+        - npm run build-translation
+        - (! grep -F '__NOT_TRANSLATED__' i18next.scanner/fr/translation.json)
         - cd $TRAVIS_BUILD_DIR/frontend_app_file
         - npm run test
+        - npm run build-translation
+        - (! grep -F '__NOT_TRANSLATED__' i18next.scanner/fr/translation.json)
         - cd $TRAVIS_BUILD_DIR/frontend_app_thread
         - npm run test
+        - npm run build-translation
+        - (! grep -F '__NOT_TRANSLATED__' i18next.scanner/fr/translation.json)
         - cd $TRAVIS_BUILD_DIR/frontend_app_folder_advanced
         - npm run test
+        - npm run build-translation
+        - (! grep -F '__NOT_TRANSLATED__' i18next.scanner/fr/translation.json)
         - cd $TRAVIS_BUILD_DIR/frontend_app_workspace
         - npm run test
+        - npm run build-translation
+        - (! grep -F '__NOT_TRANSLATED__' i18next.scanner/fr/translation.json)
         - cd $TRAVIS_BUILD_DIR/frontend_app_workspace_advanced
         - npm run test
+        - npm run build-translation
+        - (! grep -F '__NOT_TRANSLATED__' i18next.scanner/fr/translation.json)
         - cd $TRAVIS_BUILD_DIR/frontend_app_agenda
         - npm run test
+        - npm run build-translation
+        - (! grep -F '__NOT_TRANSLATED__' i18next.scanner/fr/translation.json)
         - cd $TRAVIS_BUILD_DIR/frontend_app_admin_workspace_user
         - npm run test
+        - npm run build-translation
+        - (! grep -F '__NOT_TRANSLATED__' i18next.scanner/fr/translation.json)
         - cd $TRAVIS_BUILD_DIR/frontend_app_gallery
         - npm run test
+        - npm run build-translation
+        - (! grep -F '__NOT_TRANSLATED__' i18next.scanner/fr/translation.json)
         - cd $TRAVIS_BUILD_DIR
       if: commit_message !~ /(\[skip ci unit_test\])/
     # INFO - G.M - 2019-04-25 - Stage: Functional Test ###
