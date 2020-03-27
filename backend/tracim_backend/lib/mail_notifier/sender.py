@@ -65,27 +65,10 @@ class EmailSender(object):
             logger.info(self, log.format(self._smtp_config.server))
             # TODO - G.M - 2019-01-29 - Support for SMTP SSL-only port connection
             # using smtplib.SMTP_SSL
-            self._smtp_connection = smtplib.SMTP(self._smtp_config.server, self._smtp_config.port)
+            self._smtp_connection = smtplib.SMTP_SSL(
+                self._smtp_config.server, self._smtp_config.port
+            )
             self._smtp_connection.ehlo()
-
-            if self._smtp_config.login:
-                try:
-                    starttls_result = self._smtp_connection.starttls()
-
-                    if starttls_result[0] == 220:
-                        logger.info(self, "SMTP Start TLS OK")
-
-                    log = "SMTP Start TLS return code: {} with message: {}"
-                    logger.debug(
-                        self, log.format(starttls_result[0], starttls_result[1].decode("utf-8"))
-                    )
-                except smtplib.SMTPResponseException as exc:
-                    log = "SMTP start TLS return error code: {} with message: {}"
-                    logger.error(self, log.format(exc.smtp_code, exc.smtp_error.decode("utf-8")))
-                except Exception as exc:
-                    log = "Unexpected exception during SMTP start TLS process: {}"
-                    logger.error(self, log.format(exc.__str__()))
-                    logger.error(self, traceback.format_exc())
 
             if self._smtp_config.login:
                 try:
