@@ -72,11 +72,11 @@ class ShareFolder extends React.Component {
             <div className='d-none d-md-flex' title={props.t('Actions')}>
               {props.userRoleIdInWorkspace >= ROLE.contentManager.id && (
                 <div
-                  className='extandedaction dropdown'
+                  className='extendedaction dropdown'
                   data-cy='extended_action'
                 >
                   <button
-                    className='extandedaction__button btn outlineTextBtn primaryColorBorder primaryColorBgHover primaryColorBorderDarkenHover dropdown-toggle'
+                    className='extendedaction__button btn outlineTextBtn primaryColorBorder primaryColorBgHover primaryColorBorderDarkenHover dropdown-toggle'
                     type='button'
                     id='dropdownMenuButton'
                     data-toggle='dropdown'
@@ -87,7 +87,7 @@ class ShareFolder extends React.Component {
                     <i className='fa fa-fw fa-ellipsis-h' />
                   </button>
 
-                  <div className='extandedaction__subdropdown dropdown-menu' aria-labelledby='dropdownMenuButton'>
+                  <div className='extendedaction__subdropdown dropdown-menu' aria-labelledby='dropdownMenuButton'>
                     <div
                       className='subdropdown__item primaryColorBgLightenHover dropdown-item d-flex align-items-center'
                       onClick={this.handleClickOpenShareFolderApp}
@@ -149,6 +149,8 @@ class ShareFolder extends React.Component {
                 urlContent={`${PAGE.WORKSPACE.CONTENT(content.workspaceId, content.type, content.id)}${props.location.search}`}
                 userRoleIdInWorkspace={props.userRoleIdInWorkspace}
                 onClickExtendedAction={{
+                  open: e => props.onClickExtendedAction.open(e, content),
+                  share: e => props.onClickExtendedAction.share(e, content),
                   edit: e => props.onClickExtendedAction.edit(e, content),
                   download: e => props.onClickExtendedAction.download(e, content),
                   archive: e => props.onClickExtendedAction.archive(e, content),

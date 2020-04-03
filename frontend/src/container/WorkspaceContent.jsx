@@ -332,28 +332,35 @@ class WorkspaceContent extends React.Component {
     this.setState({ contentLoaded: true })
   }
 
-  handleClickContentItem = content => {
+  handleClickEvent = callback => function (e, content) {
+    e.preventDefault()
+    e.stopPropagation()
+    callback(content)
+  }
+
+  handleClickEditContentItem = this.handleClickEvent(content => {
     console.log('%c<WorkspaceContent> content clicked', 'color: #c17838', content)
     this.props.history.push(`${PAGE.WORKSPACE.CONTENT(content.workspaceId, content.type, content.id)}${this.props.location.search}`)
-  }
+  })
 
-  handleClickEditContentItem = (e, content) => {
-    e.preventDefault()
-    e.stopPropagation()
-    this.handleClickContentItem(content)
-  }
-
-  handleClickDownloadContentItem = (e, content) => {
-    e.preventDefault()
-    e.stopPropagation()
+  handleClickDownloadContentItem = this.handleClickEvent(content => {
     console.log('%c<WorkspaceContent> download nyi', 'color: #c17838', content)
-  }
+  })
 
-  handleClickArchiveContentItem = async (e, content) => {
+  handleClickShareContentItem = this.handleClickEvent(content => {
+    window.alert(content, 'Share')
+  })
+
+  handleClickOpenContentItem = this.handleClickEvent(content => {
+    window.alert(content, 'Open')
+  })
+
+  handleClickRenameContentItem = this.handleClickEvent(content => {
+    window.alert(content, 'Rename')
+  })
+
+  handleClickArchiveContentItem = this.handleClickEvent(async content => {
     const { props, state } = this
-
-    e.preventDefault()
-    e.stopPropagation()
 
     const fetchPutContentArchived = await props.dispatch(putWorkspaceContentArchived(content.workspaceId, content.id))
     switch (fetchPutContentArchived.status) {
@@ -362,13 +369,10 @@ class WorkspaceContent extends React.Component {
         break
       default: props.dispatch(newFlashMessage(props.t('Error while archiving content'), 'warning'))
     }
-  }
+  })
 
-  handleClickArchiveShareFolderContentItem = async (e, content) => {
+  handleClickArchiveShareFolderContentItem = this.handleClickEvent(async content => {
     const { props, state } = this
-
-    e.preventDefault()
-    e.stopPropagation()
 
     const fetchPutContentArchived = await props.dispatch(putWorkspaceContentArchived(content.workspaceId, content.id))
     switch (fetchPutContentArchived.status) {
@@ -377,13 +381,11 @@ class WorkspaceContent extends React.Component {
         break
       default: props.dispatch(newFlashMessage(props.t('Error while archiving content'), 'warning'))
     }
-  }
+  })
 
-  handleClickDeleteContentItem = async (e, content) => {
+  handleClickDeleteContentItem = this.handleClickEvent(async content => {
     const { props, state } = this
 
-    e.preventDefault()
-    e.stopPropagation()
     const fetchPutContentDeleted = await props.dispatch(putWorkspaceContentDeleted(content.workspaceId, content.id))
     switch (fetchPutContentDeleted.status) {
       case 204:
@@ -391,13 +393,11 @@ class WorkspaceContent extends React.Component {
         break
       default: props.dispatch(newFlashMessage(props.t('Error while deleting content'), 'warning'))
     }
-  }
+  })
 
-  handleClickDeleteShareFolderContentItem = async (e, content) => {
+  handleClickDeleteShareFolderContentItem = this.handleClickEvent(async content => {
     const { props, state } = this
 
-    e.preventDefault()
-    e.stopPropagation()
     const fetchPutContentDeleted = await props.dispatch(putWorkspaceContentDeleted(content.workspaceId, content.id))
     switch (fetchPutContentDeleted.status) {
       case 204:
@@ -405,7 +405,7 @@ class WorkspaceContent extends React.Component {
         break
       default: props.dispatch(newFlashMessage(props.t('Error while deleting content'), 'warning'))
     }
-  }
+  })
 
   handleClickFolder = async folderId => {
     const { props, state } = this
@@ -732,6 +732,9 @@ class WorkspaceContent extends React.Component {
                     shareFolderContentList={workspaceShareFolderContentList}
                     onClickExtendedAction={{
                       edit: this.handleClickEditContentItem,
+                      open: this.handleClickOpenContentItem,
+                      rename: this.handleClickRenameContentItem,
+                      share: this.handleClickShareContentItem,
                       download: this.handleClickDownloadContentItem,
                       archive: this.handleClickArchiveShareFolderContentItem,
                       delete: this.handleClickDeleteShareFolderContentItem
@@ -757,6 +760,9 @@ class WorkspaceContent extends React.Component {
                         userRoleIdInWorkspace={userRoleIdInWorkspace}
                         onClickExtendedAction={{
                           edit: this.handleClickEditContentItem,
+                          open: this.handleClickOpenContentItem,
+                          rename: this.handleClickRenameContentItem,
+                          share: this.handleClickShareContentItem,
                           download: this.handleClickDownloadContentItem,
                           archive: this.handleClickArchiveContentItem,
                           delete: this.handleClickDeleteContentItem
@@ -792,6 +798,18 @@ class WorkspaceContent extends React.Component {
                           edit: {
                             callback: e => this.handleClickEditContentItem(e, content),
                             label: props.t('Edit')
+                          },
+                          open: {
+                            callback: e => this.handleClickOpenContentItem(e, content),
+                            label: props.t('Open')
+                          },
+                          rename: {
+                            callback: e => this.handleClickRenameContentItem(e, content),
+                            label: props.t('rename')
+                          },
+                          share: {
+                            callback: e => this.handleClickShareContentItem(e, content),
+                            label: props.t('Share')
                           },
                           download: {
                             callback: e => this.handleClickDownloadContentItem(e, content),

@@ -91,7 +91,7 @@ describe('App Gallery', function () {
         params: { workspaceId }
       })
       cy.getTag({ selectorName: s.FOLDER_IN_LIST, params: { folderId: folder1.content_id }})
-        .find('.extandedaction__button')
+        .find('.extendedaction__button')
         .click()
       cy.getTag({ selectorName: s.FOLDER_IN_LIST, params: { folderId: folder1.content_id }})
         .find('[data-cy=extended_action_gallery]')

@@ -5,7 +5,7 @@ import { translate } from 'react-i18next'
 import classnames from 'classnames'
 import { DragSource, DropTarget } from 'react-dnd'
 import SubDropdownCreateButton from '../common/Input/SubDropdownCreateButton.jsx'
-import BtnExtandedAction from './BtnExtandedAction.jsx'
+import BtnExtendedAction from './BtnExtendedAction.jsx'
 import ContentItem from './ContentItem.jsx'
 import DragHandle from '../DragHandle.jsx'
 import { ROLE } from 'tracim_frontend_lib'
@@ -41,6 +41,49 @@ class Folder extends React.Component {
     if (isHoveringChildrenFolder) return 'fa-times-circle primaryColorFont'
 
     return 'fa-arrow-circle-down primaryColorFont'
+  }
+
+  extendedActions (content, specifyAllowedRoleId) {
+    const action = this.props.onClickExtendedAction
+    const t = this.props.t
+
+    return {
+      open: {
+        callback: e => action.open(e, content),
+        label: t('Open'),
+        allowedRoleId: specifyAllowedRoleId ? ROLE.reader.id : undefined
+      },
+      edit: {
+        callback: e => action.edit(e, content),
+        label: t('Edit'),
+        allowedRoleId: specifyAllowedRoleId ? ROLE.contentManager.id: undefined
+      },
+      rename: {
+        callback: e => action.rename(e, content),
+        label: t('Rename'),
+        allowedRoleId: specifyAllowedRoleId ? ROLE.contentManager.id: undefined
+      },
+      download: {
+        callback: e => action.download(e, content),
+        label: t('Download'),
+        allowedRoleId: specifyAllowedRoleId ? ROLE.reader.id: undefined
+      },
+      share: {
+        callback: e => action.share(e, content),
+        label: t('Share'),
+          allowedRoleId: specifyAllowedRoleId ? ROLE.reader.id: undefined
+      },
+      archive: {
+        callback: e => action.archive(e, content),
+        label: t('Archive'),
+        allowedRoleId: specifyAllowedRoleId ? ROLE.contentManager.id: undefined
+      },
+      delete: {
+        callback: e => action.delete(e, content),
+        label: t('Delete'),
+        allowedRoleId: specifyAllowedRoleId ? ROLE.contentManager.id : undefined
+      }
+    }
   }
 
   render () {
@@ -143,30 +186,9 @@ class Folder extends React.Component {
               )}
 
               <div className='d-none d-md-flex' title={props.t('Actions')}>
-                <BtnExtandedAction
+                <BtnExtendedAction
                   userRoleIdInWorkspace={props.userRoleIdInWorkspace}
-                  onClickExtendedAction={{
-                    edit: {
-                      callback: e => props.onClickExtendedAction.edit(e, props.folderData),
-                      label: props.t('Edit'),
-                      allowedRoleId: ROLE.contentManager.id
-                    },
-                    download: {
-                      callback: e => props.onClickExtendedAction.download(e, props.folderData),
-                      label: props.t('Download'),
-                      allowedRoleId: ROLE.reader.id
-                    },
-                    archive: {
-                      callback: e => props.onClickExtendedAction.archive(e, props.folderData),
-                      label: props.t('Archive'),
-                      allowedRoleId: ROLE.contentManager.id
-                    },
-                    delete: {
-                      callback: e => props.onClickExtendedAction.delete(e, props.folderData),
-                      label: props.t('Delete'),
-                      allowedRoleId: ROLE.contentManager.id
-                    }
-                  }}
+                  onClickExtendedAction={this.extendedActions(props.folderData, true)}
                   folderData={props.folderData}
                 />
               </div>
@@ -215,24 +237,7 @@ class Folder extends React.Component {
                 contentType={props.contentType.length ? props.contentType.find(ct => ct.slug === content.type) : null}
                 urlContent={`${PAGE.WORKSPACE.CONTENT(content.workspaceId, content.type, content.id)}${props.location.search}`}
                 userRoleIdInWorkspace={props.userRoleIdInWorkspace}
-                onClickExtendedAction={{
-                  edit: {
-                    callback: e => props.onClickExtendedAction.edit(e, content),
-                    label: props.t('Edit')
-                  },
-                  download: {
-                    callback: e => props.onClickExtendedAction.download(e, content),
-                    label: props.t('Download')
-                  },
-                  archive: {
-                    callback: e => props.onClickExtendedAction.archive(e, content),
-                    label: props.t('Archive')
-                  },
-                  delete: {
-                    callback: e => props.onClickExtendedAction.delete(e, content),
-                    label: props.t('Delete')
-                  }
-                }}
+                onClickExtendedAction={this.extendedActions(content, false)}
                 onDropMoveContentItem={props.onDropMoveContentItem}
                 isLast={props.isLast && i === folderContentList.length - 1}
                 key={content.id}

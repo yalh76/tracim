@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { DragSource } from 'react-dnd'
 import { DRAG_AND_DROP } from '../../helper.js'
-import BtnExtandedAction from './BtnExtandedAction.jsx'
+import BtnExtendedAction from './BtnExtendedAction.jsx'
 import DragHandle from '../DragHandle.jsx'
 import {
   ROLE,
@@ -82,9 +82,24 @@ class ContentItem extends React.Component {
 
           {props.userRoleIdInWorkspace >= ROLE.contributor.id && (
             <div className='d-none d-md-block' title={props.t('Actions')}>
-              <BtnExtandedAction
+              <BtnExtendedAction
                 userRoleIdInWorkspace={props.userRoleIdInWorkspace}
                 onClickExtendedAction={{
+                  open: {
+                    callback: e => props.onClickExtendedAction.open.callback(e, props.folderData),
+                    label: props.onClickExtendedAction.open.label,
+                    allowedRoleId: ROLE.reader.id
+                  },
+                  share: {
+                    callback: e => props.onClickExtendedAction.edit.callback(e, props.folderData),
+                    label: props.onClickExtendedAction.share.label,
+                    allowedRoleId: ROLE.reader.id
+                  },
+                  rename: {
+                    callback: e => props.onClickExtendedAction.rename.callback(e, props.folderData),
+                    label: props.onClickExtendedAction.rename.label,
+                    allowedRoleId: ROLE.contentManager.id
+                  },
                   edit: {
                     callback: e => props.onClickExtendedAction.edit.callback(e, props.folderData),
                     label: props.onClickExtendedAction.edit.label,
