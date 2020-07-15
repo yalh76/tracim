@@ -70,7 +70,7 @@ chown www-data:www-data -R /var/run/uwsgi
 chown www-data:www-data -R /var/tracim
 
 # activate apache mods
-a2enmod proxy proxy_http proxy_ajp rewrite deflate headers proxy_html dav_fs dav expires
+a2enmod proxy proxy_http proxy_ajp rewrite deflate headers proxy_html dav_fs dav expires ssl http2
 
 # Activate or deactivate webdav
 if [ "$START_WEBDAV" = "1" ]; then

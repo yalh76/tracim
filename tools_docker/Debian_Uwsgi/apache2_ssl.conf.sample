@@ -1,0 +1,7 @@
+<VirtualHost *:443>
+   Protocols h2 http/1.1
+   Include /etc/apache2/sites-available/tracim.conf
+   SSLEngine On
+   SSLCertificateFile /var/tracim/cert/certificate.crt
+   SSLCertificateKeyFile /var/tracim/cert/certificate.key
+</VirtualHost>
