@@ -104,6 +104,7 @@ RUN \
         uwsgi-plugin-python3 \
         vim \
         xvfb \
+        openssl \
 # Remove default conf about apache2
     && rm /etc/apache2/sites-enabled/000-default.conf \
 # Do not show apache version
@@ -116,6 +117,6 @@ COPY --from=builder /tracim /tracim
 COPY --from=builder /usr/local /usr/local
 
 VOLUME ["/etc/tracim", "/var/tracim"]
-EXPOSE 80
+EXPOSE 80 443
 
 CMD ["/bin/bash","/tracim/tools_docker/Debian_Uwsgi/entrypoint.sh"]

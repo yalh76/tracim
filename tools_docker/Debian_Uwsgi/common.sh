@@ -52,12 +52,15 @@ fi
 # Create apache conf file if none exists
 if [ ! -f /etc/tracim/apache2.conf ]; then
     cp /tracim/tools_docker/Debian_Uwsgi/apache2.conf.sample /etc/tracim/apache2.conf
+    cp /tracim/tools_docker/Debian_Uwsgi/apache2_ssl.conf.sample /etc/tracim/apache2_ssl.conf
 fi
 if [ ! -L /etc/apache2/sites-available/tracim.conf ]; then
     ln -s /etc/tracim/apache2.conf /etc/apache2/sites-available/tracim.conf
+    ln -s /etc/tracim/apache2_ssl.conf /etc/apache2/sites-available/tracim_ssl.conf
 fi
 if [ ! -L /etc/apache2/sites-enabled/tracim.conf ]; then
     ln -s /etc/apache2/sites-available/tracim.conf /etc/apache2/sites-enabled/tracim.conf
+    ln -s /etc/apache2/sites-available/tracim_ssl.conf /etc/apache2/sites-enabled/tracim_ssl.conf
 fi
 
 # Create uwsgi conf file if none exists
@@ -110,6 +113,12 @@ if [ ! -d /var/tracim/logs ]; then
     touch /var/tracim/logs/apache2-error.log
     chown root:www-data -R /var/tracim/logs
     chmod 775 -R /var/tracim/logs
+fi
+
+if [ ! -d /var/tracim/cert ]; then
+    mkdir /var/tracim/cert
+    openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj '/CN=tracim.test/O=Tracim/C=FR' -keyout /var/tracim/cert/certificate.key -out /var/tracim/cert/tracim/certificate.crt
+    chmod 644 -R /var/tracim/cert
 fi
 
 if [ ! -L /var/log/uwsgi/app/tracim_web.log ]; then

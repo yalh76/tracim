@@ -11,6 +11,7 @@ def test_apache_running(tracim):
     assert apache2.is_running
     assert apache2.is_enabled
     assert tracim.socket("tcp://80").is_listening
+    assert tracim.socket("tcp://443").is_listening
 
 def test_uwsgi_running(tracim):
     uwsgi = tracim.service("uwsgi")
