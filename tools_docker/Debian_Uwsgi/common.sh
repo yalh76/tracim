@@ -52,14 +52,20 @@ fi
 # Create apache conf file if none exists
 if [ ! -f /etc/tracim/apache2.conf ]; then
     cp /tracim/tools_docker/Debian_Uwsgi/apache2.conf.sample /etc/tracim/apache2.conf
+fi
+if [ ! -f /etc/tracim/apache2_ssl.conf ]; then
     cp /tracim/tools_docker/Debian_Uwsgi/apache2_ssl.conf.sample /etc/tracim/apache2_ssl.conf
 fi
 if [ ! -L /etc/apache2/sites-available/tracim.conf ]; then
     ln -s /etc/tracim/apache2.conf /etc/apache2/sites-available/tracim.conf
+fi
+if [ ! -L /etc/apache2/sites-available/tracim_ssl.conf ]; then
     ln -s /etc/tracim/apache2_ssl.conf /etc/apache2/sites-available/tracim_ssl.conf
 fi
 if [ ! -L /etc/apache2/sites-enabled/tracim.conf ]; then
     ln -s /etc/apache2/sites-available/tracim.conf /etc/apache2/sites-enabled/tracim.conf
+fi
+if [ ! -L /etc/apache2/sites-enabled/tracim_ssl.conf ]; then
     ln -s /etc/apache2/sites-available/tracim_ssl.conf /etc/apache2/sites-enabled/tracim_ssl.conf
 fi
 
