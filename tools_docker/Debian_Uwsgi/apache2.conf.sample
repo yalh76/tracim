@@ -1,67 +1,10 @@
 <VirtualHost *:80>
+  Protocols http/1.1
+  Include /etc/apache2/tracim.conf
+</VirtualHost>
 
-    Alias "/assets" "/tracim/frontend/dist/assets"
-    Alias "/favicon.ico" "/tracim/frontend/dist/assets/favicon.ico"
-    <Directory "/tracim/frontend/dist/assets">
-        Require all granted
-        RequestHeader edit "If-None-Match" '^"((.*)-(gzip|br))"$' '"$1", "$2"'
-        <IfModule mod_expires.c>
-            ExpiresActive On
-            ExpiresDefault "access plus 1 months"
-        </IfModule>
-    </Directory>
-
-    Alias "/app" "/tracim/frontend/dist/app"
-    <Directory "/tracim/frontend/dist/app">
-        Require all granted
-        RequestHeader edit "If-None-Match" '^"((.*)-(gzip|br))"$' '"$1", "$2"'
-        <IfModule mod_expires.c>
-            ExpiresActive On
-            ExpiresDefault "access plus 1 months"
-        </IfModule>
-    </Directory>
-
-    # This directive is needed for macOS webdav usage (at least)
-    # If we want to remove it we have to address this issue
-    # https://github.com/tracim/tracim/issues/3320
-    SetEnv proxy-sendcl
-
-    # Setting Destination header from https to http in proxy
-    # is needed for working move/copy in webdav
-    # Can't be added in Location https://httpd.apache.org/docs/2.4/en/mod/mod_headers.html
-    RequestHeader edit Destination ^https http early
-
-    # Proxying Webdav
-    <Location /webdav>
-        # Preserving host is needed for working move/copy in webdav
-        ProxyPreserveHost On
-        #ProxyPass http://127.0.0.1:3030/webdav
-        #ProxyPassReverse http://127.0.0.1:3030/webdav
-    </Location>
-
-    # Proxying Caldav
-    #ProxyPass /agenda http://127.0.0.1:8080/agenda
-    #ProxyPassReverse /agenda http://127.0.0.1:8080/agenda
-
-    # Proxying Frontend
-    ProxyPass /ui http://127.0.0.1:8080/ui
-    ProxyPassReverse /ui http://127.0.0.1:8080/ui
-
-    # Proxying Tracim Live Message to Pushpin
-    ProxyPassMatch /api/users/(.*/live_messages)$ http://127.0.0.1:7999/api/users/$1
-    ProxyPassReverse /api/users/(.*/live_messages)$ http://127.0.0.1:7999/api/users/$1
-
-    # Proxying Backend API
-    ProxyPass /api http://127.0.0.1:8080/api
-    ProxyPassReverse /api http://127.0.0.1:8080/api
-
-    ProxyPass /custom_toolbox-assets http://127.0.0.1:8080/custom_toolbox-assets
-    ProxyPassReverse /custom_toolbox-assets http://127.0.0.1:8080/custom_toolbox-assets
-
-    ProxyPassMatch ^/$ http://localhost:8080
-    ProxyPassReverse ^/$ http://127.0.0.1:8080
-
-    CustomLog /var/tracim/logs/apache2-access.log combined
-    ErrorLog /var/tracim/logs/apache2-error.log
-
+<VirtualHost *:443>
+  Protocols h2 http/1.1
+  Include /etc/apache2/tracim.conf
+  Include /etc/apache2/ssl.conf
 </VirtualHost>

@@ -53,21 +53,27 @@ fi
 if [ ! -f /etc/tracim/apache2.conf ]; then
     cp /tracim/tools_docker/Debian_Uwsgi/apache2.conf.sample /etc/tracim/apache2.conf
 fi
-if [ ! -f /etc/tracim/apache2_ssl.conf ]; then
-    cp /tracim/tools_docker/Debian_Uwsgi/apache2_ssl.conf.sample /etc/tracim/apache2_ssl.conf
+if [ ! -f /etc/tracim/ssl.conf ]; then
+    cp /tracim/tools_docker/Debian_Uwsgi/ssl.conf.sample /etc/tracim/ssl.conf
 fi
+if [ ! -f /etc/tracim/tracim.conf ]; then
+    cp /tracim/tools_docker/Debian_Uwsgi/tracim.conf.sample /etc/tracim/tracim.conf
+fi
+
+if [ ! -L /etc/apache2/tracim.conf ]; then
+    ln -s /etc/tracim/tracim.conf /etc/apache2/tracim.conf
+fi
+if [ ! -L /etc/apache2/ssl.conf ]; then
+    ln -s /etc/tracim/ssl.conf /etc/apache2/ssl.conf
+fi
+
 if [ ! -L /etc/apache2/sites-available/tracim.conf ]; then
-    ln -s /etc/tracim/apache2.conf /etc/apache2/sites-available/tracim.conf
+    ln -s /etc/tracim/apache2.conf /etc/apache2/sites-available/tracim_vhost.conf
 fi
-if [ ! -L /etc/apache2/sites-available/tracim_ssl.conf ]; then
-    ln -s /etc/tracim/apache2_ssl.conf /etc/apache2/sites-available/tracim_ssl.conf
+if [ ! -L /etc/apache2/sites-enabled/tracim_vhost.conf ]; then
+    ln -s /etc/apache2/sites-available/tracim_vhost.conf /etc/apache2/sites-enabled/tracim_vhost.conf
 fi
-if [ ! -L /etc/apache2/sites-enabled/tracim.conf ]; then
-    ln -s /etc/apache2/sites-available/tracim.conf /etc/apache2/sites-enabled/tracim.conf
-fi
-if [ ! -L /etc/apache2/sites-enabled/tracim_ssl.conf ]; then
-    ln -s /etc/apache2/sites-available/tracim_ssl.conf /etc/apache2/sites-enabled/tracim_ssl.conf
-fi
+
 
 # Create uwsgi conf file if none exists
 if [ ! -f /etc/tracim/tracim_web.ini ]; then
