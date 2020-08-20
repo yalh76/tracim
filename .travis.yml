@@ -24,6 +24,14 @@ language: python
 dist: bionic
 python: "3.6"
 os: linux
+addons:
+  apt:
+    packages:
+      - nmon
+before_script:
+  - nmon -F statistics.nmon -s 12
+after_script:
+  - cat statistics.nmon
 
 _install_backend: &_install_backend
   addons:
@@ -43,6 +51,7 @@ _install_backend: &_install_backend
         - docker-ce
         - docker-compose
         - libimage-exiftool-perl
+        - nmon
   services:
     - redis
   before_install:
@@ -99,6 +108,7 @@ _install_backend: &_install_backend
     # version conflict with python-coveralls
     # see https://github.com/z4r/python-coveralls/issues/66
     - sh -c "if [ '$COVERAGE' = '1' ]; then pip install \"pytest-cov<2.6\" \"python-coveralls\"; fi"
+    - nmon -F statistics.nmon -s 12
 
 
 _install_full_tracim: &_install_full_tracim
@@ -114,6 +124,7 @@ _install_full_tracim: &_install_full_tracim
     - ./install_frontend_dependencies.sh
     - ./build_full_frontend.sh
     - IGNORE_APT_INSTALL=true ./setup_functionnal_tests.sh
+    - nmon -F statistics.nmon -s 12
 
 _backend_quick_test: &_backend_quick_test
   <<: *_install_backend
@@ -122,9 +133,11 @@ _backend_quick_test: &_backend_quick_test
     apt:
       packages:
         - libimage-exiftool-perl
+        - nmon
   services:
     - redis-server
   before_script:
+    - nmon -F statistics.nmon -s 12
   script:
     - pytest backend --ignore "backend/tracim_backend/tests/functional" --ignore "backend/tracim_backend/tests/commands"
 
