@@ -10210,19 +10210,6 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"radium@npm:^0.24.1":
-  version: 0.24.1
-  resolution: "radium@npm:0.24.1"
-  dependencies:
-    exenv: ^1.2.1
-    inline-style-prefixer: ^4.0.0
-    prop-types: ^15.5.8
-  peerDependencies:
-    react: ^15.3.0 || ^16.0.0
-  checksum: 1adc6114246bcd41a794f8b8cd3c8ebcc06052ee1ba7f19c4b0a2840302e9983c94f07064e41a15ff23ec8fbb3da67d52532941b0ba6510811f6d50b4326147c
-  languageName: node
-  linkType: hard
-
 "radium@npm:^0.25.2":
   version: 0.25.2
   resolution: "radium@npm:0.25.2"
@@ -12813,7 +12800,6 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
@@ -12871,7 +12857,6 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
@@ -12925,7 +12910,6 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
@@ -12983,7 +12967,6 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
@@ -13036,7 +13019,6 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
@@ -13093,7 +13075,6 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
@@ -13146,7 +13127,6 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
@@ -13209,7 +13189,6 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
@@ -13262,7 +13241,6 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
@@ -13300,7 +13278,7 @@ fsevents@^1.2.7:
     mocha: ^7.1.1
     pnp-webpack-plugin: ^1.6.4
     prop-types: ^15.7.2
-    radium: ^0.24.1
+    radium: ^0.25.2
     react: 16.13.1
     react-device-detect: ^1.7.5
     react-dom: ^16.13.1
@@ -13318,7 +13296,6 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
@@ -13370,7 +13347,6 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
@@ -13421,7 +13397,6 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
@@ -13475,7 +13450,6 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
@@ -13537,12 +13511,35 @@ fsevents@^1.2.7:
     webpack: ^4.42.1
     webpack-cli: ^3.3.11
     webpack-dev-server: ^3.10.3
-    whatwg-fetch: ^3.0.0
   peerDependencies:
     cheerio: ^1.0.0
     eslint: ^6.8.0
     react-dom: ^16.13.1
     webpack: ^4.42.1
+  languageName: unknown
+  linkType: soft
+
+"tracim_frontend_vendors@workspace:frontend_vendors":
+  version: 0.0.0-use.local
+  resolution: "tracim_frontend_vendors@workspace:frontend_vendors"
+  dependencies:
+    classnames: ^2.2.6
+    core-js: ^3.6.4
+    css-loader: ^3.5.1
+    date-fns: ^1.30.1
+    eslint: ^6.8.0
+    pnp-webpack-plugin: ^1.6.4
+    prop-types: ^15.7.2
+    radium: ^0.25.2
+    react: ^16.13.1
+    react-dom: ^16.13.1
+    react-image-lightbox: ^5.1.0
+    react-router: ^5.0.1
+    regenerator-runtime: ^0.13.2
+    standard: ^14.3.3
+    standard-loader: ^7.0.0
+    webpack: ^4.42.1
+    webpack-cli: ^3.3.11
   languageName: unknown
   linkType: soft
 
@@ -14329,13 +14326,6 @@ fsevents@^1.2.7:
   version: 3.0.0
   resolution: "whatwg-fetch@npm:3.0.0"
   checksum: 56ffff2db0908b2180830c1c543b16b3cb93f07c771f15af9ce1a31f426c4b843e0a22cb0afd9de585d7583c07f4b84cb5dbf42fe22bcf6ad34f96103b456aaf
-  languageName: node
-  linkType: hard
-
-"whatwg-fetch@npm:^3.0.0":
-  version: 3.4.0
-  resolution: "whatwg-fetch@npm:3.4.0"
-  checksum: 87205a81198481e96d969e732ce1e0518e25d8049c4fe2796f1446780d6290e6ca9a482370fd81177845661466446af6fb62400f09ca65189feb2a7bc203be09
   languageName: node
   linkType: hard
 
