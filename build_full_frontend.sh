@@ -16,8 +16,8 @@ if [ -z "${LINTING+x}" ]; then
     export LINTING=false
 fi
 
-dev=""
-appdev=""
+dev="-dev"
+appdev="-d"
 if [ "$1" = "-d" ]; then
     dev="-dev"
     appdev="-d"
