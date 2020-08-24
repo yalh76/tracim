@@ -1,7 +1,7 @@
 ---
 env:
   global:
-    - DEFAULT_SQLITE_SQLALCHEMY__URL=sqlite:////tmp/tracim.sqlite
+    - DEFAULT_SQLITE_SQLALCHEMY__URL=sqlite:////tmp/tracim/tracim.sqlite
     - DEFAULT_MYSQL_SQLALCHEMY__URL=mysql+pymysql://user:secret@127.0.0.1:3306/tracim_test
     - DEFAULT_POSTGRES_SQLALCHEMY__URL=postgresql://user:secret@127.0.0.1:5432/tracim_test?client_encoding=utf8
     - DB=sqlite
@@ -74,7 +74,7 @@ _install_backend: &_install_backend
     - |
       if [ "${DB}" == "postgres" ]; then
         docker pull postgres:9.3
-        docker run -d -p 5432:5432 --name postgres -e POSTGRES_DB=tracim_test -e POSTGRES_USER=user -e POSTGRES_PASSWORD=secret postgres:9.3
+        docker run -d -p 5432:5432 --name postgres -e POSTGRES_DB=tracim_test -e POSTGRES_USER=user -e POSTGRES_PASSWORD=secret --tmpfs /var/lib/postgresql postgres:9.3
         pip install -e ".[postgresql,testing]"
       fi
     # mysql 8+
@@ -88,7 +88,7 @@ _install_backend: &_install_backend
     - |
       if [ "${DB}" == "mariadb" ]; then
         docker pull mariadb/server:10.3
-        docker run -d -p 3306:3306 --name mariadbd -e MARIADB_DATABASE=tracim_test -e MARIADB_USER=user -e MARIADB_PASSWORD=secret -e MARIADB_RANDOM_ROOT_PASSWORD=true mariadb/server:10.3
+        docker run -d -p 3306:3306 --name mariadbd -e MARIADB_DATABASE=tracim_test -e MARIADB_USER=user -e MARIADB_PASSWORD=secret -e MARIADB_RANDOM_ROOT_PASSWORD=true --tmpfs /var/lib/mysql mariadb/server:10.3
         pip install -e ".[mysql,testing]"
       fi
     # sqlite
@@ -108,6 +108,8 @@ _install_backend: &_install_backend
     # version conflict with python-coveralls
     # see https://github.com/z4r/python-coveralls/issues/66
     - sh -c "if [ '$COVERAGE' = '1' ]; then pip install \"pytest-cov<2.6\" \"python-coveralls\"; fi"
+    - mkdir /tmp/tracim
+    - mount -t tmpfs tmpfs /tmp/tracim
     - nmon -F statistics.nmon -s 12
 
 
