@@ -139,6 +139,8 @@ _backend_quick_test: &_backend_quick_test
   services:
     - redis-server
   before_script:
+    - mkdir /tmp/tracim
+    - mount -t tmpfs tmpfs /tmp/tracim
     - nmon -F statistics.nmon -s 12
   script:
     - pytest backend --ignore "backend/tracim_backend/tests/functional" --ignore "backend/tracim_backend/tests/commands"
