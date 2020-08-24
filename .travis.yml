@@ -109,7 +109,7 @@ _install_backend: &_install_backend
     # see https://github.com/z4r/python-coveralls/issues/66
     - sh -c "if [ '$COVERAGE' = '1' ]; then pip install \"pytest-cov<2.6\" \"python-coveralls\"; fi"
     - mkdir /tmp/tracim
-    - mount -t tmpfs tmpfs /tmp/tracim
+    - sudo mount -t tmpfs tmpfs /tmp/tracim
     - nmon -F statistics.nmon -s 12
 
 
