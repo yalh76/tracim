@@ -1,6 +1,16 @@
 
 # Install Live Message mecanism for development purpose
 
+## Web Dev architecture
+
+A simple architecture diagram of web apps running in a dev environnement
+with default port, running on localhost:
+
+![Dev Architecture](./architecture/dev-stack.svg)
+
+Note: Webdav and caldav process are mostly optional for dev process. You can run this if you
+need to test agenda app or webdav.
+
 ## Install Pushpin in docker
 
 On ubuntu/debian:
