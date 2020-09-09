@@ -26,3 +26,6 @@ node_modules
 # vscode and mypy
 .vscode/
 .mypy_cache/
+
+#ignore dev.js files
+/frontend*/dist/*.dev.js
