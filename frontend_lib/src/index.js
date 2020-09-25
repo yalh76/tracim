@@ -112,6 +112,8 @@ import ProgressBar from './component/ProgressBar/ProgressBar.jsx'
 
 import RadioBtnGroup from './component/Input/RadioBtn/RadioBtn.jsx'
 
+import RenderInBody from './component/Layout/RenderInBody.jsx'
+
 import {
   tinymceAutoCompleteHandleInput,
   tinymceAutoCompleteHandleKeyDown,
@@ -205,6 +207,7 @@ export {
   ShareDownload,
   ProgressBar,
   RadioBtnGroup,
+  RenderInBody,
   CONTENT_TYPE,
   buildTracimLiveMessageEventType,
   RefreshWarningMessage,

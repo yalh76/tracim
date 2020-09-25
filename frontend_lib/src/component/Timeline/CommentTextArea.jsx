@@ -2,6 +2,7 @@ import React from 'react'
 import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
 import MentionAutoComplete from '../Input/MentionAutoComplete/MentionAutoComplete'
+import RenderInBody from '../Layout/RenderInBody'
 import {
   tinymceAutoCompleteHandleInput,
   tinymceAutoCompleteHandleKeyUp,
@@ -154,11 +155,9 @@ export class CommentTextArea extends React.Component {
     const { props, state } = this
 
     const style = {
-      transform: 'translateY(-100%)',
       position: 'absolute',
       ...(props.wysiwyg && {
-        top: state.tinymcePosition.top,
-        position: state.tinymcePosition.isFullscreen ? 'fixed' : 'absolute',
+        bottom: state.tinymcePosition.top,
         zIndex: state.tinymcePosition.isFullscreen ? 1061 : 20
       })
     }
@@ -166,13 +165,15 @@ export class CommentTextArea extends React.Component {
     return (
       <>
         {!props.disableComment && state.isAutoCompleteActivated && state.autoCompleteItemList.length > 0 && (
-          <MentionAutoComplete
-            autoCompleteItemList={state.autoCompleteItemList}
-            style={style}
-            autoCompleteCursorPosition={state.autoCompleteCursorPosition}
-            onClickAutoCompleteItem={(m) => props.wysiwyg ? tinymceAutoCompleteHandleClickItem(m, this.setState.bind(this)) : this.handleClickAutoCompleteItem(m)}
-            delimiterIndex={state.autoCompleteItemList.filter(item => item.isCommon).length - 1}
-          />
+          <RenderInBody>
+            <MentionAutoComplete
+              autoCompleteItemList={state.autoCompleteItemList}
+              style={style}
+              autoCompleteCursorPosition={state.autoCompleteCursorPosition}
+              onClickAutoCompleteItem={(m) => props.wysiwyg ? tinymceAutoCompleteHandleClickItem(m, this.setState.bind(this)) : this.handleClickAutoCompleteItem(m)}
+              delimiterIndex={state.autoCompleteItemList.filter(item => item.isCommon).length - 1}
+            />
+          </RenderInBody>
         )}
         <textarea
           id={props.id}

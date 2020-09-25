@@ -103,17 +103,12 @@ import { uniqueId } from 'lodash'
         })
 
         const getPosition = (e) => {
-          const toolbarPosition = $($editor.getContainer()).find('.mce-toolbar-grp').first()
-          const selectionNode = $($editor.selection.getNode())
-          const nodePosition = selectionNode.position()
-          const nodeOffset = selectionNode.offset()
-          const nodeHeight = selectionNode.height()
-          const isFullscreen = $editor.getContainer().className.includes('mce-fullscreen')
+          const iframePosition = $editor.iframeElement.getBoundingClientRect()
+          const selectedNodePosition = $editor.selection.getNode().getBoundingClientRect()
           return {
-            top: (isFullscreen ? $editor.getContainer().offsetTop + nodePosition.top : nodePosition.top) + toolbarPosition.height(),
-            isSelectionToTheTop: nodePosition.top === 0,
-            selectionHeight: (nodeOffset.top * 2) + nodeHeight,
-            isFullscreen
+            top: iframePosition.top + selectedNodePosition.top,
+            selectionHeight: selectedNodePosition.height,
+            isFullscreen: $editor.getContainer().className.includes('mce-fullscreen')
           }
         }
 
@@ -167,13 +162,13 @@ import { uniqueId } from 'lodash'
           title: 'Fullscreen',
           onclick: function () {
             const headerHeight = 61 // 61px is Tracim's header height
-            var iframeElement = $editor.getWin()
+            var editorWin = $editor.getWin()
 
-            if (customFullscreen.originalHeight === null) customFullscreen.originalHeight = iframeElement.frameElement.style.height
+            if (customFullscreen.originalHeight === null) customFullscreen.originalHeight = editorWin.frameElement.style.height
 
             $editor.execCommand('mceFullScreen')
 
-            var currentHeightInt = getIframeHeight(iframeElement)
+            var currentHeightInt = getIframeHeight(editorWin)
 
             customFullscreen = {
               active: !customFullscreen.active,
@@ -181,7 +176,7 @@ import { uniqueId } from 'lodash'
               newHeight: customFullscreen.active ? customFullscreen.originalHeight : currentHeightInt - headerHeight
             }
 
-            iframeElement.frameElement.style.height = customFullscreen.newHeight + 'px'
+            editorWin.frameElement.style.height = customFullscreen.newHeight + 'px'
 
             window.onresize = function () {
               if (customFullscreen.active) {

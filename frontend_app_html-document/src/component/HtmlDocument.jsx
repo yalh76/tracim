@@ -4,11 +4,24 @@ import {
   APP_FEATURE_MODE,
   MentionAutoComplete,
   PromptMessage,
-  TextAreaApp
+  TextAreaApp,
+  RenderInBody
 } from 'tracim_frontend_lib'
 import { translate } from 'react-i18next'
 
 export const HtmlDocument = props => {
+  let topOrBottom, yPos
+
+  if (props.tinymcePosition) {
+    if (props.tinymcePosition.top > document.body.scrollHeight / 2) {
+      topOrBottom = 'bottom'
+      yPos = props.tinymcePosition.top
+    } else {
+      topOrBottom = 'top'
+      yPos = props.tinymcePosition.top + props.tinymcePosition.selectionHeight
+    }
+  }
+
   return (
     <div className='html-document__contentpage__left__wrapper'>
       {props.displayNotifyAllMessage && (
@@ -92,19 +105,19 @@ export const HtmlDocument = props => {
         {(props.mode === APP_FEATURE_MODE.EDIT &&
           <div className='html-document__editionmode__container'>
             {props.isAutoCompleteActivated && props.autoCompleteItemList.length > 0 && (
-              <MentionAutoComplete
-                autoCompleteItemList={props.autoCompleteItemList}
-                autoCompleteCursorPosition={props.autoCompleteCursorPosition}
-                onClickAutoCompleteItem={props.onClickAutoCompleteItem}
-                style={{
-                  top: props.tinymcePosition.top +
-                    (props.tinymcePosition.isSelectionToTheTop ? props.tinymcePosition.selectionHeight : 0),
-                  transform: !props.tinymcePosition.isSelectionToTheTop ? 'translateY(-100%)' : 'none',
-                  position: props.tinymcePosition.isFullscreen ? 'fixed' : 'absolute',
-                  zIndex: props.tinymcePosition.isFullscreen ? 1061 : 20
-                }}
-                delimiterIndex={props.autoCompleteItemList.filter(item => item.isCommon).length - 1}
-              />
+              <RenderInBody>
+                <MentionAutoComplete
+                  autoCompleteItemList={props.autoCompleteItemList}
+                  autoCompleteCursorPosition={props.autoCompleteCursorPosition}
+                  onClickAutoCompleteItem={props.onClickAutoCompleteItem}
+                  style={{
+                    [topOrBottom]: yPos + 'px',
+                    position: 'absolute',
+                    zIndex: (props.tinymcePosition && props.tinymcePosition.isFullscreen) ? 1061 : 20
+                  }}
+                  delimiterIndex={props.autoCompleteItemList.filter(item => item.isCommon).length - 1}
+                />
+              </RenderInBody>
             )}
             <TextAreaApp
               id={props.wysiwygNewVersion}
