@@ -9,6 +9,7 @@ export const NotificationButton = props => {
       <button
         className='notificationButton__btn btn outlineTextBtn nohover primaryColorBorder'
         type='button'
+        style={{ fontWeight: props.unreadNotificationCount ? 'bold' : 'normal' }}
         onClick={props.onClickNotification}
       >
         <i className='far fa-fw fa-bell' />
@@ -27,11 +28,13 @@ export const NotificationButton = props => {
 export default translate()(NotificationButton)
 
 NotificationButton.propTypes = {
+  unreadMentionCount: PropTypes.number,
   notificationNotReadCount: PropTypes.number,
   onClickNotification: PropTypes.func
 }
 
 NotificationButton.defaultProps = {
+  unreadMentionCount: 0,
   notificationNotReadCount: 0,
   onClickNotification: () => {}
 }
