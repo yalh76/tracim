@@ -1,23 +1,21 @@
 const path = require('path')
 const isProduction = process.env.NODE_ENV === 'production'
-
-console.log('isProduction : ', isProduction)
-
+const isServDev = process.env.SERVDEV === 'true'
 const PnpWebpackPlugin = require('pnp-webpack-plugin')
 
 module.exports = {
+  stats: process.env.VERBOSE === 'false' ? 'errors-warnings' : undefined,
   mode: isProduction ? 'production' : 'development',
-  entry: isProduction
+  entry: !isServDev
     ? './src/index.js' // only one instance of babel-polyfill is allowed
     : ['./src/index.dev.js'],
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: isProduction ? 'agenda.app.js' : 'agenda.app.dev.js',
     pathinfo: !isProduction,
-    library: isProduction ? 'appAgenda' : undefined,
+    library: !isServDev ? 'appAgenda' : undefined,
     libraryTarget: isProduction ? 'var' : undefined
   },
-  externals: {},
   devServer: {
     contentBase: path.join(__dirname, 'dist/'),
     host: '0.0.0.0',
@@ -30,12 +28,12 @@ module.exports = {
     },
     historyApiFallback: true
   },
-  devtool: isProduction ? false : 'cheap-module-source-map',
+  devtool: isProduction ? false : 'eval-cheap-module-source-map',
   performance: {
     hints: false
   },
   module: {
-    rules: [{
+    rules: [ process.env.LINTING === "false" ? {} : {
       test: /\.jsx?$/,
       enforce: 'pre',
       use: 'standard-loader',
@@ -71,7 +69,7 @@ module.exports = {
   },
   resolve: {
     plugins: [
-      PnpWebpackPlugin,
+      PnpWebpackPlugin
     ],
     alias: {
       // Make ~tracim_frontend_lib work in stylus files
@@ -81,8 +79,8 @@ module.exports = {
   },
   resolveLoader: {
     plugins: [
-      PnpWebpackPlugin.moduleLoader(module),
-    ],
+      PnpWebpackPlugin.moduleLoader(module)
+    ]
   },
   plugins: [
     ...[], // @INFO - CH - 2019/04/01 - generic plugins always present
