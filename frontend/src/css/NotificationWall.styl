@@ -45,14 +45,22 @@
         margin-left auto
         margin-right 5px
         font-size 8px
+        transition 300ms font-size color
         color lightBlue
+        :hover
+          color blue
       &.itemRead
         color lightDarkGrey
         background-color offWhite
         opacity 0.8
+      &.isMention:not(.itemRead)
+        background: #FDA
       &:hover
         background-color grey-hover
         color inherit
+    > .content:last-child
+      border-bottom 1px solid #ababab
+
   &__wallClose
     height 0
     top 0
@@ -62,7 +70,26 @@
     justify-content center
     width 100%
     display flex
-
+  &__group__folded
+    > a:first-child
+      display:block
+    > a:first-child:before
+      content " ➤ "
+      padding-left 1ex
+      padding-right 1ex
+      display inline-block
+    > .notification__list, > .notification__groups
+      display none
+  &__group__unfolded
+    > a:first-child
+      display:block
+    > a:first-child:before
+      content: " ⌄ "
+      padding-left 1ex
+      padding-right 1ex
+      display inline-block
+a + .notification__groups, a + .notification__list
+  margin-left:1em
 .contentTitle
   &__highlight
     text-decoration underline
