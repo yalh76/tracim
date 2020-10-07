@@ -28,7 +28,8 @@ import {
   setUserConfiguration,
   setUserLang,
   setWorkspaceListMemberList,
-  setNotificationNotReadCounter,
+  setUnreadNotificationCounter,
+  setUnreadMentionCounter,
   setNotificationList,
   setNextPage,
   setHeadTitle
@@ -41,6 +42,7 @@ import {
   getNotificationList,
   getUserConfiguration,
   getUserMessagesSummary,
+  getUserUnreadMentions,
   getWorkspaceMemberList,
   postUserLogin,
   putUserLang
@@ -151,7 +153,7 @@ class Login extends React.Component {
         this.loadAppList()
         this.loadContentTypeList()
         this.loadWorkspaceList()
-        this.loadNotificationNotRead(loggedUser.user_id)
+        this.loadUnreadNotification(loggedUser.user_id)
         this.loadNotificationList(loggedUser.user_id)
         this.loadUserConfiguration(loggedUser.user_id)
 
@@ -234,14 +236,24 @@ class Login extends React.Component {
     }
   }
 
-  loadNotificationNotRead = async (userId) => {
+  loadUnreadNotifications = async (userId) => {
     const { props } = this
 
-    const fetchNotificationNotRead = await props.dispatch(getUserMessagesSummary(userId))
+    const fetchUnreadNotificationCount = await props.dispatch(getUserMessagesSummary(userId))
 
-    switch (fetchNotificationNotRead.status) {
-      case 200: props.dispatch(setNotificationNotReadCounter(fetchNotificationNotRead.json.unread_messages_count)); break
+    switch (fetchUnreadNotificationCount.status) {
+      case 200: {
+        props.dispatch(setUnreadNotificationCounter(fetchUnreadNotificationCount.json.unread_messages_count))
+        break
+      }
       default: props.dispatch(newFlashMessage(props.t('Error loading unread notification number')))
+    }
+
+    const fetchUnreadMentions = await props.dispatch(getUserUnreadMentions(userId))
+    if (fetchUnreadMentions.status === 200) {
+      props.dispatch(setUnreadMentionCounter(fetchUnreadMentions.json.items.length))
+    } else {
+      props.dispatch(newFlashMessage(props.t('Error loading unread mention number')))
     }
   }
 

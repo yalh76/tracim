@@ -7,7 +7,8 @@ import {
   NOTIFICATION_LIST,
   SET,
   READ,
-  NOTIFICATION_NOT_READ_COUNT,
+  UNREAD_NOTIFICATION_COUNT,
+  UNREAD_MENTION_COUNT,
   USER_DISCONNECTED
 } from '../action-creator.sync.js'
 import { serialize } from 'tracim_frontend_lib'
@@ -19,7 +20,8 @@ const defaultNotificationsObject = {
   list: [],
   hasNextPage: false,
   nextPageToken: '',
-  notificationNotReadCount: 0
+  unreadNotificationCount: 0,
+  unreadMentionCount: 0
 }
 
 // FIXME - GB - 2020-07-30 - We can't use the global serializer in this case because it doesn't handle nested object
@@ -55,13 +57,15 @@ export default function notificationPage (state = defaultNotificationsObject, ac
     }
 
     case `${ADD}/${NOTIFICATION}`: {
+      const notification = serializeNotification(action.notification)
       return {
         ...state,
         list: uniqBy([
-          serializeNotification(action.notification),
+          notification,
           ...state.list
         ], 'id'),
-        notificationNotReadCount: state.notificationNotReadCount + 1
+        unreadNotificationCount: state.unreadNotificationCount + 1,
+        unreadMentionCount: state.unreadMentionCount + (notification.type.startsWith('mention.') ? 1 : 0)
       }
     }
 
@@ -71,7 +75,8 @@ export default function notificationPage (state = defaultNotificationsObject, ac
       return {
         ...state,
         list: state.list.map(no => no.id === action.notificationId ? { ...notification, read: true } : no),
-        notificationNotReadCount: state.notificationNotReadCount - 1
+        unreadNotificationCount: state.unreadNotificationCount - 1,
+        unreadMentionCount: state.unreadMentionCount - (notification.type.startsWith('mention.') ? 1 : 0)
       }
     }
 
@@ -79,14 +84,17 @@ export default function notificationPage (state = defaultNotificationsObject, ac
       const notificationList = state.list.map(notification => (
         { ...notification, read: true }
       ))
-      return { ...state, list: uniqBy(notificationList, 'id'), notificationNotReadCount: 0 }
+      return { ...state, list: uniqBy(notificationList, 'id'), unreadNotificationCount: 0, unreadMentionCount: 0 }
     }
 
     case `${SET}/${NEXT_PAGE}`:
       return { ...state, hasNextPage: action.hasNextPage, nextPageToken: action.nextPageToken }
 
-    case `${SET}/${NOTIFICATION_NOT_READ_COUNT}`:
-      return { ...state, notificationNotReadCount: action.notificationNotReadCount }
+    case `${SET}/${UNREAD_NOTIFICATION_COUNT}`:
+      return { ...state, unreadNotificationCount: action.unreadNotificationCount }
+
+    case `${SET}/${UNREAD_MENTION_COUNT}`:
+      return { ...state, unreadMentionCount: action.unreadMentionCount }
 
     case `${SET}/${USER_DISCONNECTED}`:
       return defaultNotificationsObject

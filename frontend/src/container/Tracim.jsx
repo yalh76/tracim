@@ -45,7 +45,8 @@ import {
   getUserIsConnected,
   putUserLang,
   getUserMessagesSummary,
-  getWorkspaceMemberList
+  getWorkspaceMemberList,
+  getUserUnreadMentions
 } from '../action-creator.async.js'
 import {
   newFlashMessage,
@@ -61,7 +62,8 @@ import {
   setBreadcrumbs,
   appendBreadcrumbs,
   setWorkspaceListMemberList,
-  setNotificationNotReadCounter,
+  setUnreadMentionCounter,
+  setUnreadNotificationCounter,
   setHeadTitle
 } from '../action-creator.sync.js'
 import NotificationWall from './NotificationWall.jsx'
@@ -193,7 +195,7 @@ export class Tracim extends React.Component {
 
         this.loadAppConfig()
         this.loadWorkspaceList()
-        this.loadNotificationNotRead(fetchUser.user_id)
+        this.loadUnreadNotifications(fetchUser.user_id)
         this.loadNotificationList(fetchUser.user_id)
         this.loadUserConfiguration(fetchUser.user_id)
 
@@ -206,7 +208,7 @@ export class Tracim extends React.Component {
   }
 
   componentDidUpdate (prevProps) {
-    this.handleHeadTitleAndFavicon(prevProps.system.headTitle, prevProps.notificationPage.notificationNotReadCount)
+    this.handleHeadTitleAndFavicon(prevProps.system.headTitle, prevProps.notificationPage.unreadMentionCount)
   }
 
   componentWillUnmount () {
@@ -289,14 +291,24 @@ export class Tracim extends React.Component {
     props.dispatch(setWorkspaceListMemberList(workspaceListMemberList))
   }
 
-  loadNotificationNotRead = async (userId) => {
+  loadUnreadNotifications = async (userId) => {
     const { props } = this
 
-    const fetchNotificationNotRead = await props.dispatch(getUserMessagesSummary(userId))
+    const fetchUnreadNotificationCount = await props.dispatch(getUserMessagesSummary(userId))
 
-    switch (fetchNotificationNotRead.status) {
-      case 200: props.dispatch(setNotificationNotReadCounter(fetchNotificationNotRead.json.unread_messages_count)); break
+    switch (fetchUnreadNotificationCount.status) {
+      case 200: {
+        props.dispatch(setUnreadNotificationCounter(fetchUnreadNotificationCount.json.unread_messages_count))
+        break
+      }
       default: props.dispatch(newFlashMessage(props.t('Error loading unread notification number')))
+    }
+
+    const fetchUnreadMentions = await props.dispatch(getUserUnreadMentions(userId))
+    if (fetchUnreadMentions.status === 200) {
+      props.dispatch(setUnreadMentionCounter(fetchUnreadMentions.json.items.length))
+    } else {
+      props.dispatch(newFlashMessage(props.t('Error loading unread mention number')))
     }
   }
 
@@ -324,28 +336,28 @@ export class Tracim extends React.Component {
     }
   }
 
-  handleHeadTitleAndFavicon = (prevHeadTitle, prevNotificationNotReadCount) => {
+  handleHeadTitleAndFavicon = (prevHeadTitle, prevUnreadMentionCount) => {
     const { props } = this
 
     const hasHeadTitleChanged = prevHeadTitle !== props.system.headTitle
-    const hasNotificationNotReadCountChanged =
-      props.notificationPage.notificationNotReadCount !== prevNotificationNotReadCount
-    const notificationNotReadCount = props.notificationPage.notificationNotReadCount
+    const hasUnreadMentionCountChanged =
+      props.notificationPage.unreadMentionCount !== prevUnreadMentionCount
+    const unreadMentionCount = props.notificationPage.unreadMentionCount
 
-    if ((hasHeadTitleChanged || hasNotificationNotReadCountChanged) && props.system.headTitle !== '') {
+    if ((hasHeadTitleChanged || hasUnreadMentionCountChanged) && props.system.headTitle !== '') {
       let newHeadTitle = props.system.headTitle
-      if (notificationNotReadCount > 0) {
-        newHeadTitle = `(${notificationNotReadCount > 99 ? '99+' : notificationNotReadCount}) ${newHeadTitle}`
+      if (unreadMentionCount > 0) {
+        newHeadTitle = `(${unreadMentionCount > 99 ? '99+' : unreadMentionCount}) ${newHeadTitle}`
       }
       document.title = newHeadTitle
     }
 
     if (
-      !hasNotificationNotReadCountChanged ||
-      (prevNotificationNotReadCount > 1 && notificationNotReadCount > 1)
+      !hasUnreadMentionCountChanged ||
+      (prevUnreadMentionCount > 1 && unreadMentionCount > 1)
     ) return
 
-    toggleFavicon(notificationNotReadCount > 0)
+    toggleFavicon(unreadMentionCount > 0)
   }
 
   handleRemoveFlashMessage = msg => this.props.dispatch(removeFlashMessage(msg))
@@ -375,7 +387,8 @@ export class Tracim extends React.Component {
       <div className='tracim fullWidthFullHeight'>
         <Header
           onClickNotification={this.handleClickNotificationButton}
-          notificationNotReadCount={props.notificationPage.notificationNotReadCount}
+          unreadMentionCount={props.notificationPage.unreadMentionCount}
+          unreadNotificationCount={props.notificationPage.unreadNotificationCount}
         />
         {state.displayConnectionError && (
           <FlashMessage

@@ -455,24 +455,32 @@ export class NotificationWall extends React.Component {
 
         <div className='notification__groups'>
           {state.notificationsGroupsByContentBySpace.map(({ label: spaceName, id: spaceId, groupId, list: contentList }) => {
+            let spaceMentionUnreadCount = 0
             let spaceUnreadCount = 0
             let spaceCount = 0
 
             for (const content of contentList) {
-              spaceUnreadCount += content.list.filter(({ notification }) => !notification.read).length
+              spaceMentionUnreadCount += content.list.filter(({ details, notification }) => !notification.read && details.isMention).length
+              spaceUnreadCount += content.list.filter(({ details, notification }) => !notification.read).length
               spaceCount += content.list.length
+            }
+
+            if (spaceCount === 1) {
+              return this.renderNotication(props, contentList[0].list[0].notification, contentList[0].list[0].details, contentList[0].list)
             }
 
             return (
               <div className={'notification__group notification__group__' + (state.unfoldedNotificationGroup[groupId] ? 'un' : '') + 'folded'} key={groupId}>
-                <div class='notification__space_header'>
-                  <Link onClick={() => this.toggleGroup(groupId)}>{state.unfoldedNotificationGroup[groupId] ? '⌄' : '➤'}</Link>
+                <div className='notification__space_header' style={spaceUnreadCount ? { fontWeight: 'bold' } : {}}>
+                  <Link onClick={() => this.toggleGroup(groupId)}>
+                    <i className={'fa fa-chevron-' + (state.unfoldedNotificationGroup[groupId] ? 'down' : 'right')} />
+                  </Link>
                   <span>
                     {spaceCount + ' notification' + (spaceCount === 1 ? '' : 's') + ' in '}
                     <Link to={PAGE.WORKSPACE.DASHBOARD(spaceId)}>
                       {spaceName}
                     </Link>
-                    {spaceUnreadCount ? <b>{' (' + spaceUnreadCount + ')'}</b> : ''}
+                    {spaceMentionUnreadCount ? <b>{' (' + spaceMentionUnreadCount + ')'}</b> : ''}
                   </span>
                 </div>
                 <div className='notification__groups'>
@@ -541,7 +549,8 @@ export class NotificationWall extends React.Component {
 
     return (
       <ListItemWrapper
-        isLast
+        isLast={notification === relatedDetailsAndNotifications[relatedDetailsAndNotifications.length - 1].notification}
+        // FIXME - notifications are always last with two consecutive spaces with one notification, which is not desirable
         read={read}
         id={`${ANCHOR_NAMESPACE.notificationItem}:${notification.id}`}
         key={notification.id}

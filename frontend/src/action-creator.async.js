@@ -18,7 +18,8 @@ import {
   newFlashMessage,
   NOTIFICATION,
   NOTIFICATION_LIST,
-  NOTIFICATION_NOT_READ_COUNT,
+  UNREAD_MENTION_COUNT,
+  UNREAD_NOTIFICATION_COUNT,
   SEARCHED_KEYWORDS,
   setRedirectLogin,
   setUserDisconnected,
@@ -910,7 +911,22 @@ export const getUserMessagesSummary = userId => dispatch => {
       },
       method: 'GET'
     },
-    actionName: NOTIFICATION_NOT_READ_COUNT,
+    actionName: UNREAD_NOTIFICATION_COUNT,
+    dispatch
+  })
+}
+
+export const getUserUnreadMentions = userId => dispatch => {
+  return fetchWrapper({
+    url: `${FETCH_CONFIG.apiUrl}/users/${userId}/messages?exclude_author_ids=${userId}${eventTypesParam}&include_event_types=mention.created&count=100&read_status=unread`,
+    param: {
+      credentials: 'include',
+      headers: {
+        ...FETCH_CONFIG.headers
+      },
+      method: 'GET'
+    },
+    actionName: UNREAD_MENTION_COUNT,
     dispatch
   })
 }
