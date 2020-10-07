@@ -53,11 +53,13 @@ export class NotificationWall extends React.Component {
   constructor () {
     super()
     this.state = {
-      unfoldedNotificationGroup: {}
+      unfoldedNotificationGroup: {},
+      notificationsGroupsByContentBySpace: [],
+      knownGroupIds: []
     }
   }
 
-  handleClickNotification = async (e, notificationId, notificationDetails, dontFollowLink = false) => {
+  handleClickNotification = async (e, notificationDetails, relatedNotifications, dontFollowLink = false) => {
     const { props } = this
 
     if (dontFollowLink) {
@@ -69,14 +71,16 @@ export class NotificationWall extends React.Component {
       e.preventDefault()
     }
 
-    const fetchPutNotificationAsRead = await props.dispatch(putNotificationAsRead(props.user.userId, notificationId))
-    switch (fetchPutNotificationAsRead.status) {
-      case 204: {
-        props.dispatch(readNotification(notificationId))
-        break
+    for (const { notification } of relatedNotifications) {
+      const fetchPutNotificationAsRead = await props.dispatch(putNotificationAsRead(props.user.userId, notification.id))
+      switch (fetchPutNotificationAsRead.status) {
+        case 204: {
+          props.dispatch(readNotification(notification.id))
+          break
+        }
+        default:
+          props.dispatch(newFlashMessage(props.t('Error while marking the notification as read'), 'warning'))
       }
-      default:
-        props.dispatch(newFlashMessage(props.t('Error while marking the notification as read'), 'warning'))
     }
 
     props.onCloseNotificationWall()
@@ -125,6 +129,8 @@ export class NotificationWall extends React.Component {
             return {
               icon: 'comments-o',
               text: props.t('{{author}} commented on {{content}} in {{space}}', i18nOpts),
+              action: 'commented',
+              sentenceEnding: 'on ' + i18nOpts.content,
               url: PAGE.WORKSPACE.CONTENT(notification.workspace.id, notification.content.parentContentType, notification.content.parentId)
             }
           }
@@ -132,6 +138,8 @@ export class NotificationWall extends React.Component {
           return {
             icon: 'magic',
             text: props.t('{{author}} created {{content}} in {{space}}', i18nOpts),
+            action: 'created',
+            sentenceEnding: i18nOpts.content,
             url: contentUrl
           }
         }
@@ -140,6 +148,8 @@ export class NotificationWall extends React.Component {
             return {
               icon: 'random',
               text: props.t('{{author}} changed the status of {{content}} in {{space}}', i18nOpts),
+              action: 'changed the status',
+              sentenceEnding: 'of ' + i18nOpts.content,
               url: contentUrl
             }
           }
@@ -147,6 +157,8 @@ export class NotificationWall extends React.Component {
           return {
             icon: 'history',
             text: props.t('{{author}} updated {{content}} in {{space}}', i18nOpts),
+            action: 'updated',
+            sentenceEnding: i18nOpts.content,
             url: contentUrl
           }
         }
@@ -154,6 +166,8 @@ export class NotificationWall extends React.Component {
           return {
             icon: 'magic',
             text: props.t('{{author}} deleted {{content}} from {{space}}', i18nOpts),
+            action: 'deleted',
+            sentenceEnding: i18nOpts.content,
             url: contentUrl
           }
         }
@@ -161,6 +175,8 @@ export class NotificationWall extends React.Component {
           return {
             icon: 'magic',
             text: props.t('{{author}} restored {{content}} in {{space}}', i18nOpts),
+            action: 'deleted',
+            sentenceEnding: i18nOpts.content,
             url: contentUrl
           }
         }
@@ -172,6 +188,8 @@ export class NotificationWall extends React.Component {
         return {
           icon: 'comment-o',
           text: props.t('{{author}} mentioned you in a comment in {{content}} in {{space}}', i18nOpts),
+          action: 'mentioned you in a comment',
+          sentenceEnding: 'in ' + i18nOpts.content,
           url: PAGE.WORKSPACE.CONTENT(notification.workspace.id, notification.content.parentContentType, notification.content.parentId),
           isMention: true
         }
@@ -180,6 +198,8 @@ export class NotificationWall extends React.Component {
       return {
         icon: 'at',
         text: props.t('{{author}} mentioned you in {{content}} in {{space}}', i18nOpts),
+        action: 'mentioned you',
+        sentenceEnding: 'in ' + i18nOpts.content,
         url: contentUrl,
         isMention: true
       }
@@ -189,6 +209,7 @@ export class NotificationWall extends React.Component {
       const details = {
         url: (props.user.profile === PROFILE.administrator.slug) ? PAGE.ADMIN.USER_EDIT(notification.user.userId) : '',
         emptyUrlMsg: props.t("Only an administrator can see this user's profile"),
+        sentenceEnding: '',
         msgType: 'info'
       }
 
@@ -196,21 +217,25 @@ export class NotificationWall extends React.Component {
         case TLM_EVENT.CREATED: return {
           ...details,
           icon: 'user-plus',
+          action: "created {{user}}'s profile",
           text: props.t("{{author}} created {{user}}'s profile", i18nOpts)
         }
         case TLM_EVENT.MODIFIED: return {
           ...details,
           icon: 'user+history',
+          action: "modified {{user}}'s profile",
           text: props.t("{{author}} modified {{user}}'s profile", i18nOpts)
         }
         case TLM_EVENT.DELETED: return {
           ...details,
           icon: 'user-times',
+          action: "deleted {{user}}'s profile",
           text: props.t("{{author}} deleted {{user}}'s profile", i18nOpts)
         }
         case TLM_EVENT.UNDELETED: return {
           ...details,
           icon: 'user+undo',
+          action: "restored {{user}}'s profile",
           text: props.t("{{author}} restored {{user}}'s profile", i18nOpts)
         }
       }
@@ -225,6 +250,8 @@ export class NotificationWall extends React.Component {
           text: props.user.userId === notification.user.userId
             ? props.t('{{author}} added you to {{space}}', i18nOpts)
             : props.t('{{author}} added {{user}} to {{space}}', i18nOpts),
+          action: (props.user.userId === notification.user.userId) ? 'added you' : 'added ' + i18nOpts.user,
+          sentenceEnding: 'to ' + i18nOpts.space,
           url: dashboardUrl
         }
         case TLM_EVENT.MODIFIED: return {
@@ -232,6 +259,8 @@ export class NotificationWall extends React.Component {
           text: props.user.userId === notification.user.userId
             ? props.t('{{author}} added you to {{space}}', i18nOpts)
             : props.t('{{author}} added {{user}} to {{space}}', i18nOpts),
+          action: (props.user.userId === notification.user.userId) ? 'added you' : 'added ' + i18nOpts.user,
+          sentenceEnding: 'to ' + i18nOpts.space,
           url: dashboardUrl
         }
         case TLM_EVENT.DELETED: return {
@@ -239,6 +268,8 @@ export class NotificationWall extends React.Component {
           text: props.user.userId === notification.user.userId
             ? props.t('{{author}} added you to {{space}}', i18nOpts)
             : props.t('{{author}} added {{user}} to {{space}}', i18nOpts),
+          action: (props.user.userId === notification.user.userId) ? 'added you' : 'added ' + i18nOpts.user,
+          sentenceEnding: 'to ' + i18nOpts.space,
           url: dashboardUrl
         }
       }
@@ -249,21 +280,29 @@ export class NotificationWall extends React.Component {
         case TLM_EVENT.CREATED: return {
           icon: 'university+plus',
           text: props.t('{{author}} created the space {{space}}', i18nOpts),
+          action: 'created',
+          sentenceEnding: 'the space ' + i18nOpts.space,
           url: dashboardUrl
         }
         case TLM_EVENT.MODIFIED: return {
           icon: 'university+history',
           text: props.t('{{author}} modified the space {{space}}', i18nOpts),
+          action: 'modified',
+          sentenceEnding: 'the space ' + i18nOpts.space,
           url: dashboardUrl
         }
         case TLM_EVENT.DELETED: return {
           icon: 'university+times',
           text: props.t('{{author}} deleted the space {{space}}', i18nOpts),
+          action: 'deleted',
+          sentenceEnding: 'the space ' + i18nOpts.space,
           url: dashboardUrl
         }
         case TLM_EVENT.UNDELETED: return {
           icon: 'university+undo',
           text: props.t('{{author}} restored the space {{space}}', i18nOpts),
+          action: 'restored',
+          sentenceEnding: 'the space ' + i18nOpts.space,
           url: dashboardUrl
         }
       }
@@ -273,6 +312,8 @@ export class NotificationWall extends React.Component {
       icon: 'bell',
       text: `${notification.author} ${notification.type}`,
       url: contentUrl,
+      action: notification.type,
+      sentenceEnding: '',
       emptyUrlMsg: props.t('This notification has no associated content'),
       msgType: 'warning'
     }
@@ -297,69 +338,102 @@ export class NotificationWall extends React.Component {
     }))
   }
 
-  render () {
+  componentDidUpdate (prevProps) {
     const { props, state } = this
+    if (props === prevProps) return
+    const notificationsGroupsByContentBySpace = []
+    let lastSpaceId = -1
+    let lastContentId = -1
 
-    if (!props.notificationPage.list) return null
+    const newKnownGroupIds = []
 
-    const notificationsGroupsByContentIdBySpaceId = {}
-    for (const notification of props.notificationPage.list) {
-      const spaceId = notification.workspace ? notification.workspace.id : '0'
-      const byContent = (
-        notificationsGroupsByContentIdBySpaceId[spaceId] || (
-          notificationsGroupsByContentIdBySpaceId[spaceId] = {
-            label: (
-              notification.workspace
-                ? notification.workspace.label
-                : '(instance)'
-            ),
-            id: spaceId,
-            byContent: {}
+    const setGroup = (group) => {
+      if (!group) return
+
+      for (const knownGroupId of state.knownGroupIds) {
+        for (const subGroup of group.list) {
+          for (const { notification } of subGroup.list) {
+            if (notification.id === knownGroupId) {
+              group.groupId = knownGroupId
+              return
+            }
           }
-        )
-      ).byContent
-      const [label, contentId] = (
+        }
+      }
+
+      newKnownGroupIds.push(group.groupId = group.list[0].list[0].notification.id)
+    }
+
+    for (const notification of props.notificationPage.list) {
+      const spaceLabel = (
+        notification.workspace
+          ? notification.workspace.label
+          : '(instance)'
+      )
+
+      const spaceId = (
+        notification.workspace
+          ? notification.workspace.id
+          : -1
+      )
+
+      const [contentLabel, contentId] = (
         notification.content
           ? getNotificationLabelAndId(notification)
           : ['(space)', 0]
       )
-      ;(
-        byContent[contentId] || (
-          byContent[contentId] = {
-            label: label,
-            id: contentId,
-            list: []
-          }
-        )
-      ).list.push(notification)
-    }
 
-    const notificationsGroupListByContentListBySpace = []
-    for (const notificationsGroupsByContentId of Object.values(notificationsGroupsByContentIdBySpaceId)) {
-      const notificationsGroupsByContent = []
-
-      for (const notificationsGroup of Object.values(notificationsGroupsByContentId.byContent)) {
-        notificationsGroupsByContent.push({
-          list: notificationsGroup.list.sort(
-            (a, b) => Number(b.id) - Number(a.id)
-          ),
-          id: notificationsGroup.id,
-          label: notificationsGroup.label
+      if (lastSpaceId !== spaceId || !notificationsGroupsByContentBySpace.length) {
+        setGroup(notificationsGroupsByContentBySpace[notificationsGroupsByContentBySpace.length - 1])
+        lastSpaceId = spaceId
+        lastContentId = -1
+        notificationsGroupsByContentBySpace.push({
+          label: spaceLabel,
+          id: spaceId,
+          list: []
         })
       }
-      notificationsGroupsByContent.sort((groupA, groupB) => groupB.list[0].id - groupA.list[0].id)
-      notificationsGroupListByContentListBySpace.push({
-        id: notificationsGroupsByContentId.id,
-        label: notificationsGroupsByContentId.label,
-        list: notificationsGroupsByContent
-      })
+
+      const spaceGroup = notificationsGroupsByContentBySpace[notificationsGroupsByContentBySpace.length - 1]
+
+      if (lastContentId !== contentId) {
+        lastContentId = contentId
+        spaceGroup.list.push({
+          label: contentLabel,
+          id: spaceId,
+          details: {
+            authors: [],
+            actions: [],
+            url: '',
+            icon: '',
+            isMention: false
+          },
+          list: []
+        })
+      }
+
+      const details = this.getNotificationDetails(notification)
+      const contentGroup = spaceGroup.list[spaceGroup.list.length - 1]
+      contentGroup.list.push({ notification, details })
+      if (notification.author) contentGroup.details.authors.unshift(notification.author)
+      if (details.action) contentGroup.details.actions.unshift(details.action)
+      if (details.icon) contentGroup.details.icon = details.icon
+      if (details.url) contentGroup.details.url = details.url
+      if (details.isMention) contentGroup.details.isMention = true
     }
 
-    notificationsGroupListByContentListBySpace.sort(
-      (groupOfGroupsA, groupOfGroupsB) => (
-        groupOfGroupsB.list[0].list[0].id - groupOfGroupsA.list[0].list[0].id
-      )
-    )
+    setGroup(notificationsGroupsByContentBySpace[notificationsGroupsByContentBySpace.length - 1])
+
+    this.setState(prev => ({
+      knownGroupIds: newKnownGroupIds.length ? [...prev.knownGroupIds, ...newKnownGroupIds] : prev.knownGroupIds,
+      notificationsGroupsByContentBySpace
+    }))
+  }
+
+  render () {
+    const { props, state } = this
+
+    if (!props.notificationPage.list) return null
 
     return (
       <div className={classnames('notification', { notification__wallClose: !props.isNotificationWallOpen })}>
@@ -380,75 +454,44 @@ export class NotificationWall extends React.Component {
         </PopinFixedHeader>
 
         <div className='notification__groups'>
-          {notificationsGroupListByContentListBySpace.map(({ label: spaceName, id: workspaceId, list: contentList }) => {
+          {state.notificationsGroupsByContentBySpace.map(({ label: spaceName, id: spaceId, groupId, list: contentList }) => {
             let spaceUnreadCount = 0
+            let spaceCount = 0
+
             for (const content of contentList) {
-              spaceUnreadCount += content.list.filter(notification => !notification.read).length
+              spaceUnreadCount += content.list.filter(({ notification }) => !notification.read).length
+              spaceCount += content.list.length
             }
 
             return (
-              <div className={'notification__group notification__group__' + (state.unfoldedNotificationGroup[workspaceId] ? 'un' : '') + 'folded'} key={spaceName}>
-                <Link onClick={() => this.toggleGroup(workspaceId)}>
-                  {spaceName}
-                  {spaceUnreadCount ? <b>{' (' + spaceUnreadCount + ')'}</b> : ''}
-                </Link>
+              <div className={'notification__group notification__group__' + (state.unfoldedNotificationGroup[groupId] ? 'un' : '') + 'folded'} key={groupId}>
+                <div class='notification__space_header'>
+                  <Link onClick={() => this.toggleGroup(groupId)}>{state.unfoldedNotificationGroup[groupId] ? '⌄' : '➤'}</Link>
+                  <span>
+                    {spaceCount + ' notifications in '}
+                    <Link to={PAGE.WORKSPACE.DASHBOARD(spaceId)}>
+                      {spaceName}
+                    </Link>
+                    {spaceUnreadCount ? <b>{' (' + spaceUnreadCount + ')'}</b> : ''}
+                  </span>
+                </div>
                 <div className='notification__groups'>
-                  {contentList.map(({ label: contentName, id: contentId, list: notificationList }) => {
-                    const contentUnreadCount = notificationList.filter(notification => !notification.read).length
-                    const groupId = workspaceId + '.' + contentId
-                    return (
-                      <div className={'notification__group notification__group__' + (state.unfoldedNotificationGroup[groupId] ? 'un' : '') + 'folded'} key={contentId}>
-                        <Link onClick={() => this.toggleGroup(groupId)}>
-                          {contentName}
-                          {contentUnreadCount ? <b>{' (' + contentUnreadCount + ')'}</b> : ''}
-                        </Link>
-                        <div className='notification__list'>
-                          {notificationList.map((notification, i) => {
-                            const notificationDetails = this.getNotificationDetails(notification)
-                            const icons = notificationDetails.icon.split('+')
-                            const icon = (
-                              icons.length === 1
-                                ? <i className={`fa fa-fw fa-${icons[0]}`} />
-                                : <ComposedIcon mainIcon={icons[0]} smallIcon={icons[1]} />
-                            )
+                  {contentList.map(({ list: detailsAndNotificationList, details }) => {
+                    if (detailsAndNotificationList.length === 1) {
+                      return this.renderNotication(props, detailsAndNotificationList[0].notification, detailsAndNotificationList[0].details, detailsAndNotificationList)
+                    }
 
-                            return (
-                              <ListItemWrapper
-                                isLast={i === props.notificationPage.list.length - 1}
-                                read={false}
-                                id={`${ANCHOR_NAMESPACE.notificationItem}:${notification.id}`}
-                                key={notification.id}
-                              >
-                                <Link
-                                  to={notificationDetails.url || '#'}
-                                  onClick={(e) => this.handleClickNotification(e, notification.id, notificationDetails)}
-                                  className={
-                                    classnames('notification__list__item', { itemRead: notification.read, isMention: notificationDetails.isMention })
-                                  }
-                                  key={notification.id}
-                                >
-                                  {icon}
-                                  <div className='notification__list__item__text'>
-                                    <Avatar publicName={notification.author} width={23} style={{ marginRight: '5px' }} />
-                                    <span
-                                      dangerouslySetInnerHTML={{
-                                        __html: (
-                                          notificationDetails.text + ' ' +
-                                          `<span title='${escapeHtml(formatAbsoluteDate(notification.created, props.user.lang))}'>` +
-                                            escapeHtml(displayDistanceDate(notification.created, props.user.lang)) +
-                                          '</span>'
-                                        )
-                                      }}
-                                    />
-                                  </div>
-                                  {!notification.read && <Link onClick={(e) => this.handleClickNotification(e, notification.id, notificationDetails, true)} className='notification__list__item__circle fa fa-circle' />}
-                                </Link>
-                              </ListItemWrapper>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )
+                    const authors = this.joinComma(details.authors)
+                    const actions = this.joinComma(details.actions)
+
+                    const mergedDetails = {
+                      text: authors + ' ' + actions + ' ' + detailsAndNotificationList[0].details.sentenceEnding + ' (' + detailsAndNotificationList.length + ')',
+                      icon: details.icon,
+                      url: details.url,
+                      isMention: details.isMention
+                    }
+
+                    return this.renderNotication(props, detailsAndNotificationList[0].notification, mergedDetails, detailsAndNotificationList)
                   })}
                 </div>
               </div>
@@ -466,6 +509,66 @@ export class NotificationWall extends React.Component {
           </div>
         )}
       </div>
+    )
+  }
+
+  joinComma (toJoin) {
+    const joined = []
+    for (const e of toJoin) {
+      if (!joined.includes(e)) {
+        joined.push(e)
+      }
+    }
+
+    if (joined.length > 1) {
+      const last = joined.pop()
+      const beforeLast = joined.pop()
+      joined.push(beforeLast + ' and ' + last)
+    }
+
+    return joined.join(', ')
+  }
+
+  renderNotication (props, notification, notificationDetails, relatedDetailsAndNotifications) {
+    const icons = notificationDetails.icon.split('+')
+    const icon = (
+      icons.length === 1
+        ? <i className={`fa fa-fw fa-${icons[0]}`} />
+        : <ComposedIcon mainIcon={icons[0]} smallIcon={icons[1]} />
+    )
+
+    const read = relatedDetailsAndNotifications.every(({ notification }) => notification.read)
+
+    return (
+      <ListItemWrapper
+        isLast
+        read={read}
+        id={`${ANCHOR_NAMESPACE.notificationItem}:${notification.id}`}
+        key={notification.id}
+      >
+        <Link
+          to={notificationDetails.url || '#'}
+          onClick={(e) => this.handleClickNotification(e, notificationDetails, relatedDetailsAndNotifications)}
+          className={classnames('notification__list__item', { itemRead: read, isMention: notificationDetails.isMention })}
+          key={notification.id}
+        >
+          {icon}
+          <div className='notification__list__item__text'>
+            <Avatar publicName={notification.author} width={23} style={{ marginRight: '5px' }} />
+            <span
+              dangerouslySetInnerHTML={{
+                __html: (
+                  notificationDetails.text + ' ' +
+                  `<span title='${escapeHtml(formatAbsoluteDate(notification.created, props.user.lang))}'>` +
+                  escapeHtml(displayDistanceDate(notification.created, props.user.lang)) +
+                  '</span>'
+                )
+              }}
+            />
+          </div>
+          {!read && <Link onClick={(e) => this.handleClickNotification(e, notificationDetails, relatedDetailsAndNotifications, true)} className='notification__list__item__circle fa fa-circle' />}
+        </Link>
+      </ListItemWrapper>
     )
   }
 }

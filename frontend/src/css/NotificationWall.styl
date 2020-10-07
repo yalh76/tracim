@@ -15,6 +15,12 @@
   max-width 600px
   overflow hidden
   transition 0.5s
+  &__space_header
+    display flex
+    & > :first-child
+      min-width 2em
+    & > :last-child
+      flex 1
   &__header
     border-bottom 1px solid grey
     & div
@@ -71,23 +77,8 @@
     width 100%
     display flex
   &__group__folded
-    > a:first-child
-      display:block
-    > a:first-child:before
-      content " ➤ "
-      padding-left 1ex
-      padding-right 1ex
-      display inline-block
     > .notification__list, > .notification__groups
       display none
-  &__group__unfolded
-    > a:first-child
-      display:block
-    > a:first-child:before
-      content: " ⌄ "
-      padding-left 1ex
-      padding-right 1ex
-      display inline-block
   &__groups
     flex 1
     overflow auto
