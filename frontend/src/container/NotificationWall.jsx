@@ -468,7 +468,7 @@ export class NotificationWall extends React.Component {
                 <div class='notification__space_header'>
                   <Link onClick={() => this.toggleGroup(groupId)}>{state.unfoldedNotificationGroup[groupId] ? '⌄' : '➤'}</Link>
                   <span>
-                    {spaceCount + ' notifications in '}
+                    {spaceCount + ' notification' + (spaceCount === 1 ? '' : 's') + ' in '}
                     <Link to={PAGE.WORKSPACE.DASHBOARD(spaceId)}>
                       {spaceName}
                     </Link>
