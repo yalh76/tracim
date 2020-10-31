@@ -49,8 +49,7 @@ module.exports = {
         ],
         plugins: [
           '@babel/plugin-proposal-object-rest-spread',
-          '@babel/plugin-proposal-class-properties',
-          '@babel/plugin-transform-object-assign'
+          '@babel/plugin-proposal-class-properties'
         ]
       },
       exclude: [/node_modules/]
