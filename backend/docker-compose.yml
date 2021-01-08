@@ -52,7 +52,7 @@ services:
       MYSQL_DATABASE: ${DATABASE_NAME}
       MYSQL_USER: user
       MYSQL_PASSWORD: secret
-      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+      MYSQL_ROOT_PASSWORD: secret
     tmpfs:
       - ${TMPFS_DIR}
     command:
