@@ -3,6 +3,7 @@ import os
 import pathlib
 import subprocess
 import typing
+import urllib.parse
 
 from depot.manager import DepotManager
 import plaster
@@ -10,8 +11,12 @@ from pyramid import testing
 import pytest
 import requests
 from sqlalchemy import text
+from sqlalchemy.event import listen
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import Session
+from sqlalchemy.pool import Pool
 import transaction
 from webtest import TestApp
 
@@ -53,58 +58,63 @@ from tracim_backend.tests.utils import WorkspaceApiFactory
 from tracim_backend.tests.utils import find_free_port
 from tracim_backend.tests.utils import tracim_plugin_loader
 
+DATABASE_USER = "user"
+DATABASE_PASSWORD = "secret"
+DEFAULT_DATABASE_NAME = "tracim_test"
 
-@pytest.fixture
-def sqlalchemy_url(sqlalchemy_database, tmp_path, worker_id) -> str:
-    default_db_name = "tracim_test"
-    db_name = "{}__{}".format(default_db_name, worker_id)
-    username = "user"
-    password = "secret"
-    DATABASE_URLS = {
-        "sqlite": "sqlite:////{path}/{name}.sqlite".format(path=str(tmp_path), name=db_name),
-        "mysql": "mysql+pymysql://{username}:{password}@localhost:3306/{name}".format(
-            name=db_name, username=username, password=password
-        ),
-        "mariadb": "mysql+pymysql://{username}:{password}@localhost:3307/{name}".format(
-            name=db_name, username=username, password=password
-        ),
-        "postgresql": "postgresql://{username}:{password}@localhost:5432/{name}?client_encoding=utf8".format(
-            name=db_name, username=username, password=password
-        ),
-    }
 
-    # create the database for server-based DB
-    if sqlalchemy_database == "postgresql":
+def create_database(url) -> None:
+    """
+    Create the database for server-based DB
+    """
+    u = urllib.parse.urlparse(url)
+    if u.scheme == "postgresql":
         import psycopg2
         from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
         conn = psycopg2.connect(
-            "host=localhost dbname={dbname} user={username} password={password}".format(
-                dbname=default_db_name, username=username, password=password
+            "host=localhost port={port} dbname={dbname} user={username} password={password}".format(
+                dbname=DEFAULT_DATABASE_NAME,
+                port=u.port,
+                username=DATABASE_USER,
+                password=DATABASE_PASSWORD,
             )
         )
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cursor = conn.cursor()
-        try:
-            cursor.execute("CREATE DATABASE {}".format(db_name))
-        except Exception:
-            pass
-    elif sqlalchemy_database in ("mysql", "mariadb"):
+        cursor.execute("CREATE DATABASE {}".format(u.path[1:]))
+    elif u.scheme in ("mysql", "mariadb"):
         import pymysql
 
-        port = 3306 if sqlalchemy_database == "mysql" else 3307
         conn = pymysql.connect(
-            host="localhost", port=port, user="root", password=password, db=default_db_name
+            host="localhost",
+            port=u.port,
+            user="root",
+            password=DATABASE_PASSWORD,
+            db=DEFAULT_DATABASE_NAME,
         )
         cursor = conn.cursor()
-        try:
-            cursor.execute("CREATE DATABASE {}".format(db_name))
-            cursor.execute(
-                "GRANT ALL ON {db_name}.* TO {user}".format(db_name=db_name, user=username)
-            )
-        except Exception:
-            pass
+        cursor.execute("CREATE DATABASE {}".format(u.path[1:]))
+        cursor.execute(
+            "GRANT ALL ON {db_name}.* TO {user}".format(db_name=u.path[1:], user=DATABASE_USER)
+        )
 
+
+@pytest.fixture()
+def sqlalchemy_url(sqlalchemy_database, tmp_path, worker_id) -> str:
+    db_name = "{}__{}".format(DEFAULT_DATABASE_NAME, worker_id)
+    DATABASE_URLS = {
+        "sqlite": "sqlite:////{path}/{name}.sqlite".format(path=str(tmp_path), name=db_name),
+        "mysql": "mysql+pymysql://{username}:{password}@localhost:3306/{name}".format(
+            name=db_name, username=DATABASE_USER, password=DATABASE_PASSWORD
+        ),
+        "mariadb": "mysql+pymysql://{username}:{password}@localhost:3307/{name}".format(
+            name=db_name, username=DATABASE_USER, password=DATABASE_PASSWORD
+        ),
+        "postgresql": "postgresql://{username}:{password}@localhost:5432/{name}?client_encoding=utf8".format(
+            name=db_name, username=DATABASE_USER, password=DATABASE_PASSWORD
+        ),
+    }
     return DATABASE_URLS[sqlalchemy_database]
 
 @pytest.fixture
@@ -185,7 +195,6 @@ def tracim_webserver(
         except Exception:
             process.kill()
     session_factory.close_all()
-    DeclarativeBase.metadata.drop_all(engine)
 
 
 @pytest.fixture
@@ -210,13 +219,13 @@ def settings(config_uri, config_section, sqlalchemy_url, tmp_path, worker_id):
     _settings = plaster.get_settings(config_uri, config_section)
     _settings["here"] = str(tmp_path)
     for path_setting in (
-        "uploaded_files_storage_path",
-        "caldav_storage_dir",
-        "preview_cache_dir",
-        "sessions_data_root_dir",
+        "uploaded_files.storage.local.storage_path",
+        "basic_setup.caldav_storage_dir",
+        "basic_setup.preview_cache_dir",
+        "basic_setup.sessions_data_root_dir",
     ):
         (tmp_path / path_setting).mkdir()
-        _settings["basic_setup.{}".format(path_setting)] = str(tmp_path / path_setting)
+        _settings[path_setting] = str(tmp_path / path_setting)
     _settings["uploaded_files.storage.s3.bucket"] = worker_id
 
     port = find_free_port()
@@ -273,12 +282,32 @@ def engine(config, app_config):
     init_models(config, app_config)
     from tracim_backend.models.setup_models import get_engine
 
-    if app_config.SQLALCHEMY__URL.startswith("sqlite"):
+    is_sqlite = app_config.SQLALCHEMY__URL.startswith("sqlite")
+    if is_sqlite:
         isolation_level = "SERIALIZABLE"
+
+        def no_journal(dbapi_con, connection_record):
+            dbapi_con.execute("PRAGMA JOURNAL_MODE=OFF")
+
+        listen(Pool, "connect", no_journal)
     else:
         isolation_level = "READ_COMMITTED"
-    engine = get_engine(app_config, isolation_level=isolation_level, pool_pre_ping=True)
+    try:
+        engine = get_engine(app_config, isolation_level=isolation_level, pool_pre_ping=True)
+        DeclarativeBase.metadata.create_all(engine, checkfirst=True)
+    except OperationalError:
+        engine.dispose()
+        create_database(app_config.SQLALCHEMY__URL)
+        engine = get_engine(app_config, isolation_level=isolation_level, pool_pre_ping=True)
+        DeclarativeBase.metadata.create_all(engine)
     yield engine
+    connection = engine.connect()
+    with connection.begin():
+        try:
+            for table in reversed(DeclarativeBase.metadata.sorted_tables):
+                connection.execute(table.delete())
+        except (OperationalError, ProgrammingError):
+            pass
     engine.dispose()
 
 
@@ -333,19 +362,10 @@ def test_context_without_plugins(app_config, session_factory):
 @pytest.fixture
 def session(request, engine, session_factory, app_config, test_logger, test_context):
     context = test_context
-    with transaction.manager:
-        try:
-            DeclarativeBase.metadata.drop_all(engine)
-            DeclarativeBase.metadata.create_all(engine)
-        except Exception as e:
-            transaction.abort()
-            raise e
     yield context.dbsession
-
     context.dbsession.rollback()
     context.dbsession.close_all()
     transaction.abort()
-    DeclarativeBase.metadata.drop_all(engine)
 
 
 @pytest.fixture

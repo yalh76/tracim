@@ -97,7 +97,7 @@ _backend_quick_test: &_backend_quick_test
     # quick tests need redis to run (!!)
     - docker-compose up -d redis
   script:
-    - pytest --ignore "tracim_backend/tests/functional" --ignore "tracim_backend/tests/commands"
+    - pytest -mquick
 
 _backend_test: &_backend_test
   <<: *_install_backend
