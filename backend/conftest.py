@@ -19,3 +19,7 @@ def pytest_collection_modifyitems(items):
     for item in items:
         if "tests/functional" not in item.nodeid and "tests/command" not in item.nodeid:
             item.add_marker(pytest.mark.quick)
+        if "mailhog" in item.fixturenames:
+            item.add_marker(pytest.mark.mail)
+        if "elasticsearch" in item.fixturenames:
+            item.add_marker(pytest.mark.elasticsearch)
