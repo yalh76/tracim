@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-import pathlib
-
-from depot.io.utils import FileIntent
+# from depot.io.utils import FileIntent
 import transaction
 
 from tracim_backend.app_models.contents import content_type_list
@@ -136,9 +134,6 @@ class Content(Fixture):
             do_save=False,
             do_notify=False,
         )
-        apple_pie_recipe.file_extension = ".png"
-        with open(pathlib.Path(__file__).parent / "white.png", "rb") as f:
-            apple_pie_recipe.depot_file = FileIntent(f.read(), "apple_Pie.png", "image/png")
         self._session.add(apple_pie_recipe)
         brownie_recipe = content_api.create(
             content_type_slug=content_type_list.File.slug,
@@ -148,9 +143,6 @@ class Content(Fixture):
             do_save=False,
             do_notify=False,
         )
-        brownie_recipe.file_extension = ".png"
-        with open(pathlib.Path(__file__).parent / "black.png", "rb") as f:
-            brownie_recipe.depot_file = FileIntent(f.read(), "brownie_recipe.png", "image/png")
         self._session.add(brownie_recipe)
         fruits_desserts_folder = content_api.create(
             content_type_slug=content_type_list.Folder.slug,

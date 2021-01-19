@@ -76,10 +76,10 @@ def small_html_document_c(workspace_api_factory, content_api_factory, session) -
     return small_html_document(workspace_api_factory, content_api_factory, session, "C")
 
 
-def put_document(doc, pushpin_base):
+def put_document(doc, pushpin_base_url):
     update_user_request = requests.put(
         "{}/api/workspaces/{}/html-documents/{}/status".format(
-            pushpin_base, doc.workspace_id, doc.content_id
+            pushpin_base_url, doc.workspace_id, doc.content_id
         ),
         auth=("admin@admin.admin", "admin@admin.admin"),
         json={"status": "closed-validated"},
@@ -159,9 +159,8 @@ class TestLiveMessages(object):
         assert "code" in res.json_body
         assert res.json_body["code"] == ErrorCode.GENERIC_SCHEMA_VALIDATION_ERROR
 
-    @pytest.mark.pushpin
     def test_api__user_live_messages_endpoint_with_GRIP_proxy__ok__nominal_case(
-        self, pushpin, app_config
+        self, pushpin_base_url, app_config
     ):
         with messages_stream_client(base_url=pushpin) as client_events:
             LiveMessagesLib(config=app_config).publish_dict("user_1", {"test_message": "example"})
@@ -169,10 +168,10 @@ class TestLiveMessages(object):
         assert json.loads(event.data) == {"test_message": "example"}
         assert event.event == "message"
 
-    @pytest.mark.pushpin
+
     @pytest.mark.parametrize("config_section", [{"name": "functional_live_test"}], indirect=True)
     def test_api__user_live_messages_endpoint_with_GRIP_proxy__ok__user_update(
-        self, pushpin, app_config
+        self, pushpin_base_url, app_config
     ):
         params = {"public_name": "updated", "timezone": "Europe/London", "lang": "en"}
         with messages_stream_client(base_url=pushpin) as client_events:
@@ -220,7 +219,7 @@ class TestLiveMessages(object):
         "config_section", [{"name": "functional_async_live_test"}], indirect=True
     )
     def test_api__user_live_messages_endpoint_with_GRIP_proxy__ok__user_update__async(
-        self, pushpin, app_config, rq_database_worker
+        self, pushpin_base_url, app_config, rq_database_worker
     ):
 
         with messages_stream_client(base_url=pushpin) as client_events:
@@ -244,7 +243,6 @@ class TestLiveMessages(object):
         assert result["fields"]["author"]["user_id"] == 1
         assert event.event == "message"
 
-    @pytest.mark.pushpin
     @pytest.mark.parametrize(
         "config_section", [{"name": "functional_async_live_test"}], indirect=True
     )
@@ -286,7 +284,6 @@ class TestLiveMessages(object):
                 assert_mention_event(event)
 
 
-    @pytest.mark.pushpin
     @pytest.mark.parametrize(
         "config_section", [{"name": "functional_async_live_test"}], indirect=True
     )
@@ -298,7 +295,6 @@ class TestLiveMessages(object):
         big_html_document,
         rq_database_worker,
     ):
-
         with messages_stream_client(base_url=pushpin) as client_events:
             status = put_document(big_html_document)
             assert status == 204
@@ -306,13 +302,12 @@ class TestLiveMessages(object):
         result = json.loads(event.data)
         assert result["event_type"] == "content.modified.html-document"
 
-    @pytest.mark.pushpin
     @pytest.mark.parametrize(
         "config_section", [{"name": "functional_async_live_test"}], indirect=True
     )
     def test_api__user_live_messages_endpoint_with_GRIP_proxy__ok__after_event_id(
         self,
-        pushpin,
+        pushpin_base_url,
         app_config,
         small_html_document_a,
         small_html_document_b,
@@ -338,9 +333,8 @@ class TestLiveMessages(object):
             event3 = next(client_events)
             assert json.loads(event3.data)["fields"]["content"]["label"] == "Small document C"
 
-    @pytest.mark.pushpin
     def test_api__user_live_messages_endpoint_with_GRIP_proxy__ok__disconnect(
-        self, pushpin, app_config
+        self, pushpin_base_url, app_config
     ):
         with messages_stream_client(base_url=pushpin) as client_events:
             requests.post(
@@ -350,6 +344,7 @@ class TestLiveMessages(object):
 
             with pytest.raises(StopIteration):
                 next(client_events)
+
 
     @pytest.mark.pushpin
     @pytest.mark.parametrize(

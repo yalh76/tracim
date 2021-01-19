@@ -13,9 +13,6 @@ from tracim_backend.lib.mail_notifier.sender import EmailSender
 from tracim_backend.lib.mail_notifier.utils import EmailAddress
 from tracim_backend.lib.mail_notifier.utils import EmailNotificationMessage
 from tracim_backend.lib.mail_notifier.utils import SmtpConfiguration
-from tracim_backend.lib.rq import RqQueueName
-from tracim_backend.lib.rq import get_redis_connection
-from tracim_backend.lib.rq import get_rq_queue
 from tracim_backend.tests.fixtures import *  # noqa: F403,F40
 
 
@@ -257,7 +254,7 @@ class TestNotificationsSync(object):
 @pytest.mark.parametrize("config_section", [{"name": "mail_test_async"}], indirect=True)
 class TestNotificationsAsync(object):
     def test_func__create_user_with_mail_notification__ok__nominal_case(
-        self, mailhog, user_api_factory, app_config
+        self, mailhog, user_api_factory, app_config, rq_mail_sender_worker: SimpleWorker
     ):
         api = user_api_factory.get(current_user=None)
         u = api.create_user(
@@ -275,10 +272,7 @@ class TestNotificationsAsync(object):
         assert u.timezone == "+2"
 
         # Send mail async from redis queue
-        redis = get_redis_connection(app_config)
-        queue = get_rq_queue(redis, RqQueueName.MAIL_SENDER)
-        worker = SimpleWorker([queue], connection=queue.connection)
-        worker.work(burst=True)
+        rq_mail_sender_worker.work(burst=True)
         # check mail received
         response = mailhog.get_mailhog_mails()
         headers = response[0]["Content"]["Headers"]
@@ -294,6 +288,7 @@ class TestNotificationsAsync(object):
         mailhog,
         app_config,
         content_type_list,
+        rq_mail_sender_worker: SimpleWorker,
     ):
         uapi = user_api_factory.get(current_user=None)
         current_user = uapi.get_one_by_email("admin@admin.admin")
@@ -311,10 +306,7 @@ class TestNotificationsAsync(object):
             content_type_list.File.slug, workspace, item, "file1", do_save=True, do_notify=True
         )
         # Send mail async from redis queue
-        redis = get_redis_connection(app_config)
-        queue = get_rq_queue(redis, RqQueueName.MAIL_SENDER)
-        worker = SimpleWorker([queue], connection=queue.connection)
-        worker.work(burst=True)
+        rq_mail_sender_worker.work(burst=True)
         # check mail received
         response = mailhog.get_mailhog_mails()
         headers = response[0]["Content"]["Headers"]
@@ -327,16 +319,15 @@ class TestNotificationsAsync(object):
             == '"Bob i. & all members of Recipes" <test_user_reply+22@localhost>'
         )
 
-    def test_func__reset_password__ok__nominal_case(self, user_api_factory, mailhog, app_config):
+    def test_func__reset_password__ok__nominal_case(
+        self, user_api_factory, mailhog, app_config, rq_mail_sender_worker: SimpleWorker
+    ):
         uapi = user_api_factory.get()
         current_user = uapi.get_one_by_email("admin@admin.admin")
         uapi.reset_password_notification(current_user, do_save=True)
         transaction.commit()
         # Send mail async from redis queue
-        redis = get_redis_connection(app_config)
-        queue = get_rq_queue(redis, RqQueueName.MAIL_SENDER)
-        worker = SimpleWorker([queue], connection=queue.connection)
-        worker.work(burst=True)
+        rq_mail_sender_worker.work(burst=True)
         # check mail received
         response = mailhog.get_mailhog_mails()
         headers = response[0]["Content"]["Headers"]
