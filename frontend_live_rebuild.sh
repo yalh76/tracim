@@ -69,13 +69,12 @@ quit () {
     done
 }
 
-wait_modified_file () {
+list_modified_paths () {
     # returns the path of the file that has been changed
-    inotifywait -q -r -e "close_write,modify,create,move,delete" \
+    inotifywait -m -q -r -e "close_write,modify,create,move,moved_from,moved_to,delete" \
         "src" \
         "package.json" \
-        "webpack.config.js" \
-    | cut -d' ' -f3
+        "webpack.config.js"
 }
 
 patch_optimized_webpack_config () {
@@ -92,7 +91,9 @@ patch_optimized_webpack_config () {
 patch_optimized_webpack_configs () {
     cd "$TRACIM_DIR"
     for i in frontend frontend_*; do
-        patch_optimized_webpack_config "$i"
+        if [ -d "$i" ]; then
+            patch_optimized_webpack_config "$i"
+        fi
     done
 }
 
@@ -108,25 +109,33 @@ restore_optimized_webpack_config () {
 restore_optimized_webpack_configs () {
     cd "$TRACIM_DIR"
     for i in frontend frontend_*; do
-        restore_optimized_webpack_config "$i"
+        if [ -d "$i" ]; then
+            restore_optimized_webpack_config "$i"
+        fi
     done
 }
 
-
 watch_frontend_component () {
     component="$1"
+    echo watching $component
     cd "$TRACIM_DIR/$component"
     while true; do
-        if ! [[ "$(wait_modified_file)" == .* ]]; then
-            show_msg "Recompiling $component..."
-            patch_optimized_webpack_config "$component"
-            if [ -f ./build_*.sh ]; then
-                ./build_*.sh -d && ok "$component" || err "$component"
-            else
-                yarn buildoptimized-dev && ok "$component" || err "$component"
+        list_modified_paths | while read line; do
+            modified_filename="$(echo "$line" | cut -d' ' -f3)"
+            if ! [[ "$modified_filename" == .* ]]; then
+                echo "Modified file: $modified_filename"
+                show_msg "Recompiling $component..."
+                patch_optimized_webpack_config "$component"
+                if [ -f ./build_*.sh ]; then
+                    ./build_*.sh -d && ok "$component" || err "$component"
+                else
+                    yarn buildoptimized-dev && ok "$component" || err "$component"
+                fi
+                restore_optimized_webpack_config "$component"
+#                 exec 0<&-
+                break
             fi
-            restore_optimized_webpack_config "$component"
-        fi
+        done
     done
 }
 
@@ -174,14 +183,17 @@ watch_frontend_components () {
     echo "Watching modifications in each frontend component..."
     cd "$TRACIM_DIR"
     for i in frontend frontend_*; do
-#         printf " %s" "$i"
-        watch_frontend_component "$i" &
-        children_pid+=($!)
+        if [ -d "$i" ]; then
+            watch_frontend_component "$i" &
+            children_pid+=($!)
+        fi
     done
 
     cd "$TRACIM_DIR"
     for i in frontend frontend_*; do
-        wait
+        if [ -d "$i" ]; then
+            wait
+        fi
     done
 }
 
