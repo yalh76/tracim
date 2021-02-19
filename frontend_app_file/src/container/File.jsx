@@ -972,7 +972,7 @@ export class File extends React.Component {
           customColor={state.config.hexcolor}
           faIcon={state.config.faIcon}
           rawTitle={state.content.label}
-          componentTitle={<span>{state.content.label} <Badge text={state.content.file_extension} /></span>}
+          componentTitle={<span><span className="textTitle">{state.content.label}</span><span><Badge text={state.content.file_extension} /></span></span>}
           userRoleIdInWorkspace={state.loggedUser.userRoleIdInWorkspace}
           onClickCloseBtn={this.handleClickBtnCloseApp}
           onValidateChangeTitle={this.handleSaveEditTitle}
