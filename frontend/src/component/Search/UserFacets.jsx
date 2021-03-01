@@ -29,6 +29,12 @@ export class UserFacets extends React.Component {
   render () {
     const { props, state } = this
 
+    const USER_FIELD_LIST = [
+      { slug: 'public_name', value: i18n.t('Full name') },
+      { slug: 'userame', value: i18n.t('Username') },
+      { slug: 'custom_properties', value: i18n.t('Profile') }
+    ]
+
     const workspaceNames = (props.searchFacets.workspaces || []).map(
       workspace => ({
         value: workspace.value.label,

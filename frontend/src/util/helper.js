@@ -43,12 +43,6 @@ export const ADVANCED_SEARCH_FILTER = {
   SEARCH_FACETS: 'searchFacets'
 }
 
-export const USER_FIELD_LIST = [
-  { slug: 'public_name', value: i18n.t('Full name') },
-  { slug: 'userame', value: i18n.t('Username') },
-  { slug: 'profile', value: i18n.t('Public profile') }
-]
-
 export const CONTENT_FIELD_LIST = [
   { slug: 'label', value: i18n.t('Title') },
   { slug: 'raw_content', value: i18n.t('Content') },
