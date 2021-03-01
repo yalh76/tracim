@@ -4,6 +4,7 @@ import { translate } from 'react-i18next'
 import PropTypes from 'prop-types'
 import { Icon } from 'tracim_frontend_lib'
 import DateFilter from '../component/Search/DateFilter.jsx'
+import UserFacets from '../component/Search/UserFacets.jsx'
 import ContentFacets from '../component/Search/ContentFacets.jsx'
 import SpaceFacets from '../component/Search/SpaceFacets.jsx'
 import CheckboxFilter from '../component/Search/CheckboxFilter.jsx'
@@ -249,6 +250,14 @@ export class SearchFilterMenu extends React.Component {
               )}
             </>
           )}
+          {props.searchType === ADVANCED_SEARCH_TYPE.USER && currentSearch.searchFacets && (
+            <UserFacets
+              searchFacets={currentSearch.searchFacets}
+              onChangeSearchFacets={(facetObject) => props.onChangeSearchFacets(facetObject)}
+              appliedFilters={currentSearch.appliedFilters.searchFacets || {}}
+            />
+          )}
+
           {props.searchType === ADVANCED_SEARCH_TYPE.CONTENT && currentSearch.searchFacets && (
             <ContentFacets
               searchFacets={currentSearch.searchFacets}
