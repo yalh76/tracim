@@ -140,7 +140,7 @@ stop() {
 }
 
 wait_build() {
-    if ! wait -n 1; then
+    if ! wait -n; then
         stop
     fi
 }
