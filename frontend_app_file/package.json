@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@lourenci/react-kanban": "^2.1.0",
     "classnames": "^2.2.6",
     "color": "^3.1.2",
     "core-js": "^3.6.4",
@@ -30,6 +31,7 @@
     "react-image-lightbox": "^5.1.0",
     "regenerator-runtime": "^0.13.2",
     "tracim_frontend_lib": "^1.1.9",
+    "uuid": "^8.1.0",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11"
   },
