@@ -39,6 +39,7 @@ if (!global.window && !global.document) {
   global.GLOBAL_excludedNotifications = []
   global.DOMParser = window.DOMParser
   global.Element = window.Element
+  global.FormData = window.FormData
 }
 
 Enzyme.configure({ adapter: new Adapter() })
