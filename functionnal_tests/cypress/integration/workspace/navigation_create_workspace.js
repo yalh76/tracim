@@ -53,7 +53,7 @@ describe('navigate :: create_new > workspace', function () {
     cy.get('.cardPopup__container .newSpace__input')
       .should('be.visible')
       .and('have.attr', 'value', 'Space name')
-    cy.get('.cardPopup__container .cardPopup__close button')
+    cy.get('.cardPopup__container .cardPopup__close')
       .should('be.visible')
       .click()
     cy.get('.cardPopup__container .newSpace__title')
