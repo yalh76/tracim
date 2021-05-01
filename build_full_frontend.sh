@@ -40,6 +40,12 @@ build_tracim_lib() {
     yarn workspace tracim_frontend_lib run buildtracimlib$dev > /dev/null && loggood "Built tracim_frontend_lib for unit tests" || logerror "Could not build tracim_frontend_lib"
 }
 
+build_vendors_list() {
+    if vendors_outdated list.js; then
+        yarn workspace tracim_frontend_vendors run build-list > /dev/null
+    fi
+}
+
 fake_lib_presence() {
     touch frontend_lib/dist/tracim_frontend_lib.lib.js
 }
@@ -58,12 +64,23 @@ parallel_build_lib() {
     fi
 }
 
+vendors_outdated() {
+    [ ! -e "frontend_vendors/dist/$1" ] || [ "$(ls -t "frontend_vendors/package.json" frontend_vendors/webpack.* "frontend_vendors/dist/$1"  | head -n1)" != "frontend_vendors/dist/$1" ]
+}
+
 build_vendors() {
-    # Tracim vendors
     log "Building tracim_frontend_vendors"
-    cd frontend_vendors
-    ./build_vendors.sh "$appdev" > /dev/null && loggood "Built tracim_frontend_vendors successfully" || logerror "Could not build tracim_frontend_vendors"
-    cd ..
+    if [ -n "$dev" ]; then
+        if vendors_outdated tracim_frontend_vendors.dev.js; then
+            NODE_ENV=development yarn workspace tracim_frontend_vendors run webpack-cli > /dev/null
+        fi
+        cp -lf frontend_vendors/dist/tracim_frontend_vendors.dev.js frontend/dist/app/tracim_frontend_vendors.js || logerror "Could not install frontend_vendors"
+    else
+        if vendors_outdated tracim_frontend_vendors.js; then
+            NODE_ENV=production yarn workspace tracim_frontend_vendors run webpack-cli > /dev/null
+        fi
+        cp -lf frontend_vendors/dist/tracim_frontend_vendors.js frontend/dist/app/tracim_frontend_vendors.js || logerror "Could not install frontend_vendors"
+    fi
 }
 
 build_app() {
@@ -166,8 +183,9 @@ mkdir -p "frontend/dist/app" || logerror "Failed to make directory frontend/dist
 
 trap stop SIGINT SIGTERM
 
-build_vendors
 init_parallel
+run_with_lock build_vendors
+build_vendors_list
 fake_lib_presence
 parallel_build_lib
 build_apps
