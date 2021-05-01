@@ -37,7 +37,11 @@ logerror() {
 }
 
 build_tracim_lib() {
-    yarn workspace tracim_frontend_lib run build$dev > /dev/null && loggood "Built tracim_frontend_lib for unit tests" || logerror "Could not build tracim_frontend_lib"
+    yarn workspace tracim_frontend_lib run buildtracimlib$dev > /dev/null && loggood "Built tracim_frontend_lib for unit tests" || logerror "Could not build tracim_frontend_lib"
+}
+
+fake_lib_presence() {
+    touch frontend_lib/dist/tracim_frontend_lib.lib.js
 }
 
 build_frontend() {
@@ -46,7 +50,7 @@ build_frontend() {
 }
 
 parallel_build_lib() {
-    log "Building tracim_frontend_lib for unit tests"
+    log "Building tracim_frontend_lib"
     if [ "$PARALLEL_BUILD" = 1 ]; then
         build_tracim_lib
     else
@@ -54,28 +58,12 @@ parallel_build_lib() {
     fi
 }
 
-wait_for_lib_build_to_end() {
-    if [ "$PARALLEL_BUILD" != 1 ]; then
-        # We need to wait for the build of tracim_frontend_lib for unit tests to finish
-        wait_build
-    fi
-}
-
 build_vendors() {
     # Tracim vendors
     log "Building tracim_frontend_vendors"
     cd frontend_vendors
-    ./build_vendors.sh > /dev/null && loggood "Built tracim_frontend_vendors successfully" || logerror "Could not build tracim_frontend_vendors"
+    ./build_vendors.sh "$appdev" > /dev/null && loggood "Built tracim_frontend_vendors successfully" || logerror "Could not build tracim_frontend_vendors"
     cd ..
-    # RJ - 2020-06-11 - we do not build the vendors in development mode by default
-    # even if -d was passed to this script, since it produce a huge file that is slow to load in the browser.
-    # If you ever need to debug something in the vendors, go to the frontend_vendors directory and run ./build_vendors.sh -d
-}
-
-build_lib_using_externals() {
-    # Tracim Lib for the browsers
-    log "Building tracim_frontend_lib for Tracim"
-    yarn workspace tracim_frontend_lib run buildoptimized$dev > /dev/null && loggood "Built tracim_frontend_lib for Tracim successfully" || logerror "Failed to build tracim_frontend_lib for Tracim"
 }
 
 build_app() {
@@ -178,11 +166,10 @@ mkdir -p "frontend/dist/app" || logerror "Failed to make directory frontend/dist
 
 trap stop SIGINT SIGTERM
 
-init_parallel
-parallel_build_lib
 build_vendors
-build_lib_using_externals
-wait_for_lib_build_to_end
+init_parallel
+fake_lib_presence
+parallel_build_lib
 build_apps
 build_frontend
 
