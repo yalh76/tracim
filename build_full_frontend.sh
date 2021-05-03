@@ -70,17 +70,14 @@ vendors_outdated() {
 
 build_vendors() {
     log "Building tracim_frontend_vendors"
-    if [ -n "$dev" ]; then
-        if vendors_outdated tracim_frontend_vendors.dev.js; then
+    if vendors_outdated tracim_frontend_vendors.js; then
+        if [ -n "$dev" ]; then
             NODE_ENV=development yarn workspace tracim_frontend_vendors run webpack-cli > /dev/null
-        fi
-        cp -lf frontend_vendors/dist/tracim_frontend_vendors.dev.js frontend/dist/app/tracim_frontend_vendors.js || logerror "Could not install frontend_vendors"
-    else
-        if vendors_outdated tracim_frontend_vendors.js; then
+        else
             NODE_ENV=production yarn workspace tracim_frontend_vendors run webpack-cli > /dev/null
         fi
-        cp -lf frontend_vendors/dist/tracim_frontend_vendors.js frontend/dist/app/tracim_frontend_vendors.js || logerror "Could not install frontend_vendors"
     fi
+    cp -lf frontend_vendors/dist/tracim_frontend_vendors.js frontend/dist/app/tracim_frontend_vendors.js || logerror "Could not install frontend_vendors"
 }
 
 build_app() {
