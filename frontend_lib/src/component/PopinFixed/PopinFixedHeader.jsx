@@ -3,16 +3,64 @@ import classnames from 'classnames'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
 import { ROLE } from '../../helper.js'
-// import { DropdownMenu } from '../DropdownMenu/DropdownMenu.jsx'
+import DropdownMenu from '../DropdownMenu/DropdownMenu.jsx'
+import FavoriteButton from '../Button/FavoriteButton.jsx'
+import FAVORITE_STATE from '../Button/FavoriteButton.jsx'
+import { appContentFactory } from '../../appContentFactory.js'
+import { getLocalStorageItem } from '../../localStorage.js'
+import { LOCAL_STORAGE_FIELD } from '../../localStorage.js'
+import { debug } from '../../debug.js'
 
 class PopinFixedHeader extends React.Component {
   constructor (props) {
     super(props)
+
+    const param = props.data || debug
+    props.setApiUrl(param.config.apiUrl)
+
     this.state = {
       editTitle: false,
-      editTitleValue: props.rawTitle
+      editTitleValue: props.rawTitle,
+      config: param.config,
+      loggedUser: param.loggedUser,
+      content: param.content
     }
   }
+
+  async componentDidMount () {
+    // console.log('%c<File> did mount', `color: ${this.state.config.hexcolor}`)
+    this.updateTimelineAndContent()
+    this.props.loadFavoriteContentList(this.state.loggedUser, this.setState.bind(this))
+  }
+
+  async updateTimelineAndContent (pageToLoad = null) {
+    this.setState({
+      newComment: getLocalStorageItem(
+        this.state.appName,
+        this.state.content,
+        LOCAL_STORAGE_FIELD.COMMENT
+      ) || ''
+    })
+
+    await this.loadContent(pageToLoad)
+    this.loadTimeline()
+    // if (this.state.config.workspace.downloadEnabled) this.loadShareLinkList()
+  }
+
+  componentDidUpdate (prevProps, prevState) {
+    const { state } = this
+
+    // console.log('%c<File> did update', `color: ${this.state.config.hexcolor}`, prevState, state)
+    if (!prevState.content || !state.content) return
+
+    if (prevState.content.content_id !== state.content.content_id) {
+      this.setState({ fileCurrentPage: 1 })
+      // this.updateTimelineAndContent(1)
+    }
+
+    if (prevState.timelineWysiwyg && !state.timelineWysiwyg) globalThis.tinymce.remove('#wysiwygTimelineComment')
+  }
+
 
   componentDidUpdate (prevProps) {
     if (prevProps.rawTitle !== this.props.rawTitle) this.setState({ editTitleValue: this.props.rawTitle })
@@ -53,7 +101,8 @@ class PopinFixedHeader extends React.Component {
 
   render () {
     const { customClass, customColor, faIcon, rawTitle, componentTitle, userRoleIdInWorkspace, onClickCloseBtn, disableChangeTitle, showChangeTitleButton, t } = this.props
-    const { state } = this
+    const { state, props } = this
+
 
     return (
       <div className={classnames('wsContentGeneric__header', `${customClass}__header`)} style={{ backgroundColor: customColor }}>
@@ -78,36 +127,49 @@ class PopinFixedHeader extends React.Component {
               : componentTitle}
         </div>
 
-        {/* <DropdownMenu
-          buttonCustomClass='timedEvent__top'
+        <FavoriteButton
+          favoriteState={props.isContentInFavoriteList(state.content, state)
+            ? FAVORITE_STATE.FAVORITE
+            : FAVORITE_STATE.NOT_FAVORITE}
+          onClickAddToFavoriteList={() => props.addContentToFavoriteList(
+            state.content, state.loggedUser, this.setState.bind(this)
+          )}
+          onClickRemoveFromFavoriteList={() => props.removeContentFromFavoriteList(
+            state.content, state.loggedUser, this.setState.bind(this)
+          )}
+        />
+
+        <DropdownMenu
+          buttonCustomClass=''
           // buttonClick={props.onEventClicked} // eslint-disable-line
-          buttonOpts={topContents}
+          buttonIcon='fas fa-ellipsis-v'
           buttonTooltip=''
         >
-          {props.eventList.map(createHistoryTimedEvent)}
-        </DropdownMenu> */}
+          <span>hi</span>
+          <span>hello</span>
 
-        {userRoleIdInWorkspace >= ROLE.contributor.id && state.editTitle &&
-          <button
+          {userRoleIdInWorkspace >= ROLE.contributor.id && state.editTitle &&
+            <button
             className={classnames('wsContentGeneric__header__edittitle', `${customClass}__header__changetitle iconBtn`)}
             onClick={this.handleClickUndoChangeTitleBtn}
             disabled={disableChangeTitle}
-          >
-            <i className='fas fa-undo' title={t('Undo change in title')} />
-          </button>}
+            >
+              <i className='fas fa-undo' title={t('Undo change in title')} />
+            </button>}
 
-        {userRoleIdInWorkspace >= ROLE.contributor.id && showChangeTitleButton &&
-          <button
+          {userRoleIdInWorkspace >= ROLE.contributor.id && showChangeTitleButton &&
+            <button
             className={classnames('wsContentGeneric__header__edittitle', `${customClass}__header__changetitle iconBtn`)}
             onClick={this.handleClickChangeTitleBtn}
             disabled={disableChangeTitle}
-          >
-            {state.editTitle
-              ? <i className='fas fa-check' title={t('Validate the title')} />
-              : <i className='fas fa-pencil-alt' title={t('Edit title')} />}
-          </button>}
+            >
+              {state.editTitle
+                ? <i className='fas fa-check' title={t('Validate the title')} />
+                : <i className='fas fa-pencil-alt' title={t('Edit title')} />}
+            </button>}
 
-        {this.props.children}
+          {this.props.children}
+        </DropdownMenu>
 
         <div
           className={classnames('wsContentGeneric__header__close', `${customClass}__header__close iconBtn`)}
@@ -122,7 +184,7 @@ class PopinFixedHeader extends React.Component {
   }
 }
 
-export default translate()(PopinFixedHeader)
+export default translate()(appContentFactory(PopinFixedHeader))
 
 PopinFixedHeader.propTypes = {
   faIcon: PropTypes.string.isRequired,
