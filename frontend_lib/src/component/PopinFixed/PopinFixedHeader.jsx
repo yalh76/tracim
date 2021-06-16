@@ -10,12 +10,12 @@ import { appContentFactory } from '../../appContentFactory.js'
 import { getLocalStorageItem } from '../../localStorage.js'
 import { LOCAL_STORAGE_FIELD } from '../../localStorage.js'
 import { debug } from '../../debug.js'
-
+const param
 class PopinFixedHeader extends React.Component {
   constructor (props) {
     super(props)
 
-    const param = props.data || debug
+    param = props.data || debug
     props.setApiUrl(param.config.apiUrl)
 
     this.state = {
