@@ -26,14 +26,13 @@ describe('<PopinFixed />', () => {
 
   describe('Static design', () => {
     it('should have the class visible when props.visible is set to true', () => {
-      expect(wrapper.find(`div.${props.customClass}.visible`).length).to.equal(0)
       wrapper.setProps({ visible: true })
-      expect(wrapper.find(`div.${props.customClass}.visible`).length).to.equal(1)
-      wrapper.setProps({ visible: props.visible })
+      expect(wrapper.find('.visible').length).to.equal(1)
     })
 
-    it('div should have the proper style', () => {
-      expect(wrapper.find(`div.${props.customClass}`).prop('style')).to.eql(props.style)
+    it('should not have the class visible when props.visible is set to false', () => {
+      wrapper.setProps({ visible: false })
+      expect(wrapper.find('.visible').length).to.equal(0)
     })
   })
 })
