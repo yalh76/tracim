@@ -5,7 +5,7 @@
   top headerHeight
   right 0
   width 100%
-  height 100%
+  height "calc(100% - %s)" % headerHeight
   background-color lightGrey
   z-index 9
   &.sidebarVisible
@@ -15,7 +15,7 @@
   &__header
     display flex
     align-items center
-    margin 5px 5px 5px 40px
+    margin 5px 5px 5px 30px
     height 60px
     border-bottom 1px solid mediumGrey
     & > *
@@ -29,25 +29,29 @@
     &__title
       margin-right 10px
       border-radius 5px
-      width 100%
+      flex 2
       text-overflow ellipsis
       overflow hidden
       white-space nowrap
       font-size fontSizeMedium
+      font-weight bold
+      & > div
+        text-overflow ellipsis
+        overflow hidden
       & > input
         padding-left 5px
+    &__reactions
+      flex 1
+      height 100%
+      & > .EmojiReactions
+        flex-wrap wrap-reverse
     &__close
       border-radius 5px
       padding 3px 7px
       & > i
         font-size fontSizeMedium
   &__option
-    border-bottom 1px solid grey
-    padding 6px 10px
-    height 58px
-    background-color offWhite
     &__menu
-      height 100%
       & > div
         display flex
         flex-flow row
@@ -78,9 +82,8 @@
   &__content
     display flex
     flex-wrap wrap
-    // 209 = wsContentGeneric:top wsContentGeneric__header:height - wsContentGeneric__option:height
     width 200% // to allow transform translateX of right part
-    height calc(100% - 209px)
+    height 100%
     &__state
       width 100%
       padding 5px 15px
@@ -96,6 +99,7 @@
         color lightDarkGrey
         font-size fontSizeSmall
         padding 5px 10px
+        margin-inline-start 20px
         & .breadcrumbs
           margin-inline-end auto
           overflow auto
@@ -229,10 +233,15 @@ responsiveColumnStyle()
   responsiveColumnStyle()
 
 @media (max-width: max-xs)
+  .headerBtn
+    & span
+      display none
   .wsContentGeneric
     width 100%
     max-width 100%
     top headerHeight
+    &.sidebarVisible
+      max-width 100%
     &__option
       display none
     &__content

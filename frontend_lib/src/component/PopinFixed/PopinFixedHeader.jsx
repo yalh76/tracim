@@ -59,6 +59,7 @@ class PopinFixedHeader extends React.Component {
     const {
       customClass,
       customColor,
+      headerButtons,
       faIcon,
       rawTitle,
       componentTitle,
@@ -67,8 +68,17 @@ class PopinFixedHeader extends React.Component {
       disableChangeTitle,
       showChangeTitleButton,
       t,
-      actionList
+      actionList,
+      apiUrl,
+      content,
+      favoriteState,
+      loggedUser,
+      onClickAddToFavoriteList,
+      onClickRemoveFromFavoriteList,
+      showReactions
     } = props
+    const filteredActionList = actionList ? actionList.filter(action => action.showAction) : []
+    const filteredHeaderButtons = headerButtons ? headerButtons.filter(action => action.showAction) : []
 
     return (
       <div className={classnames('wsContentGeneric__header', `${customClass}__header`)}>
@@ -93,27 +103,6 @@ class PopinFixedHeader extends React.Component {
             : componentTitle}
         </div>
 
-        {props.showReactions && (
-          <div>
-            <EmojiReactions
-              apiUrl={props.apiUrl}
-              loggedUser={props.loggedUser}
-              contentId={props.content.content_id}
-              workspaceId={props.content.workspace_id}
-            />
-          </div>
-        )}
-
-        {props.favoriteState && (
-          <FavoriteButton
-            favoriteState={props.favoriteState}
-            onClickAddToFavoriteList={props.onClickAddToFavoriteList}
-            onClickRemoveFromFavoriteList={props.onClickRemoveFromFavoriteList}
-          />
-        )}
-
-        {props.children}
-
         {userRoleIdInWorkspace >= ROLE.contributor.id && state.editTitle && (
           <button
             className={classnames('wsContentGeneric__header__edittitle', `${customClass}__header__changetitle iconBtn`)}
@@ -124,23 +113,69 @@ class PopinFixedHeader extends React.Component {
           </button>
         )}
 
-        {userRoleIdInWorkspace >= ROLE.contributor.id && showChangeTitleButton &&
+        {userRoleIdInWorkspace >= ROLE.contributor.id && showChangeTitleButton && state.editTitle && (
           <button
             className={classnames('wsContentGeneric__header__edittitle', `${customClass}__header__changetitle iconBtn`)}
             onClick={this.handleClickChangeTitleBtn}
             disabled={disableChangeTitle}
           >
-            {state.editTitle
-              ? <i className='fas fa-check' title={t('Validate the title')} />
-              : <i className='fas fa-pencil-alt' title={t('Edit title')} />}
-          </button>}
-        {actionList && actionList.length > 0 && (
+            <i className='fas fa-check' title={t('Validate the title')} />
+          </button>
+        )}
+
+        {showReactions && (
+          <div className='wsContentGeneric__header__reactions'>
+            <EmojiReactions
+              apiUrl={apiUrl}
+              loggedUser={loggedUser}
+              contentId={content.content_id}
+              workspaceId={content.workspace_id}
+            />
+          </div>
+        )}
+
+        {favoriteState && (
+          <FavoriteButton
+            favoriteState={favoriteState}
+            onClickAddToFavoriteList={onClickAddToFavoriteList}
+            onClickRemoveFromFavoriteList={onClickRemoveFromFavoriteList}
+          />
+        )}
+
+        {filteredHeaderButtons.map((action) =>
+          <IconButton
+            disabled={action.disabled}
+            icon={action.icon}
+            text={action.label}
+            label={action.label}
+            key={action.label}
+            onClick={action.onClick} // eslint-disable-line react/jsx-handler-names
+            customClass='transparentButton headerBtn'
+            showAction={action.showAction}
+            dataCy={action.dataCy}
+          />
+        )}
+
+        {props.children}
+
+        {filteredActionList.length > 0 && (
           <DropdownMenu
             buttonCustomClass='wsContentGeneric__header__actions'
             buttonIcon='fas fa-ellipsis-v'
             buttonTooltip={t('Actions')}
+            buttonDataCy='dropdownContentButton'
           >
-            {actionList.filter(action => action.showAction).map((action) => action.downloadLink
+            {userRoleIdInWorkspace >= ROLE.contributor.id && showChangeTitleButton && !state.editTitle && (
+              <IconButton
+                icon='fas fa-pencil-alt'
+                text={t('Edit title')}
+                label={t('Edit title')}
+                key={t('Edit title')}
+                onClick={this.handleClickChangeTitleBtn} // eslint-disable-line react/jsx-handler-names
+                customClass='transparentButton'
+              />
+            )}
+            {filteredActionList.map((action) => action.downloadLink
               ? (
                 <a
                   href={action.downloadLink}
@@ -163,7 +198,7 @@ class PopinFixedHeader extends React.Component {
                   onClick={action.onClick} // eslint-disable-line react/jsx-handler-names
                   customClass='transparentButton'
                   showAction={action.showAction}
-                  data-cy={action.dataCy}
+                  dataCy={action.dataCy}
                 />
               ))}
           </DropdownMenu>
@@ -189,23 +224,42 @@ PopinFixedHeader.propTypes = {
   onClickCloseBtn: PropTypes.func.isRequired,
   customClass: PropTypes.string,
   customColor: PropTypes.string,
+  headerButtons: PropTypes.array,
   rawTitle: PropTypes.string,
   componentTitle: PropTypes.element,
   userRoleIdInWorkspace: PropTypes.number,
   onValidateChangeTitle: PropTypes.func,
   disableChangeTitle: PropTypes.bool,
   showChangeTitleButton: PropTypes.bool,
-  actionList: PropTypes.array
+  actionList: PropTypes.array,
+  apiUrl: PropTypes.string,
+  content: PropTypes.object,
+  favoriteState: PropTypes.string,
+  loggedUser: PropTypes.object,
+  onClickAddToFavoriteList: PropTypes.func,
+  onClickRemoveFromFavoriteList: PropTypes.func,
+  showReactions: PropTypes.bool
 }
 
 PopinFixedHeader.defaultProps = {
   customClass: '',
   customColor: '',
+  headerButtons: [],
   rawTitle: '',
   componentTitle: <div />,
   userRoleIdInWorkspace: ROLE.reader.id,
   onChangeTitle: () => { },
   disableChangeTitle: false,
   showChangeTitleButton: true,
-  actionList: []
+  actionList: [],
+  apiUrl: '',
+  content: {
+    content_id: 0,
+    workspace_id: 0
+  },
+  favoriteState: '',
+  loggedUser: {},
+  onClickAddToFavoriteList: () => { },
+  onClickRemoveFromFavoriteList: () => { },
+  showReactions: false
 }
