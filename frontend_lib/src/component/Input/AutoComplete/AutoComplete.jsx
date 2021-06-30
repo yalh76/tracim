@@ -11,9 +11,13 @@ export const AutoComplete = props => {
         <div key={autocompleteItem.mention || autocompleteItem.content_id}>
           <div
             className={
-              classnames('autocomplete__item', { autocomplete__item__active: props.autoCompleteCursorPosition === i })
+              classnames('autocomplete__item', {
+                autocomplete__item__active: props.autoCompleteCursorPosition === i
+              })
             }
-            onClick={() => props.onClickAutoCompleteItem(autocompleteItem)}
+            onClick={(e) => {
+              props.onClickAutoCompleteItem(autocompleteItem)
+            }}
           >
             {autocompleteItem.username && (
               <Avatar
@@ -24,10 +28,10 @@ export const AutoComplete = props => {
               />
             )}
             <b className='autocomplete__item__highlight'>
-              {autocompleteItem.mention ? `@${autocompleteItem.mention}` : `#${autocompleteItem.content_id}`}
+              {props.t(autocompleteItem.detail)}
             </b>
             &nbsp;-&nbsp;
-            {props.t(autocompleteItem.detail)}
+            {autocompleteItem.mention ? `@${autocompleteItem.mention}` : `#${autocompleteItem.content_id}`}
           </div>
           {i === props.delimiterIndex && i !== props.autoCompleteItemList.length - 1 && (
             <div className='autocomplete__delimiter' key={`delimiter${i}`} />
