@@ -21,11 +21,13 @@ import {
   PAGE,
   SPACE_TYPE,
   PopinFixedRightPartContent,
+  ROLE,
   tinymceAutoCompleteHandleInput,
   tinymceAutoCompleteHandleKeyUp,
   tinymceAutoCompleteHandleKeyDown,
   tinymceAutoCompleteHandleClickItem,
-  tinymceAutoCompleteHandleSelectionChange
+  tinymceAutoCompleteHandleSelectionChange,
+  TagList
 } from 'tracim_frontend_lib'
 import { debug } from '../debug.js'
 import {
@@ -77,6 +79,7 @@ export class WorkspaceAdvanced extends React.Component {
         avatarUrl: '',
         isEmail: false
       },
+      displayNewTagForm: false,
       autoCompleteFormNewMemberActive: false,
       autoCompleteClicked: false,
       searchedKnownMemberList: [],
@@ -111,7 +114,7 @@ export class WorkspaceAdvanced extends React.Component {
   // Custom Event Handlers
   handleShowApp = data => {
     console.log('%c<WorkspaceAdvanced> Custom event', 'color: #28a745', CUSTOM_EVENT.SHOW_APP(this.state.config.slug), data)
-    this.props.appContentCustomEventHandlerShowApp(data.content, this.state.content, this.setState.bind(this), () => {})
+    this.props.appContentCustomEventHandlerShowApp(data.content, this.state.content, this.setState.bind(this), () => { })
   }
 
   handleHideApp = data => {
@@ -685,6 +688,13 @@ export class WorkspaceAdvanced extends React.Component {
     }
   }
 
+  handleToggleAddTagForm = () => this.setState(prev => ({ displayNewTagForm: !prev.displayNewTagForm }))
+
+  handleClickAutoComplete = () => this.setState({
+    autoCompleteFormNewTagActive: false,
+    autoCompleteClicked: true
+  })
+
   getMenuItemList = () => {
     const { props, state } = this
     const memberlistObject = {
@@ -750,27 +760,49 @@ export class WorkspaceAdvanced extends React.Component {
         <PopinFixedRightPartContent
           label={props.t('Optional Functionalities')}
         >
-          <OptionalFeatures
-            appAgendaAvailable={state.content.appAgendaAvailable}
-            agendaEnabled={state.content.agenda_enabled}
-            onToggleAgendaEnabled={this.handleToggleAgendaEnabled}
-            downloadEnabled={state.content.public_download_enabled}
-            appDownloadAvailable={state.content.appDownloadAvailable}
-            onToggleDownloadEnabled={this.handleToggleDownloadEnabled}
-            uploadEnabled={state.content.public_upload_enabled}
-            appUploadAvailable={state.content.appUploadAvailable}
-            onToggleUploadEnabled={this.handleToggleUploadEnabled}
-            publicationEnabled={state.content.publication_enabled}
-            onTogglePublicationEnabled={this.handleTogglePublicationEnabled}
+          {state.loggedUser.userRoleIdInWorkspace > ROLE.contentManager.id && (
+            <OptionalFeatures
+              appAgendaAvailable={state.content.appAgendaAvailable}
+              agendaEnabled={state.content.agenda_enabled}
+              onToggleAgendaEnabled={this.handleToggleAgendaEnabled}
+              downloadEnabled={state.content.public_download_enabled}
+              appDownloadAvailable={state.content.appDownloadAvailable}
+              onToggleDownloadEnabled={this.handleToggleDownloadEnabled}
+              uploadEnabled={state.content.public_upload_enabled}
+              appUploadAvailable={state.content.appUploadAvailable}
+              onToggleUploadEnabled={this.handleToggleUploadEnabled}
+              publicationEnabled={state.content.publication_enabled}
+              onTogglePublicationEnabled={this.handleTogglePublicationEnabled}
+            />
+          )}
+        </PopinFixedRightPartContent>
+      )
+    }
+    const tagList = {
+      id: 'tag',
+      label: props.t('Tags'),
+      icon: 'fas fa-tag',
+      children: (
+        <PopinFixedRightPartContent>
+          <TagList
+            apiUrl={state.config.apiUrl}
+            workspaceId={state.content.workspace_id}
+            contentId={state.content.content_id}
+            displayNewTagForm={state.displayNewTagForm}
+            onClickAddTagBtn={this.handleToggleAddTagForm}
+            onClickCloseAddTagBtn={this.handleToggleAddTagForm}
+            searchedKnownTagList={props.searchedKnownTagList}
+            onClickAutoComplete={this.handleClickAutoComplete}
+            viewMode={state.loggedUser.userRoleIdInWorkspace < ROLE.contentManager.id}
           />
         </PopinFixedRightPartContent>
       )
     }
 
-    if (state.content.access_type === SPACE_TYPE.onRequest.slug) {
+    if (state.content.access_type === SPACE_TYPE.onRequest.slug && state.loggedUser.userRoleIdInWorkspace > ROLE.contentManager.id) {
       return [memberlistObject, subscriptionObject, functionalitesObject]
     } else {
-      return [memberlistObject, functionalitesObject]
+      return [memberlistObject, functionalitesObject, tagList]
     }
   }
 
@@ -794,32 +826,34 @@ export class WorkspaceAdvanced extends React.Component {
           onValidateChangeTitle={this.handleSaveEditLabel}
           disableChangeTitle={false}
         >
-          <WorkspaceAdvancedConfiguration
-            apiUrl={state.config.apiUrl}
-            textareaId={WORKSPACE_DESCRIPTION_TEXTAREA_ID}
-            autoCompleteCursorPosition={state.autoCompleteCursorPosition}
-            autoCompleteItemList={state.autoCompleteItemList}
-            customColor={state.config.hexcolor}
-            description={state.content.description}
-            defaultRole={state.content.default_user_role}
-            displayPopupValidateDeleteWorkspace={state.displayPopupValidateDeleteWorkspace}
-            isAutoCompleteActivated={state.isAutoCompleteActivated}
-            onClickAutoCompleteItem={(item) => {
-              tinymceAutoCompleteHandleClickItem(item, this.setState.bind(this))
-            }}
-            onClickValidateNewDescription={this.handleClickValidateNewDescription}
-            onClickClosePopupDeleteWorkspace={this.handleClickClosePopupDeleteWorkspace}
-            onClickDeleteWorkspaceBtn={this.handleClickDeleteWorkspaceBtn}
-            onClickValidateNewDefaultRole={this.handleClickValidateNewDefaultRole}
-            onClickValidatePopupDeleteWorkspace={this.handleClickValidateDeleteWorkspace}
-            onChangeDescription={this.handleChangeDescription}
-            onChangeNewDefaultRole={this.handleChangeNewDefaultRole}
-            key='workspace_advanced'
-            onTinyMceInput={this.handleTinyMceInput}
-            onTinyMceKeyDown={this.handleTinyMceKeyDown}
-            onTinyMceKeyUp={this.handleTinyMceKeyUp}
-            onTinyMceSelectionChange={this.handleTinyMceSelectionChange}
-          />
+          {state.loggedUser.userRoleIdInWorkspace > ROLE.contentManager.id
+            ? <WorkspaceAdvancedConfiguration
+              apiUrl={state.config.apiUrl}
+              textareaId={WORKSPACE_DESCRIPTION_TEXTAREA_ID}
+              autoCompleteCursorPosition={state.autoCompleteCursorPosition}
+              autoCompleteItemList={state.autoCompleteItemList}
+              customColor={state.config.hexcolor}
+              description={state.content.description}
+              defaultRole={state.content.default_user_role}
+              displayPopupValidateDeleteWorkspace={state.displayPopupValidateDeleteWorkspace}
+              isAutoCompleteActivated={state.isAutoCompleteActivated}
+              onClickAutoCompleteItem={(item) => {
+                tinymceAutoCompleteHandleClickItem(item, this.setState.bind(this))
+              }}
+              onClickValidateNewDescription={this.handleClickValidateNewDescription}
+              onClickClosePopupDeleteWorkspace={this.handleClickClosePopupDeleteWorkspace}
+              onClickDeleteWorkspaceBtn={this.handleClickDeleteWorkspaceBtn}
+              onClickValidateNewDefaultRole={this.handleClickValidateNewDefaultRole}
+              onClickValidatePopupDeleteWorkspace={this.handleClickValidateDeleteWorkspace}
+              onChangeDescription={this.handleChangeDescription}
+              onChangeNewDefaultRole={this.handleChangeNewDefaultRole}
+              key='workspace_advanced'
+              onTinyMceInput={this.handleTinyMceInput}
+              onTinyMceKeyDown={this.handleTinyMceKeyDown}
+              onTinyMceKeyUp={this.handleTinyMceKeyUp}
+              onTinyMceSelectionChange={this.handleTinyMceSelectionChange}
+            />
+            : <div />}
 
           <PopinFixedRightPart
             customClass={`${state.config.slug}__contentpage`}
