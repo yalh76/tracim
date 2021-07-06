@@ -450,6 +450,7 @@ class CFG(object):
         self.USER__SELF_REGISTRATION__ENABLED = asbool(
             self.get_raw_config("user.self_registration.enabled", "False")
         )
+        self.USER__ONLINE_TIMEOUT = int(self.get_raw_config("user.online_timeout", 10))
         default_user_custom_properties_path = self.here_macro_replace(
             "%(here)s/tracim_backend/templates/user_custom_properties/default/"
         )
@@ -577,6 +578,9 @@ class CFG(object):
     def _load_live_messages_config(self) -> None:
         self.LIVE_MESSAGES__CONTROL_ZMQ_URI = self.get_raw_config(
             "live_messages.control_zmq_uri", "tcp://localhost:5563"
+        )
+        self.LIVE_MESSAGES__STATS_ZMQ_URI = self.get_raw_config(
+            "live_messages.stats_zmq_uri", "ipc:///var/run/pushpin/pushpin-stats"
         )
         async_processing = str(self.JOBS__PROCESSING_MODE == self.CST.ASYNC)
         self.LIVE_MESSAGES__BLOCKING_PUBLISH = asbool(
@@ -1110,6 +1114,10 @@ class CFG(object):
     def _check_live_messages_config_validity(self) -> None:
         self.check_mandatory_param(
             "LIVE_MESSAGES__CONTROL_ZMQ_URI", self.LIVE_MESSAGES__CONTROL_ZMQ_URI
+        )
+
+        self.check_mandatory_param(
+            "LIVE_MESSAGES__STATS_ZMQ_URI", self.LIVE_MESSAGES__STATS_ZMQ_URI
         )
 
     def _check_email_config_validity(self) -> None:
