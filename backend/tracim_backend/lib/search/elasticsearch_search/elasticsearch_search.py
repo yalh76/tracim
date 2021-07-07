@@ -25,8 +25,8 @@ from tracim_backend.lib.core.tag import TagLib
 from tracim_backend.lib.core.user import UserApi
 from tracim_backend.lib.core.userworkspace import RoleApi
 from tracim_backend.lib.core.workspace import WorkspaceApi
-from tracim_backend.lib.rq import RqQueueName
-from tracim_backend.lib.rq import get_rq_queue2
+from tracim_backend.lib.rq import get_redis_connection
+from tracim_backend.lib.rq import get_rq_queue
 from tracim_backend.lib.rq.worker import worker_context
 from tracim_backend.lib.search.elasticsearch_search.es_models import EXACT_FIELD
 from tracim_backend.lib.search.elasticsearch_search.es_models import DigestComments
@@ -995,7 +995,10 @@ class ESContentIndexer:
 
     def index_contents(self, contents: typing.List[Content], context: TracimContext) -> None:
         if context.app_config.JOBS__PROCESSING_MODE == CFG.CST.ASYNC:
-            queue = get_rq_queue2(context.app_config, RqQueueName.ELASTICSEARCH_INDEXER)
+            redis_connection = get_redis_connection(context.app_config)
+            queue = get_rq_queue(
+                redis_connection, context.app_config.SEARCH__ELASTICSEARCH__ASYNC_QUEUE_NAME
+            )
             content_ids = [
                 content.content_id for content in self._filter_excluded_content_types(contents)
             ]
@@ -1131,7 +1134,10 @@ class ESUserIndexer:
         Two execution modes: sync or async depending on jobs.processing_mode.
         """
         if context.app_config.JOBS__PROCESSING_MODE == CFG.CST.ASYNC:
-            queue = get_rq_queue2(context.app_config, RqQueueName.ELASTICSEARCH_INDEXER)
+            queue = get_rq_queue(
+                get_redis_connection(context.app_config),
+                context.app_config.LIVE_MESSAGES__ASYNC_QUEUE_NAME,
+            )
             user_id = user.user_id
 
             def index_via_rq_worker(session: Session, flush_context=None) -> None:
@@ -1207,7 +1213,10 @@ class ESWorkspaceIndexer:
         Two execution modes: sync or async depending on jobs.processing_mode.
         """
         if context.app_config.JOBS__PROCESSING_MODE == CFG.CST.ASYNC:
-            queue = get_rq_queue2(context.app_config, RqQueueName.ELASTICSEARCH_INDEXER)
+            queue = get_rq_queue(
+                get_redis_connection(context.app_config),
+                context.app_config.LIVE_MESSAGES__ASYNC_QUEUE_NAME,
+            )
             workspace_id = workspace.workspace_id
 
             def index_via_rq_worker(session: Session, flush_context=None) -> None:
