@@ -603,13 +603,8 @@ export class NotificationWall extends React.Component {
 
         <div className='notification__groups'>
           {state.notificationsGroupsByContentBySpace.map(({ label: spaceName, id: spaceId, groupId, list: contentList }) => {
-            let spaceMentionUnreadCount = 0
-            let spaceUnreadCount = 0
             let spaceCount = 0
-
             for (const content of contentList) {
-              spaceMentionUnreadCount += content.list.filter(({ details, notification }) => !notification.read && details.isMention).length
-              spaceUnreadCount += content.list.filter(({ details, notification }) => !notification.read).length
               spaceCount += content.list.length
             }
 
@@ -618,38 +613,24 @@ export class NotificationWall extends React.Component {
             }
 
             return (
-              <div className={'notification__group notification__group__' + (state.unfoldedNotificationGroup[groupId] ? 'un' : '') + 'folded'} key={groupId}>
-                <div className='notification__space_header' style={spaceUnreadCount ? { fontWeight: 'bold' } : {}}>
-                  <Link onClick={() => this.toggleGroup(groupId)}>
-                    <i className={'fa fa-chevron-' + (state.unfoldedNotificationGroup[groupId] ? 'down' : 'right')} />
-                  </Link>
-                  <span>
-                    {spaceCount + ' notification' + (spaceCount === 1 ? '' : 's') + ' in '}
-                    <Link to={PAGE.WORKSPACE.DASHBOARD(spaceId)}>
-                      {spaceName}
-                    </Link>
-                    {spaceMentionUnreadCount ? <b>{' (' + spaceMentionUnreadCount + ')'}</b> : ''}
-                  </span>
-                </div>
-                <div className='notification__groups'>
-                  {contentList.map(({ list: detailsAndNotificationList, details }) => {
-                    if (detailsAndNotificationList.length === 1) {
-                      return this.renderNotication(props, detailsAndNotificationList[0].notification, detailsAndNotificationList[0].details, detailsAndNotificationList)
-                    }
+              <div className='notification__groups' key={groupId}>
+                {contentList.map(({ list: detailsAndNotificationList, details }) => {
+                  if (detailsAndNotificationList.length === 1) {
+                    return this.renderNotication(props, detailsAndNotificationList[0].notification, detailsAndNotificationList[0].details, detailsAndNotificationList)
+                  }
 
-                    const authors = this.joinComma(details.authors.map(user => user.publicName))
-                    const actions = this.joinComma(details.actions)
+                  const authors = this.joinComma(details.authors.map(user => user.publicName))
+                  const actions = this.joinComma(details.actions)
 
-                    const mergedDetails = {
-                      text: authors + ' ' + actions + ' ' + detailsAndNotificationList[0].details.sentenceEnding + ' (' + detailsAndNotificationList.length + ')',
-                      icon: details.icon,
-                      url: details.url,
-                      isMention: details.isMention
-                    }
+                  const mergedDetails = {
+                    text: authors + ' ' + actions + ' ' + detailsAndNotificationList[0].details.sentenceEnding + ' (' + detailsAndNotificationList.length + ')',
+                    icon: details.icon,
+                    url: details.url,
+                    isMention: details.isMention
+                  }
 
-                    return this.renderNotication(props, detailsAndNotificationList[0].notification, mergedDetails, detailsAndNotificationList)
-                  })}
-                </div>
+                  return this.renderNotication(props, detailsAndNotificationList[0].notification, mergedDetails, detailsAndNotificationList)
+                })}
               </div>
             )
           })}
