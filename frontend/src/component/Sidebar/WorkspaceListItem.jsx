@@ -80,8 +80,11 @@ class WorkspaceListItem extends React.Component {
           {
             'primaryColorBorder sidebar__content__navigation__item__current':
               props.location.pathname.includes(`${PAGE.WORKSPACE.ROOT}/${props.workspaceId}/`)
-          }
-        )}
+          },
+          {
+            sidebar__content__navigation__item__unread:
+              props.isUnread
+          })}
         data-cy={`sidebar__content__navigation__workspace__item_${props.workspaceId}`}
         ref={props.connectDropTarget}
         onMouseEnter={this.handleMouseEnterItem}
@@ -179,7 +182,8 @@ WorkspaceListItem.propTypes = {
   activeWorkspaceId: PropTypes.number,
   level: PropTypes.number,
   onToggleFoldChildren: PropTypes.func,
-  userRoleIdInWorkspace: PropTypes.number
+  userRoleIdInWorkspace: PropTypes.number,
+  isUnread: PropTypes.bool
 }
 
 WorkspaceListItem.defaultProps = {
@@ -190,5 +194,6 @@ WorkspaceListItem.defaultProps = {
   activeWorkspaceId: NO_ACTIVE_SPACE_ID,
   level: 0,
   onToggleFoldChildren: () => {},
-  userRoleIdInWorkspace: ROLE.reader.id
+  userRoleIdInWorkspace: ROLE.reader.id,
+  isUnread: false
 }

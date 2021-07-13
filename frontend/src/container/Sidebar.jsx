@@ -37,6 +37,7 @@ export class Sidebar extends React.Component {
     this.state = {
       activeWorkspaceId: NO_ACTIVE_SPACE_ID,
       foldedSpaceList: [],
+      unreadSpaceIdList: [],
       sidebarClose: isMobile
     }
 
@@ -70,6 +71,7 @@ export class Sidebar extends React.Component {
 
   displaySpace = (spaceLevel, spaceList) => {
     const { props, state } = this
+    const workspaceUnreadIdList = this.handleReadNotification(props.notificationPage.list)
 
     return spaceList.map(space =>
       <React.Fragment key={space.id}>
@@ -85,6 +87,7 @@ export class Sidebar extends React.Component {
           workspaceId={space.id}
           id={this.spaceItemId(space.id)}
           onToggleFoldChildren={() => this.handleToggleFoldChildren(space.id)}
+          isUnread={workspaceUnreadIdList.includes(space.id)}
         />
         {!state.foldedSpaceList.find(id => id === space.id) &&
           space.children.length !== 0 &&
@@ -178,6 +181,15 @@ export class Sidebar extends React.Component {
 
   handleClickJoinWorkspace = () => { this.props.history.push(PAGE.JOIN_WORKSPACE) }
 
+  handleReadNotification = (notificationList) => {
+    const workspaceUnreadIdList = []
+    for (const notification of notificationList) {
+      if (!notification.workspace) continue
+      if (!notification.read) workspaceUnreadIdList.push(notification.workspace.id)
+    }
+    return workspaceUnreadIdList
+  }
+
   render () {
     const { props, state } = this
 
@@ -251,5 +263,5 @@ export class Sidebar extends React.Component {
   }
 }
 
-const mapStateToProps = ({ user, workspaceList, system, accessibleWorkspaceList }) => ({ user, workspaceList, system, accessibleWorkspaceList })
+const mapStateToProps = ({ user, workspaceList, system, accessibleWorkspaceList, notificationPage }) => ({ user, workspaceList, system, accessibleWorkspaceList, notificationPage })
 export default withRouter(connect(mapStateToProps)(appFactory(translate()(TracimComponent(Sidebar)))))
