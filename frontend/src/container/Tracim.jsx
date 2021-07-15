@@ -446,9 +446,7 @@ export class Tracim extends React.Component {
         <ReduxTlmDispatcher />
 
         <div className='sidebarpagecontainer'>
-          <Route render={() => <Sidebar
-            unreadMentionCount={props.notificationPage.unreadMentionCount}
-          />} />
+          <Route render={() => <Sidebar unreadMentionCount={props.notificationPage.unreadMentionCount} />} />
 
           <Route
             render={() => (
