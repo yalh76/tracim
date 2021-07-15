@@ -71,7 +71,10 @@ export class Sidebar extends React.Component {
 
   displaySpace = (spaceLevel, spaceList) => {
     const { props, state } = this
-    const workspaceUnreadIdList = this.handleReadNotification(props.notificationPage.list)
+    const {
+      workspaceUnreadIdList,
+      unreadMentionCountByWorkspace
+    } = this.handleReadNotification(props.notificationPage.list)
 
     return spaceList.map(space =>
       <React.Fragment key={space.id}>
@@ -88,6 +91,7 @@ export class Sidebar extends React.Component {
           id={this.spaceItemId(space.id)}
           onToggleFoldChildren={() => this.handleToggleFoldChildren(space.id)}
           isUnread={workspaceUnreadIdList.includes(space.id)}
+          unreadMentionCount={unreadMentionCountByWorkspace[space.id] || 0}
         />
         {!state.foldedSpaceList.find(id => id === space.id) &&
           space.children.length !== 0 &&
@@ -183,11 +187,27 @@ export class Sidebar extends React.Component {
 
   handleReadNotification = (notificationList) => {
     const workspaceUnreadIdList = []
+    const unreadMentionCountByWorkspace = {}
+
     for (const notification of notificationList) {
-      if (!notification.workspace) continue
-      if (!notification.read) workspaceUnreadIdList.push(notification.workspace.id)
+      if (!notification.workspace || notification.read) continue
+
+      const workspaceId = notification.workspace.id
+      workspaceUnreadIdList.push(workspaceId)
+
+      const [entityType, /* eventType */ , contentType] = notification.type.split('.')
+      if (entityType === TLM_ET.MENTION) {
+        if (!unreadMentionCountByWorkspace[workspaceId]) {
+          unreadMentionCountByWorkspace[workspaceId] = 0
+        }
+        unreadMentionCountByWorkspace[workspaceId]++
+      }
     }
-    return workspaceUnreadIdList
+
+    return {
+      workspaceUnreadIdList,
+      unreadMentionCountByWorkspace
+    }
   }
 
   render () {

@@ -112,22 +112,31 @@ class WorkspaceListItem extends React.Component {
           />
         )}
 
+
         <Link
           className={classnames(
             'sidebar__content__navigation__item__wrapper',
             { sidebar__content__navigation__item__withoutChildren: !props.hasChildren }
-          )}
-          to={PAGE.WORKSPACE.DASHBOARD(props.workspaceId)}
-        >
+            )}
+            to={PAGE.WORKSPACE.DASHBOARD(props.workspaceId)}
+            >
           {(props.canDrop && props.isOver) && (
             <i className={`fas fa-fw ${this.getIcon()} sidebar__content__navigation__item__dragNdrop`} />
           )}
 
+
           <div
             className='sidebar__content__navigation__item__name'
             title={props.label}
-          >
+            >
             {props.label}
+            {props.unreadMentionCount > 0 && (
+              <div
+                className='notifications'
+              >
+                ({props.unreadMentionCount > 99 ? '99+' : props.unreadMentionCount})
+              </div>
+            )}
           </div>
         </Link>
 
@@ -183,7 +192,8 @@ WorkspaceListItem.propTypes = {
   level: PropTypes.number,
   onToggleFoldChildren: PropTypes.func,
   userRoleIdInWorkspace: PropTypes.number,
-  isUnread: PropTypes.bool
+  isUnread: PropTypes.bool,
+  unreadMentionCount: PropTypes.number
 }
 
 WorkspaceListItem.defaultProps = {
@@ -195,5 +205,6 @@ WorkspaceListItem.defaultProps = {
   level: 0,
   onToggleFoldChildren: () => {},
   userRoleIdInWorkspace: ROLE.reader.id,
-  isUnread: false
+  isUnread: false,
+  unreadMentionCount: 1
 }
