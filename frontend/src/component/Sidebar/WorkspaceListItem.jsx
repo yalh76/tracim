@@ -134,7 +134,7 @@ class WorkspaceListItem extends React.Component {
               <div
                 className='notifications'
               >
-                ({props.unreadMentionCount > 99 ? '99+' : props.unreadMentionCount})
+                {props.unreadMentionCount > 99 ? '99+' : props.unreadMentionCount}
               </div>
             )}
           </div>
