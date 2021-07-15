@@ -196,10 +196,12 @@ export const NOTIFICATION_LIST = 'NotificationList'
 export const NOTIFICATION = 'Notification'
 export const UNREAD_MENTION_COUNT = 'UnreadMentionCount'
 export const UNREAD_NOTIFICATION_COUNT = 'UnreadNotificationCount'
+export const CONTENT_NOTIFICATION = `${CONTENT}${NOTIFICATION}`
 export const setNotificationList = notificationList => ({ type: `${SET}/${NOTIFICATION_LIST}`, notificationList })
 export const appendNotificationList = notificationList => ({ type: `${APPEND}/${NOTIFICATION_LIST}`, notificationList })
 export const addNotification = notification => ({ type: `${ADD}/${NOTIFICATION}`, notification })
 export const readNotification = notificationId => ({ type: `${READ}/${NOTIFICATION}`, notificationId })
+export const readContentNotificationList = (contentId, parentId) => ({ type: `${READ}/${CONTENT_NOTIFICATION}`, contentId })
 export const readNotificationList = () => ({ type: `${READ}/${NOTIFICATION_LIST}` })
 export const setNextPage = (hasNextPage, nextPageToken) => ({ type: `${SET}/${NEXT_PAGE}`, hasNextPage, nextPageToken })
 export const setUnreadMentionCount = (count) => ({ type: `${SET}/${UNREAD_MENTION_COUNT}`, count })

@@ -225,11 +225,23 @@ class EventApi:
         self._session.flush()
         return message
 
-    def mark_user_messages_as_read(self, user_id: int) -> List[Message]:
-        unread_messages = self._base_query(read_status=ReadStatus.UNREAD, user_id=user_id).all()
+    def mark_user_messages_as_read(
+        self, user_id: int, content_ids: Optional[List[int]] = None
+    ) -> List[Message]:
+        unread_messages = self._base_query(read_status=ReadStatus.UNREAD, user_id=user_id)
+        if content_ids:
+            unread_messages = unread_messages.filter(
+                and_(
+                    cast(Event.content, String) != text("'null'"),
+                    or_(
+                        Event.content["content_id"].as_integer().in_(content_ids),
+                        Event.content["parent_id"].as_integer().in_(content_ids),
+                    ),
+                )
+            )
+        current_datetime = datetime.utcnow()
         for message in unread_messages:
-            message.read = datetime.utcnow()
-            self._session.add(message)
+            message.read = current_datetime
         self._session.flush()
         return unread_messages
 

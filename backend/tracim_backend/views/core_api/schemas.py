@@ -2070,6 +2070,17 @@ class UserMessagesSummarySchema(marshmallow.Schema):
     user = marshmallow.fields.Nested(UserDigestSchema())
 
 
+class UserMessagesMarkAsReadSchema(marshmallow.Schema):
+    content_ids = StringList(
+        marshmallow.fields.Int(
+            example=42,
+            description="If provided, only messages matching the given content ids will be marked as read",
+        ),
+        missing=None,
+        default=None,
+    )
+
+
 class WorkspaceSubscriptionSchema(marshmallow.Schema):
     state = StrippedString(
         example="pending", validate=workspace_subscription_state_validator, attribute="state_slug"

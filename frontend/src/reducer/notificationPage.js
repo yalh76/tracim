@@ -2,6 +2,7 @@ import { uniqBy } from 'lodash'
 import {
   ADD,
   APPEND,
+  CONTENT_NOTIFICATION,
   NEXT_PAGE,
   NOTIFICATION,
   NOTIFICATION_LIST,
@@ -89,6 +90,23 @@ export default function notificationPage (state = defaultNotificationsObject, ac
         list: state.list.map(no => no.id === action.notificationId ? { ...notification, read: true } : no),
         unreadMentionCount: newUnreadMentionCount,
         unreadNotificationCount: state.unreadNotificationCount - 1
+      }
+    }
+
+    case `${READ}/${CONTENT_NOTIFICATION}`: {
+      let readNotificationCount = 0
+      let readMentionCount = 0
+      const list = state.list.map(notification => {
+        if (!notification.content || ![notification.content.id, notification.content.parentId].includes(action.contentId)) return notification
+        if (notification.type === 'mention.created') readMentionCount += 1
+        readNotificationCount += 1
+        return { ...notification, read: true }
+      })
+      return {
+        ...state,
+        list: list,
+        unreadMentionCount: state.unreadMentionCount - readMentionCount,
+        unreadNotificationCount: state.unreadNotificationCount - readNotificationCount
       }
     }
 

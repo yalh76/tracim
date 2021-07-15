@@ -6,6 +6,7 @@ import { translate } from 'react-i18next'
 import {
   getNotificationList,
   putAllNotificationAsRead,
+  putContentNotificationAsRead,
   putNotificationAsRead
 } from '../action-creator.async.js'
 import {
@@ -13,6 +14,7 @@ import {
   newFlashMessage,
   readNotification,
   readNotificationList,
+  readContentNotificationList,
   setNextPage
 } from '../action-creator.sync.js'
 import {
@@ -62,7 +64,7 @@ export class NotificationWall extends React.Component {
     }
   }
 
-  handleClickNotification = async (e, notificationDetails, relatedNotifications, dontFollowLink = false) => {
+  handleClickNotification = async (e, notification, notificationDetails, dontFollowLink = false) => {
     const { props } = this
 
     if (dontFollowLink) {
@@ -74,11 +76,22 @@ export class NotificationWall extends React.Component {
       e.preventDefault()
     }
 
-    for (const { notification } of relatedNotifications) {
+    if (!notification.content) {
       const fetchPutNotificationAsRead = await props.dispatch(putNotificationAsRead(props.user.userId, notification.id))
       switch (fetchPutNotificationAsRead.status) {
         case 204: {
           props.dispatch(readNotification(notification.id))
+          break
+        }
+        default:
+          props.dispatch(newFlashMessage(props.t('Error while marking the notification as read'), 'warning'))
+      }
+    } else {
+      const mainContentId = notification.type.endsWith('comment') ? notification.content.parentId : notification.content.id
+      const fetchPutContentNotificationAsRead = await props.dispatch(putContentNotificationAsRead(props.user.userId, mainContentId))
+      switch (fetchPutContentNotificationAsRead.status) {
+        case 204: {
+          props.dispatch(readContentNotificationList(mainContentId))
           break
         }
         default:
@@ -590,13 +603,8 @@ export class NotificationWall extends React.Component {
 
         <div className='notification__groups'>
           {state.notificationsGroupsByContentBySpace.map(({ label: spaceName, id: spaceId, groupId, list: contentList }) => {
-            let spaceMentionUnreadCount = 0
-            let spaceUnreadCount = 0
             let spaceCount = 0
-
             for (const content of contentList) {
-              spaceMentionUnreadCount += content.list.filter(({ details, notification }) => !notification.read && details.isMention).length
-              spaceUnreadCount += content.list.filter(({ details, notification }) => !notification.read).length
               spaceCount += content.list.length
             }
 
@@ -605,38 +613,24 @@ export class NotificationWall extends React.Component {
             }
 
             return (
-              <div className={'notification__group notification__group__' + (state.unfoldedNotificationGroup[groupId] ? 'un' : '') + 'folded'} key={groupId}>
-                <div className='notification__space_header' style={spaceUnreadCount ? { fontWeight: 'bold' } : {}}>
-                  <Link onClick={() => this.toggleGroup(groupId)}>
-                    <i className={'fa fa-chevron-' + (state.unfoldedNotificationGroup[groupId] ? 'down' : 'right')} />
-                  </Link>
-                  <span>
-                    {spaceCount + ' notification' + (spaceCount === 1 ? '' : 's') + ' in '}
-                    <Link to={PAGE.WORKSPACE.DASHBOARD(spaceId)}>
-                      {spaceName}
-                    </Link>
-                    {spaceMentionUnreadCount ? <b>{' (' + spaceMentionUnreadCount + ')'}</b> : ''}
-                  </span>
-                </div>
-                <div className='notification__groups'>
-                  {contentList.map(({ list: detailsAndNotificationList, details }) => {
-                    if (detailsAndNotificationList.length === 1) {
-                      return this.renderNotication(props, detailsAndNotificationList[0].notification, detailsAndNotificationList[0].details, detailsAndNotificationList)
-                    }
+              <div className='notification__groups' key={groupId}>
+                {contentList.map(({ list: detailsAndNotificationList, details }) => {
+                  if (detailsAndNotificationList.length === 1) {
+                    return this.renderNotication(props, detailsAndNotificationList[0].notification, detailsAndNotificationList[0].details, detailsAndNotificationList)
+                  }
 
-                    const authors = this.joinComma(details.authors)
-                    const actions = this.joinComma(details.actions)
+                  const authors = this.joinComma(details.authors.map(user => user.publicName))
+                  const actions = this.joinComma(details.actions)
 
-                    const mergedDetails = {
-                      text: authors + ' ' + actions + ' ' + detailsAndNotificationList[0].details.sentenceEnding + ' (' + detailsAndNotificationList.length + ')',
-                      icon: details.icon,
-                      url: details.url,
-                      isMention: details.isMention
-                    }
+                  const mergedDetails = {
+                    text: authors + ' ' + actions + ' ' + detailsAndNotificationList[0].details.sentenceEnding + ' (' + detailsAndNotificationList.length + ')',
+                    icon: details.icon,
+                    url: details.url,
+                    isMention: details.isMention
+                  }
 
-                    return this.renderNotication(props, detailsAndNotificationList[0].notification, mergedDetails, detailsAndNotificationList)
-                  })}
-                </div>
+                  return this.renderNotication(props, detailsAndNotificationList[0].notification, mergedDetails, detailsAndNotificationList)
+                })}
               </div>
             )
           })}
@@ -693,7 +687,7 @@ export class NotificationWall extends React.Component {
       >
         <Link
           to={notificationDetails.url || '#'}
-          onClick={(e) => this.handleClickNotification(e, notificationDetails, relatedDetailsAndNotifications)}
+          onClick={(e) => this.handleClickNotification(e, notification, notificationDetails)}
           className={classnames('notification__list__item', { itemRead: read, isMention: notificationDetails.isMention })}
           key={notification.id}
         >
@@ -716,7 +710,7 @@ export class NotificationWall extends React.Component {
               }}
             />
           </div>
-          {!read && <Link onClick={(e) => this.handleClickNotification(e, notificationDetails, relatedDetailsAndNotifications, true)} className='notification__list__item__circle fas fa-circle' />}
+          {!read && <Link onClick={(e) => this.handleClickNotification(e, notification, notificationDetails, true)} className='notification__list__item__circle fas fa-circle' />}
         </Link>
       </ListItemWrapper>
     )
