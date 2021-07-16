@@ -128,10 +128,12 @@ class WorkspaceListItem extends React.Component {
           >
             <div
               className='label'
-            >{props.label}</div>
+            >
+              {props.label}
+            </div>
             {props.unreadMentionCount > 0 && (
               <div
-                className='notification'
+                className='mention'
               >
                 {props.unreadMentionCount > 99 ? '99+' : props.unreadMentionCount}
               </div>
