@@ -126,10 +126,12 @@ class WorkspaceListItem extends React.Component {
             className='sidebar__content__navigation__item__name'
             title={props.label}
           >
-            {props.label}
+            <div
+              className='label'
+            >{props.label}</div>
             {props.unreadMentionCount > 0 && (
               <div
-                className='notifications'
+                className='notification'
               >
                 {props.unreadMentionCount > 99 ? '99+' : props.unreadMentionCount}
               </div>

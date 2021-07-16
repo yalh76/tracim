@@ -195,7 +195,7 @@ export class Sidebar extends React.Component {
       const workspaceId = notification.workspace.id
       workspaceUnreadIdList.push(workspaceId)
 
-      const [entityType, /* eventType */, /* contentType */] = notification.type.split('.')
+      const [entityType] = notification.type.split('.')
       if (entityType === TLM_ET.MENTION) {
         if (!unreadMentionCountByWorkspace[workspaceId]) {
           unreadMentionCountByWorkspace[workspaceId] = 0

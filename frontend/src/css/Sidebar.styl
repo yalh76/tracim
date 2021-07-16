@@ -122,15 +122,20 @@ sidebar-animate-speed = 0.5s
           padding 10px
           width 100%
           font-size 20px
-          overflow hidden
-          text-overflow ellipsis
           align-items center
           display inline-flex
-          & .notifications
+          & .label
+            overflow hidden
+            text-overflow ellipsis
+          & .notification
             background errorRed
             border-radius 50%
-            padding 0px 10px
             margin-left 10px
+            line-height 25px
+            font-size 15px
+            min-width 25px
+            font-weight normal
+            text-align center
         &__current
           padding-left 0
           background-color var(--sidebarColorLighten)
