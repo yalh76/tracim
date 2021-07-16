@@ -43,6 +43,18 @@ import {
 } from 'tracim_frontend_lib'
 import { escape as escapeHtml } from 'lodash'
 
+const AUTHOR = 'author'
+const SPACE = 'space'
+const CONTENT = 'content'
+
+const GROUP_RULES = [
+  [3, CONTENT, AUTHOR],
+  [3, CONTENT],
+  [3, SPACE, AUTHOR],
+  [6, SPACE],
+  [6, AUTHOR]
+]
+
 const getNotificationLabelAndId = (notification) => {
   if (!notification.content) {
     return ['', 0]
@@ -54,17 +66,70 @@ const getNotificationLabelAndId = (notification) => {
     : [notification.content.label, notification.content.id]
 }
 
+function getCriterionValue(notification, criterion) {
+  if (!notification) return undefined
+
+  switch (criterion) {
+    case AUTHOR:
+      return notification.author && notification.author.userId
+
+    case SPACE:
+      return notification.workspace && notification.workspace.id
+
+    case CONTENT:
+      return notification.content && (notification.content.parentId || notification.content.id)
+
+    default:
+      return undefined
+  }
+}
+
+function* notificationsWithGroups(notificationGroupList) {
+  for (const group of notificationGroupList) {
+    for (const notification of group.list) {
+      yield [notification, group]
+    }
+  }
+}
+
+function newGroup (notificationGroupList) {
+  const group = {
+    minNotificationCountForGrouping: Number.MAX_SAFE_INTEGER,
+    grouped: false,
+    list: []
+  }
+
+  notificationGroupList.push(group)
+
+  return group
+}
+
+function matchCriteria (notificationA,  notificationB, firstCriterion, secondCriterion) {
+  return (
+    getCriterionValue(notificationA, firstCriterion) === getCriterionValue(notificationB, firstCriterion) &&
+    getCriterionValue(notificationA, secondCriterion) === getCriterionValue(notificationB, secondCriterion)
+  )
+}
+
+function zip(l1, l2) {
+  const res = []
+  const length = Math.max(l1.length, l2.length)
+  for (let i = 0; i < length; i++) {
+    res.push([l1[i], l2[i]])
+  }
+
+  return res
+}
+
 export class NotificationWall extends React.Component {
-  constructor () {
-    super()
+  constructor (props) {
+    super(props)
     this.state = {
-      unfoldedNotificationGroup: {},
-      notificationsGroupsByContentBySpace: [],
-      knownGroupIds: []
+      notificationGroupList: this.buildNotificationGroups(props.notificationPage)
     }
   }
 
-  handleClickNotification = async (e, notification, notificationDetails, dontFollowLink = false) => {
+  handleClickNotification = async (e, notificationList, notificationDetails, dontFollowLink = false) => {
     const { props } = this
 
     if (dontFollowLink) {
@@ -76,26 +141,29 @@ export class NotificationWall extends React.Component {
       e.preventDefault()
     }
 
-    if (!notification.content) {
-      const fetchPutNotificationAsRead = await props.dispatch(putNotificationAsRead(props.user.userId, notification.id))
-      switch (fetchPutNotificationAsRead.status) {
-        case 204: {
-          props.dispatch(readNotification(notification.id))
-          break
+    for (const notification of notificationList) {
+      if (notification.read) continue
+      if (!notification.content) {
+        const fetchPutNotificationAsRead = await props.dispatch(putNotificationAsRead(props.user.userId, notification.id))
+        switch (fetchPutNotificationAsRead.status) {
+          case 204: {
+            props.dispatch(readNotification(notification.id))
+            break
+          }
+          default:
+            props.dispatch(newFlashMessage(props.t('Error while marking the notification as read'), 'warning'))
         }
-        default:
-          props.dispatch(newFlashMessage(props.t('Error while marking the notification as read'), 'warning'))
-      }
-    } else {
-      const mainContentId = notification.type.endsWith('comment') ? notification.content.parentId : notification.content.id
-      const fetchPutContentNotificationAsRead = await props.dispatch(putContentNotificationAsRead(props.user.userId, mainContentId))
-      switch (fetchPutContentNotificationAsRead.status) {
-        case 204: {
-          props.dispatch(readContentNotificationList(mainContentId))
-          break
+      } else {
+        const mainContentId = notification.type.endsWith('comment') ? notification.content.parentId : notification.content.id
+        const fetchPutContentNotificationAsRead = await props.dispatch(putContentNotificationAsRead(props.user.userId, mainContentId))
+        switch (fetchPutContentNotificationAsRead.status) {
+          case 204: {
+            props.dispatch(readContentNotificationList(mainContentId))
+            break
+          }
+          default:
+            props.dispatch(newFlashMessage(props.t('Error while marking the notification as read'), 'warning'))
         }
-        default:
-          props.dispatch(newFlashMessage(props.t('Error while marking the notification as read'), 'warning'))
       }
     }
 
@@ -167,7 +235,7 @@ export class NotificationWall extends React.Component {
               text: props.t('{{author}} commented on {{content}} in {{space}}', i18nOpts),
               url: this.linkToComment(notification),
               action: 'commented',
-              sentenceEnding: 'on ' + i18nOpts.content
+              sentenceEnding: 'on ' + i18nOpts.content + ' in ' + i18nOpts.space
             }
           }
 
@@ -176,7 +244,7 @@ export class NotificationWall extends React.Component {
             title: isPublication ? props.t('New publication') : props.t('New content'),
             text: props.t('{{author}} created {{content}} in {{space}}', i18nOpts),
             action: 'created',
-            sentenceEnding: i18nOpts.content,
+            sentenceEnding: i18nOpts.content + ' in ' + i18nOpts.space,
             url: contentUrl
           }
         }
@@ -187,7 +255,7 @@ export class NotificationWall extends React.Component {
               title: props.t('Status updated'),
               text: props.t('{{author}} changed the status of {{content}} in {{space}}', i18nOpts),
               action: 'changed the status',
-              sentenceEnding: 'of ' + i18nOpts.content,
+              sentenceEnding: 'of ' + i18nOpts.content + ' in ' + i18nOpts.space,
               url: contentUrl
             }
           }
@@ -197,7 +265,7 @@ export class NotificationWall extends React.Component {
             title: isPublication ? props.t('Publication updated') : props.t('Content updated'),
             text: props.t('{{author}} updated {{content}} in {{space}}', i18nOpts),
             action: 'updated',
-            sentenceEnding: i18nOpts.content,
+            sentenceEnding: i18nOpts.content + ' in ' + i18nOpts.space,
             url: contentUrl
           }
         }
@@ -207,7 +275,7 @@ export class NotificationWall extends React.Component {
             title: isPublication ? props.t('Publication deleted') : props.t('Content deleted'),
             text: props.t('{{author}} deleted {{content}} from {{space}}', i18nOpts),
             action: 'deleted',
-            sentenceEnding: i18nOpts.content,
+            sentenceEnding: i18nOpts.content + ' in ' + i18nOpts.space,
             url: contentUrl
           }
         }
@@ -217,7 +285,7 @@ export class NotificationWall extends React.Component {
             title: isPublication ? props.t('Publication restored') : props.t('Content restored'),
             text: props.t('{{author}} restored {{content}} in {{space}}', i18nOpts),
             action: 'deleted',
-            sentenceEnding: i18nOpts.content,
+            sentenceEnding: i18nOpts.content + ' in ' + i18nOpts.space,
             url: contentUrl
           }
         }
@@ -232,7 +300,7 @@ export class NotificationWall extends React.Component {
           text: props.t('{{author}} mentioned you in a comment in {{content}} in {{space}}', i18nOpts),
           url: this.linkToComment(notification),
           action: 'mentioned you in a comment',
-          sentenceEnding: 'in ' + i18nOpts.content,
+          sentenceEnding: 'in ' + i18nOpts.content + ' in ' + i18nOpts.space,
           isMention: true
         }
       }
@@ -242,7 +310,7 @@ export class NotificationWall extends React.Component {
         title: props.t('Mention'),
         text: props.t('{{author}} mentioned you in {{content}} in {{space}}', i18nOpts),
         action: 'mentioned you',
-        sentenceEnding: 'in ' + i18nOpts.content,
+        sentenceEnding: 'in ' + i18nOpts.content + ' in ' + i18nOpts.space,
         url: contentUrl,
         isMention: true
       }
@@ -487,95 +555,99 @@ export class NotificationWall extends React.Component {
   }
 
   componentDidUpdate (prevProps) {
-    const { props, state } = this
-    if (props === prevProps) return
-    const notificationsGroupsByContentBySpace = []
-    let lastSpaceId = -1
-    let lastContentId = -1
+    const { props } = this
 
-    const newKnownGroupIds = []
+    if (zip(props?.notificationPage?.list || [], prevProps?.notificationPage?.list || []).every(
+      ([notificationA, notificationB]) => notificationA?.id === notificationB?.id && notificationA?.read === notificationB?.read)
+    ) {
+      return
+    }
 
-    const setGroup = (group) => {
-      if (!group) return
+    this.setState({ notificationGroupList: this.buildNotificationGroups(props.notificationPage) })
+  }
 
-      for (const knownGroupId of state.knownGroupIds) {
-        for (const subGroup of group.list) {
-          for (const { notification } of subGroup.list) {
-            if (notification.id === knownGroupId) {
-              group.groupId = knownGroupId
-              return
+  buildNotificationGroups (notificationPage) {
+    console.log(notificationPage, notificationPage?.list)
+    if (!notificationPage?.list) return []
+
+    let notificationGroupList = [{
+      minNotificationCountForGrouping: Number.MAX_SAFE_INTEGER,
+      grouped: false,
+      list: notificationPage.list
+    }]
+
+    for (const [minNotificationCountForGrouping, firstCriterion, secondCriterion] of GROUP_RULES) {
+      console.log("Grouping by", [firstCriterion, secondCriterion], notificationGroupList)
+      const newNotificationGroupList = []
+
+      let lastGroup = newNotificationGroupList[newNotificationGroupList.length - 1] || newGroup(newNotificationGroupList)
+
+      for (const group of notificationGroupList) {
+        if (!group.list.length) {
+          continue
+        }
+
+        let match = true
+
+        if (lastGroup.grouped) {
+          outer: for (const notification of group.list) {
+            for (const notificationLastGroup of lastGroup.list) {
+              if (!matchCriteria(
+                notification,
+                notificationLastGroup,
+                firstCriterion,
+                secondCriterion
+              )) {
+                match = false
+                break outer
+              }
             }
           }
+
+          if (match) {
+            lastGroup.list = [
+              ...lastGroup.list,
+              ...group.list
+            ]
+            lastGroup.grouped.push([firstCriterion, secondCriterion])
+            continue
+          }
+        }
+
+        if (group.grouped) {
+          newNotificationGroupList.push(group)
+          lastGroup = group
+          continue
+        }
+
+        lastGroup = newGroup(newNotificationGroupList)
+
+        for (const notification of group.list) {
+          const lastGroupLastNotification = lastGroup.list[lastGroup.list.length - 1]
+
+          if (lastGroupLastNotification) {
+            if (matchCriteria(
+              notification,
+              lastGroupLastNotification,
+              firstCriterion,
+              secondCriterion
+            )) {
+              lastGroup.grouped = [[firstCriterion, secondCriterion]]
+            } else {
+              lastGroup = newGroup(newNotificationGroupList)
+            }
+          }
+
+          lastGroup.list.push(notification)
         }
       }
 
-      newKnownGroupIds.push(group.groupId = group.list[0].list[0].notification.id)
+      notificationGroupList = newNotificationGroupList
+      console.log("Grouped by", [firstCriterion, secondCriterion], notificationGroupList)
     }
 
-    for (const notification of props.notificationPage.list) {
-      const spaceLabel = (
-        notification.workspace
-          ? notification.workspace.label
-          : '(instance)'
-      )
-
-      const spaceId = (
-        notification.workspace
-          ? notification.workspace.id
-          : -1
-      )
-
-      const [contentLabel, contentId] = (
-        notification.content
-          ? getNotificationLabelAndId(notification)
-          : ['(space)', 0]
-      )
-
-      if (lastSpaceId !== spaceId || !notificationsGroupsByContentBySpace.length) {
-        setGroup(notificationsGroupsByContentBySpace[notificationsGroupsByContentBySpace.length - 1])
-        lastSpaceId = spaceId
-        lastContentId = -1
-        notificationsGroupsByContentBySpace.push({
-          label: spaceLabel,
-          id: spaceId,
-          list: []
-        })
-      }
-
-      const spaceGroup = notificationsGroupsByContentBySpace[notificationsGroupsByContentBySpace.length - 1]
-
-      if (lastContentId !== contentId) {
-        lastContentId = contentId
-        spaceGroup.list.push({
-          label: contentLabel,
-          id: spaceId,
-          details: {
-            authors: [],
-            actions: [],
-            url: '',
-            icon: '',
-            isMention: false
-          },
-          list: []
-        })
-      }
-
-      const details = this.getNotificationDetails(notification)
-      const contentGroup = spaceGroup.list[spaceGroup.list.length - 1]
-      contentGroup.list.push({ notification, details })
-      if (notification.author) contentGroup.details.authors.unshift(notification.author)
-      if (details.action) contentGroup.details.actions.unshift(details.action)
-      if (details.icon) contentGroup.details.icon = details.icon
-      if (details.url) contentGroup.details.url = details.url
-      if (details.isMention) contentGroup.details.isMention = true
-    }
-
-    setGroup(notificationsGroupsByContentBySpace[notificationsGroupsByContentBySpace.length - 1])
-
-    this.setState(prev => ({
-      knownGroupIds: newKnownGroupIds.length ? [...prev.knownGroupIds, ...newKnownGroupIds] : prev.knownGroupIds,
-      notificationsGroupsByContentBySpace
-    }))
+    console.log("NOTIFICATIONGROUPLIST", notificationGroupList, notificationPage?.list)
+    return notificationGroupList
   }
 
   render () {
@@ -602,38 +674,42 @@ export class NotificationWall extends React.Component {
         </PopinFixedHeader>
 
         <div className='notification__groups'>
-          {state.notificationsGroupsByContentBySpace.map(({ label: spaceName, id: spaceId, groupId, list: contentList }) => {
-            let spaceCount = 0
-            for (const content of contentList) {
-              spaceCount += content.list.length
+          {state.notificationGroupList.map(({ grouped, groupId, list }) => {
+            console.log("NOTIFICATION GROUP", grouped, groupId, list)
+            const detailsList = list.map(notification => this.getNotificationDetails(notification))
+            if (list.length === 1 || !grouped || list.length < list.minNotificationCountForGrouping) {
+              return zip(list, detailsList).map(
+                ([notification, details]) => this.renderNotication(
+                  notification,
+                  details,
+                  list
+                )
+              )
             }
 
-            if (spaceCount === 1) {
-              return this.renderNotication(props, contentList[0].list[0].notification, contentList[0].list[0].details, contentList[0].list)
+            const authors = this.joinComma(list.filter(n => n.author).map(n => n.author.publicName))
+            const actions = this.joinComma(detailsList.filter(d => d.action).map(d => d.action))
+
+            const mergedDetails = {
+              text: (
+                authors +
+                ' ' +
+                actions +
+                ' ' +
+                this.joinComma(detailsList.map(d => d.sentenceEnding))
+              ),
+              icon: (detailsList.find(d => d.icon) || {}).icon,
+              url: (detailsList.find(d => d.url) || {}).url,
+              isMention: detailsList.some(d => d.isMention),
+              grouped
             }
 
-            return (
-              <div className='notification__groups' key={groupId}>
-                {contentList.map(({ list: detailsAndNotificationList, details }) => {
-                  if (detailsAndNotificationList.length === 1) {
-                    return this.renderNotication(props, detailsAndNotificationList[0].notification, detailsAndNotificationList[0].details, detailsAndNotificationList)
-                  }
-
-                  const authors = this.joinComma(details.authors.map(user => user.publicName))
-                  const actions = this.joinComma(details.actions)
-
-                  const mergedDetails = {
-                    text: authors + ' ' + actions + ' ' + detailsAndNotificationList[0].details.sentenceEnding + ' (' + detailsAndNotificationList.length + ')',
-                    icon: details.icon,
-                    url: details.url,
-                    isMention: details.isMention
-                  }
-
-                  return this.renderNotication(props, detailsAndNotificationList[0].notification, mergedDetails, detailsAndNotificationList)
-                })}
-              </div>
+            return this.renderNotication(
+              list[0],
+              mergedDetails,
+              list
             )
-          })}
+          }).flat()}
         </div>
         {(props.notificationPage.hasNextPage &&
           <div className='notification__footer'>
@@ -666,7 +742,7 @@ export class NotificationWall extends React.Component {
     return joined.join(', ')
   }
 
-  renderNotication (props, notification, notificationDetails, relatedDetailsAndNotifications) {
+  renderNotication = (notification, notificationDetails, relatedNotifications) => {
     if (Object.keys(notificationDetails).length === 0) return
     const icons = notificationDetails.icon.split('+')
     const icon = (
@@ -675,11 +751,15 @@ export class NotificationWall extends React.Component {
         : <ComposedIcon titleIcon={notificationDetails.title} mainIcon={icons[0]} smallIcon={icons[1]} />
     )
 
-    const read = relatedDetailsAndNotifications.every(({ notification }) => notification.read)
+    const read = relatedNotifications.every(notification => notification.read)
+    const { props } = this
+    if (notificationDetails.grouped) {
+      notificationDetails.grouped = [notificationDetails.grouped[notificationDetails.grouped.length - 1]]
+    }
 
     return (
       <ListItemWrapper
-        isLast={notification === relatedDetailsAndNotifications[relatedDetailsAndNotifications.length - 1].notification}
+        isLast={notification === relatedNotifications[relatedNotifications.length - 1]}
         // FIXME - notifications are always last with two consecutive spaces with one notification, which is not desirable
         read={read}
         id={`${ANCHOR_NAMESPACE.notificationItem}:${notification.id}`}
@@ -687,9 +767,10 @@ export class NotificationWall extends React.Component {
       >
         <Link
           to={notificationDetails.url || '#'}
-          onClick={(e) => this.handleClickNotification(e, notification, notificationDetails)}
+          onClick={(e) => this.handleClickNotification(e, relatedNotifications, notificationDetails)}
           className={classnames('notification__list__item', { itemRead: read, isMention: notificationDetails.isMention })}
           key={notification.id}
+          title={notificationDetails.grouped && ('Grouped because: ' + relatedNotifications.length + ' times the ' + notificationDetails.grouped.map(criteria => 'same ' + criteria.filter(c => c).join('+')).join(', then '))}
         >
           {icon}
           <div className='notification__list__item__text'>
@@ -710,7 +791,7 @@ export class NotificationWall extends React.Component {
               }}
             />
           </div>
-          {!read && <Link onClick={(e) => this.handleClickNotification(e, notification, notificationDetails, true)} className='notification__list__item__circle fas fa-circle' />}
+          {!read && <i onClick={(e) => this.handleClickNotification(e, relatedNotifications, notificationDetails, true)} className='notification__list__item__circle fas fa-circle' />}
         </Link>
       </ListItemWrapper>
     )
