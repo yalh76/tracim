@@ -66,7 +66,7 @@ const getNotificationLabelAndId = (notification) => {
     : [notification.content.label, notification.content.id]
 }
 
-function getCriterionValue(notification, criterion) {
+function getCriterionValue (notification, criterion) {
   if (!notification) return undefined
 
   switch (criterion) {
@@ -84,17 +84,9 @@ function getCriterionValue(notification, criterion) {
   }
 }
 
-function* notificationsWithGroups(notificationGroupList) {
-  for (const group of notificationGroupList) {
-    for (const notification of group.list) {
-      yield [notification, group]
-    }
-  }
-}
-
-function newGroup (notificationGroupList) {
+function newGroup (notificationGroupList, minNotificationCountForGrouping) {
   const group = {
-    minNotificationCountForGrouping: Number.MAX_SAFE_INTEGER,
+    minNotificationCountForGrouping,
     grouped: false,
     list: []
   }
@@ -104,14 +96,14 @@ function newGroup (notificationGroupList) {
   return group
 }
 
-function matchCriteria (notificationA,  notificationB, firstCriterion, secondCriterion) {
+function matchCriteria (notificationA, notificationB, firstCriterion, secondCriterion) {
   return (
     getCriterionValue(notificationA, firstCriterion) === getCriterionValue(notificationB, firstCriterion) &&
     getCriterionValue(notificationA, secondCriterion) === getCriterionValue(notificationB, secondCriterion)
   )
 }
 
-function zip(l1, l2) {
+function zip (l1, l2) {
   const res = []
   const length = Math.max(l1.length, l2.length)
   for (let i = 0; i < length; i++) {
@@ -577,10 +569,10 @@ export class NotificationWall extends React.Component {
     }]
 
     for (const [minNotificationCountForGrouping, firstCriterion, secondCriterion] of GROUP_RULES) {
-      console.log("Grouping by", [firstCriterion, secondCriterion], notificationGroupList)
+      console.log('Grouping by', [firstCriterion, secondCriterion], notificationGroupList)
       const newNotificationGroupList = []
 
-      let lastGroup = newNotificationGroupList[newNotificationGroupList.length - 1] || newGroup(newNotificationGroupList)
+      let lastGroup = newNotificationGroupList[newNotificationGroupList.length - 1] || newGroup(newNotificationGroupList, minNotificationCountForGrouping)
 
       for (const group of notificationGroupList) {
         if (!group.list.length) {
@@ -590,7 +582,7 @@ export class NotificationWall extends React.Component {
         let match = true
 
         if (lastGroup.grouped) {
-          outer: for (const notification of group.list) {
+          for (const notification of group.list) {
             for (const notificationLastGroup of lastGroup.list) {
               if (!matchCriteria(
                 notification,
@@ -599,9 +591,10 @@ export class NotificationWall extends React.Component {
                 secondCriterion
               )) {
                 match = false
-                break outer
+                break
               }
             }
+            if (!match) break
           }
 
           if (match) {
@@ -620,7 +613,7 @@ export class NotificationWall extends React.Component {
           continue
         }
 
-        lastGroup = newGroup(newNotificationGroupList)
+        lastGroup = newGroup(newNotificationGroupList, minNotificationCountForGrouping)
 
         for (const notification of group.list) {
           const lastGroupLastNotification = lastGroup.list[lastGroup.list.length - 1]
@@ -634,7 +627,7 @@ export class NotificationWall extends React.Component {
             )) {
               lastGroup.grouped = [[firstCriterion, secondCriterion]]
             } else {
-              lastGroup = newGroup(newNotificationGroupList)
+              lastGroup = newGroup(newNotificationGroupList, minNotificationCountForGrouping)
             }
           }
 
@@ -643,10 +636,10 @@ export class NotificationWall extends React.Component {
       }
 
       notificationGroupList = newNotificationGroupList
-      console.log("Grouped by", [firstCriterion, secondCriterion], notificationGroupList)
+      console.log('Grouped by', [firstCriterion, secondCriterion], notificationGroupList)
     }
 
-    console.log("NOTIFICATIONGROUPLIST", notificationGroupList, notificationPage?.list)
+    console.log('NOTIFICATIONGROUPLIST', notificationGroupList, notificationPage?.list)
     return notificationGroupList
   }
 
@@ -674,10 +667,10 @@ export class NotificationWall extends React.Component {
         </PopinFixedHeader>
 
         <div className='notification__groups'>
-          {state.notificationGroupList.map(({ grouped, groupId, list }) => {
-            console.log("NOTIFICATION GROUP", grouped, groupId, list)
+          {state.notificationGroupList.map(({ grouped, groupId, list, minNotificationCountForGrouping }) => {
+            console.log('NOTIFICATION GROUP', grouped, groupId, list, minNotificationCountForGrouping)
             const detailsList = list.map(notification => this.getNotificationDetails(notification))
-            if (list.length === 1 || !grouped || list.length < list.minNotificationCountForGrouping) {
+            if (list.length === 1 || !grouped || list.length < minNotificationCountForGrouping) {
               return zip(list, detailsList).map(
                 ([notification, details]) => this.renderNotication(
                   notification,
