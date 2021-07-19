@@ -47,9 +47,7 @@ export const FlashMessage = props => {
                   {dataType.label}
                 </div>
 
-                <div className='flashmessage__container__content__text__paragraph'>
-                  {props.flashMessage[0].message}
-                </div>
+                <div className='flashmessage__container__content__text__paragraph' dangerouslySetInnerHTML={{ __html: props.flashMessage[0].message }} />
               </div>
             </div>
           </div>

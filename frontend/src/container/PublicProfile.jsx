@@ -25,7 +25,8 @@ import {
   getCustomPropertiesSchema,
   getCustomPropertiesUiSchema,
   getUserCustomPropertiesDataSchema,
-  putUserCustomPropertiesDataSchema
+  putUserCustomPropertiesDataSchema,
+  putSendInterruptRequest
 } from '../action-creator.async'
 import { serializeUserProps } from '../reducer/user.js'
 import { FETCH_CONFIG } from '../util/helper.js'
@@ -384,6 +385,12 @@ export class PublicProfile extends React.Component {
 
   handleCloseUploadPopup = () => this.setState({ displayUploadPopup: undefined })
 
+  handleSendInterruptRequest = () => {
+    const { state, props } = this
+    const message = `Allons en parler <a href="https://pro.suricate.tv/tracim-${props.user.publicName}+${state.displayedUser.publicName}">en visio</a>`
+    props.dispatch(putSendInterruptRequest(props.user.userId, state.displayedUser.userId, message))
+  }
+
   render () {
     const { props, state } = this
 
@@ -440,6 +447,13 @@ export class PublicProfile extends React.Component {
             breadcrumbsList={props.breadcrumbs}
             onChangeAvatarClick={this.handleChangeAvatarClick}
             changeAvatarEnabled={isPublicProfileEditable}
+          />
+
+          <IconButton
+            text={props.t('Send Interrupt Request')}
+            icon='fas fa-bell'
+            onClick={this.handleSendInterruptRequest}
+            intent='secondary'
           />
 
           <div className='profile__content'>
