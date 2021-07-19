@@ -925,10 +925,13 @@ class ContentApi(object):
         before_content_find = False
         for content in resultset:
             related_active_content = None
-            if content_type_list.Comment.slug == content.type:
-                related_active_content = content.parent
-            else:
-                related_active_content = content
+
+            # FIXME - SGD - 2021-07-19 - disabled those lines to experiment read status of comments
+            # We'll have to re-think the read status of contents later on.
+            # if content_type_list.Comment.slug == content.type:
+            #     related_active_content = content.parent
+            # else:
+            #     related_active_content = content
 
             # INFO - G.M - 2018-08-10 - re-apply general filters here to avoid
             # issue with comments
@@ -1769,9 +1772,11 @@ class ContentApi(object):
         for revision in viewed_revisions:
             revision.read_by[self._user] = read_datetime
 
-        if recursive:
-            for child in content.recursive_children:
-                self.mark_read(child, read_datetime=read_datetime, do_flush=False, recursive=True)
+        # FIXME - SGD - 2021-07-19 - do not mark children as read to allow marking
+        # individual comments as read.
+        # if recursive:
+        #     for child in content.recursive_children:
+        #         self.mark_read(child, read_datetime=read_datetime, do_flush=False, recursive=True)
 
         if do_flush:
             self.flush()
