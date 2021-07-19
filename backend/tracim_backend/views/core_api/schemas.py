@@ -2216,3 +2216,14 @@ class ContentRevisionsPageQuerySchema(BaseOptionalPaginatedQuerySchema):
         missing=ContentSortOrder.MODIFIED_ASC,
         description="Order of the returned revisions, default is to sort by modification (e.g. creation of the revision) date, older first",
     )
+
+
+class InterruptRequestSchema(marshmallow.Schema):
+    user_id = marshmallow.fields.Int(
+        example=42, required=True, description="user to send the interrupt request to"
+    )
+    message = marshmallow.fields.String(
+        example="I need to talk to you about our plans.",
+        required=True,
+        description="Message that will be displayed to the interrupted user",
+    )

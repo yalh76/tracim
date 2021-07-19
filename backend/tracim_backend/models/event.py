@@ -49,6 +49,7 @@ class EntityType(enum.Enum):
     REACTION = "reaction"
     TAG = "tag"
     CONTENT_TAG = "content_tag"
+    INTERRUPT = "interrupt"
 
     def __str__(self) -> str:
         return self.value

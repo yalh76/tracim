@@ -1,6 +1,6 @@
 import React from 'react'
 import { expect } from 'chai'
-import { shallow } from 'enzyme'
+import { mount } from 'enzyme'
 import { FlashMessage as FlashMessageWithoutHOC } from '../../../src/component/FlashMessage.jsx'
 import sinon from 'sinon'
 
@@ -15,7 +15,7 @@ describe('<FlashMessage />', () => {
     onRemoveFlashMessage: onRemoveFlashMessageCallBack
   }
 
-  const wrapper = shallow(<FlashMessageWithoutHOC {...props} t={key => key} />)
+  const wrapper = mount(<FlashMessageWithoutHOC {...props} t={key => key} />)
 
   describe('static design', () => {
     it(`should display the message: ${props.flashMessage[0].message} in a div`, () =>
