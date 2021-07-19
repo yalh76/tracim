@@ -2157,3 +2157,14 @@ class AboutUserSchema(UserDigestSchema):
         description="count of spaces where this user authored at least one content revision",
         validate=positive_int_validator,
     )
+
+
+class InterruptRequestSchema(marshmallow.Schema):
+    user_id = marshmallow.fields.Int(
+        example=42, required=True, description="user to send the interrupt request to"
+    )
+    message = marshmallow.fields.String(
+        example="I need to talk to you about our plans.",
+        required=True,
+        description="Message that will be displayed to the interrupted user",
+    )

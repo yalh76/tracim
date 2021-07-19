@@ -76,6 +76,7 @@ from tracim_backend.views.core_api.schemas import FileQuerySchema
 from tracim_backend.views.core_api.schemas import FollowedUsersSchemaPage
 from tracim_backend.views.core_api.schemas import GetLiveMessageQuerySchema
 from tracim_backend.views.core_api.schemas import GetUserFollowQuerySchema
+from tracim_backend.views.core_api.schemas import InterruptRequestSchema
 from tracim_backend.views.core_api.schemas import KnownContentsQuerySchema
 from tracim_backend.views.core_api.schemas import KnownMembersQuerySchema
 from tracim_backend.views.core_api.schemas import LiveMessageSchemaPage
@@ -811,6 +812,20 @@ class UserController(Controller):
         event_api = EventApi(request.current_user, request.dbsession, app_config)
         event_api.mark_user_message_as_read(
             event_id=hapic_data.path.event_id, user_id=request.candidate_user.user_id
+        )
+
+    @hapic.with_api_doc(tags=[SWAGGER_TAG__USER_EVENT_ENDPOINTS])
+    @check_right(has_personal_access)
+    @hapic.input_body(InterruptRequestSchema())
+    @hapic.output_body(NoContentSchema(), default_http_code=HTTPStatus.NO_CONTENT)
+    def interrupt_user(self, context, request: TracimRequest, hapic_data: HapicData) -> None:
+        """
+        Interrupt another user
+        """
+        app_config = request.registry.settings["CFG"]  # type: CFG
+        event_api = EventApi(request.current_user, request.dbsession, app_config)
+        event_api.create_interrupt_event(
+            user_id=hapic_data.body["user_id"], message=hapic_data.body["message"]
         )
 
     @hapic.with_api_doc(tags=[SWAGGER_TAG__USER_EVENT_ENDPOINTS])
@@ -1682,3 +1697,10 @@ class UserController(Controller):
             request_method="PUT",  # noqa: W605
         )
         configurator.add_view(self.put_raw_cover, route_name="put_raw_cover")
+
+        configurator.add_route(
+            "put_interrupt_request",
+            "/users/{user_id:\d+}/interrupt",
+            request_method="PUT",  # noqa: W605
+        )
+        configurator.add_view(self.interrupt_user, route_name="put_interrupt_request")

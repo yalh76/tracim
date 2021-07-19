@@ -1140,6 +1140,23 @@ export const putUserCustomPropertiesDataSchema = (userId, formData) => dispatch 
   })
 }
 
+export const putSendInterruptRequest = (authorId, userId, message) => dispatch => {
+  return fetchWrapper({
+    url: `${FETCH_CONFIG.apiUrl}/users/${authorId}/interrupt`,
+    param: {
+      credentials: 'include',
+      headers: FETCH_CONFIG.headers,
+      method: 'PUT',
+      body: JSON.stringify({
+        user_id: userId,
+        message: message
+      })
+    },
+    actionName: 'INTERRUPT',
+    dispatch
+  })
+}
+
 const getUTCMidnight = (dateString) => parseISO(`${dateString}T00:00:00Z`)
 
 const getDateRangeParameters = (range, rangeParameterPrefix) => {

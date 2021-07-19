@@ -296,6 +296,21 @@ class EventApi:
             related_to_content_ids=related_to_content_ids,
         ).count()
 
+    def create_interrupt_event(self, user_id: int, message: str) -> Event:
+        user_api = UserApi(self._current_user, self._session, self._config)
+        fields = {
+            Event.USER_FIELD: EventApi.user_schema.dump(
+                user_api.get_user_with_context(user_api.get_one(user_id))
+            ).data,
+            "message": message,
+        }
+        self.create_event(
+            entity_type=EntityType.INTERRUPT,
+            operation=OperationType.CREATED,
+            additional_fields=fields,
+            context=self._session.context,
+        )
+
     def create_event(
         self,
         entity_type: EntityType,
@@ -918,6 +933,7 @@ class BaseLiveMessageBuilder(abc.ABC):
         EntityType.REACTION: _get_content_event_receiver_ids,
         EntityType.TAG: _get_workspace_event_receiver_ids,
         EntityType.CONTENT_TAG: _get_content_event_receiver_ids,
+        EntityType.INTERRUPT: lambda event, session, config: {event.user["user_id"]},
     }  # type: Dict[str, GetReceiverIdsCallable]
 
     def __init__(self, config: CFG) -> None:

@@ -31,7 +31,8 @@ import {
   LiveMessageManager,
   LIVE_MESSAGE_STATUS,
   LIVE_MESSAGE_ERROR_CODE,
-  PAGE
+  PAGE,
+  TLM_CORE_EVENT_TYPE as TLM_CET
 } from 'tracim_frontend_lib'
 import {
   COOKIE_FRONTEND,
@@ -97,7 +98,9 @@ export class Tracim extends React.Component {
     this.connectionErrorDisplayTimeoutId = 0
     this.state = {
       displayConnectionError: false,
-      isNotificationWallOpen: false
+      isNotificationWallOpen: false,
+      interruptMessage: null,
+      interruptUsername: null
     }
 
     this.liveMessageManager = new LiveMessageManager()
@@ -121,6 +124,16 @@ export class Tracim extends React.Component {
       { name: CUSTOM_EVENT.USER_CONNECTED, handler: this.handleUserConnected },
       { name: CUSTOM_EVENT.USER_DISCONNECTED, handler: this.handleUserDisconnected }
     ])
+    props.registerLiveMessageHandlerList([
+      { entityType: 'interrupt', coreEntityType: TLM_CET.CREATED, handler: this.handleInterrupt }
+    ])
+  }
+
+  handleInterrupt = (tlm) => {
+    this.setState({
+      interruptMessage: tlm.fields.message,
+      interruptUser: tlm.fields.author.public_name
+    })
   }
 
   handleClickLogout = async () => {
@@ -443,6 +456,13 @@ export class Tracim extends React.Component {
           onRemoveFlashMessage={this.handleRemoveFlashMessage}
           t={props.t}
         />
+        {state.interruptMessage && (
+          <FlashMessage
+            flashMessage={[{ message: `${state.interruptUser}: ${state.interruptMessage}`, type: 'info' }]}
+            onRemoveFlashMessage={() => { this.setState({ interruptMessage: null, interruptUser: null }) }}
+            t={props.t}
+          />
+        )}
         <ReduxTlmDispatcher />
 
         <div className='sidebarpagecontainer'>
