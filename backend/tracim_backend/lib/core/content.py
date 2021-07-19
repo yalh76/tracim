@@ -931,7 +931,7 @@ class ContentApi(object):
             # if content_type_list.Comment.slug == content.type:
             #     related_active_content = content.parent
             # else:
-            #     related_active_content = content
+            related_active_content = content
 
             # INFO - G.M - 2018-08-10 - re-apply general filters here to avoid
             # issue with comments
