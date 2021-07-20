@@ -387,7 +387,7 @@ export class PublicProfile extends React.Component {
 
   handleSendInterruptRequest = () => {
     const { state, props } = this
-    const message = `Allons en parler <a href="https://pro.suricate.tv/tracim-${props.user.publicName}+${state.displayedUser.publicName}">en visio</a>`
+    const message = `Allons en parler <a href="https://pro.suricate.tv/tracim-${props.user.publicName}+${state.displayedUser.publicName}" target="_blank" rel="noopener noreferrer">en visio</a>`
     props.dispatch(putSendInterruptRequest(props.user.userId, state.displayedUser.userId, message))
   }
 
@@ -455,6 +455,16 @@ export class PublicProfile extends React.Component {
             onClick={this.handleSendInterruptRequest}
             intent='secondary'
           />
+          &nbsp;
+          {state.displayedUser && (
+            <a
+              href={`https://pro.suricate.tv/tracim-${props.user.publicName}+${state.displayedUser.publicName}`}
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              Votre lien de visio avec {`${state.displayedUser.publicName}`}
+            </a>
+          )}
 
           <div className='profile__content'>
             <div className='profile__content__information'>
