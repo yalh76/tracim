@@ -352,6 +352,7 @@ export class FeedItemWithPreview extends React.Component {
               ? (commentToShow &&
                 <Comment
                   isPublication
+                  currentWorkspace={props.currentWorkspace}
                   customClass='feedItem__publication'
                   apiUrl={FETCH_CONFIG.apiUrl}
                   contentId={Number(props.content.id)}
@@ -402,6 +403,7 @@ export class FeedItemWithPreview extends React.Component {
             {props.showTimeline && (
               <Timeline
                 apiUrl={FETCH_CONFIG.apiUrl}
+                currentWorkspace={props.currentWorkspace}
                 customClass='feedItem__timeline'
                 customColor={props.customColor}
                 id={props.content.id}

@@ -165,13 +165,17 @@ export default function currentWorkspace (state = defaultWorkspace, action) {
         recentActivityList: state.recentActivityList.filter(c => !action.workspaceContentList.some(cc => c.id === cc.content_id))
       }
 
-    case `${SET}/${WORKSPACE_READ_STATUS_LIST}`:
+    case `${SET}/${WORKSPACE_READ_STATUS_LIST}`: {
+      const contentReadStatusList = action.workspaceReadStatusList
+        .filter(content => content.read_by_user)
+        .map(content => content.content_id)
+
+      globalThis.GLOBAL_dispatchEvent({ type: 'readstatus', data: { contentReadStatusList } })
       return {
         ...state,
-        contentReadStatusList: action.workspaceReadStatusList
-          .filter(content => content.read_by_user)
-          .map(content => content.content_id)
+        contentReadStatusList
       }
+    }
 
     case `${ADD}/${WORKSPACE_READ_STATUS_LIST}`:
       if (state.id !== action.workspaceId) return state

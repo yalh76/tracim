@@ -158,6 +158,7 @@ export class Timeline extends React.Component {
                 return (
                   <Comment
                     isPublication={false}
+                    currentWorkspace={props.currentWorkspace}
                     customClass={`${props.customClass}__comment`}
                     customColor={props.customColor}
                     apiUrl={props.apiUrl}
@@ -330,6 +331,7 @@ export default translate()(Radium(TracimComponent(Timeline)))
 
 Timeline.propTypes = {
   timelineData: PropTypes.array.isRequired,
+  currentWorkspace: PropTypes.object.isRequired,
   apiUrl: PropTypes.string.isRequired,
   workspaceId: PropTypes.number.isRequired,
   newComment: PropTypes.string.isRequired,

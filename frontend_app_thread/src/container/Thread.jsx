@@ -550,6 +550,7 @@ export class Thread extends React.Component {
             https://github.com/tracim/tracim/issues/1840 */}
             {state.config.apiUrl ? (
               <Timeline
+                currentWorkspace={props.data.currentWorkspace}
                 customClass={`${state.config.slug}__contentpage`}
                 customColor={color}
                 loggedUser={state.loggedUser}

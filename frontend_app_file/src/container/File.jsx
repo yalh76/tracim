@@ -913,6 +913,7 @@ export class File extends React.Component {
         <Timeline
           customClass={`${state.config.slug}__contentpage`}
           customColor={state.config.hexcolor}
+          currentWorkspace={props.data.currentWorkspace}
           apiUrl={state.config.apiUrl}
           loggedUser={state.loggedUser}
           timelineData={state.timeline}

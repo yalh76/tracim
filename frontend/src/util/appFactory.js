@@ -24,6 +24,7 @@ export function appFactory (WrappedComponent) {
         profileObject: PROFILE,
         history: this.props.history
       },
+      currentWorkspace: this.props.currentWorkspace,
       content
     })
 
