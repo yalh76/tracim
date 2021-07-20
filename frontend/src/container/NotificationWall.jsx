@@ -207,11 +207,7 @@ export class NotificationWall extends React.Component {
 
     const contentUrl = (
       notification.content
-        ? (
-          isPublication
-            ? PAGE.WORKSPACE.PUBLICATION(notification.workspace.id, notification.content.id)
-            : PAGE.WORKSPACE.CONTENT(notification.workspace.id, notification.content.type, notification.content.id)
-        )
+        ? PAGE.WORKSPACE.CONTENT(notification.workspace.id, notification.content.type, notification.content.id)
         : ''
     )
 
@@ -533,11 +529,7 @@ export class NotificationWall extends React.Component {
   }
 
   linkToComment (notification) {
-    return (
-      notification.content.parentContentNamespace === CONTENT_NAMESPACE.PUBLICATION
-        ? PAGE.WORKSPACE.PUBLICATION(notification.workspace.id, notification.content.parentId)
-        : PAGE.WORKSPACE.CONTENT(notification.workspace.id, notification.content.parentContentType, notification.content.parentId)
-    )
+    return PAGE.WORKSPACE.CONTENT(notification.workspace.id, notification.content.parentContentType, notification.content.parentId)
   }
 
   toggleGroup (spaceId) {

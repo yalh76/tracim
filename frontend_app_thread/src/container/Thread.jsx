@@ -8,6 +8,7 @@ import {
   Breadcrumbs,
   BREADCRUMBS_TYPE,
   buildContentPathBreadcrumbs,
+  CONTENT_NAMESPACE,
   CONTENT_TYPE,
   handleFetchResult,
   handleInvalidMentionInComment,
@@ -306,8 +307,13 @@ export class Thread extends React.Component {
   }
 
   handleClickBtnCloseApp = () => {
-    this.setState({ isVisible: false })
-    GLOBAL_dispatchEvent({ type: CUSTOM_EVENT.APP_CLOSED, data: {} })
+    const { state } = this
+    const isPublication = state.content.content_namespace === CONTENT_NAMESPACE.PUBLICATION
+    if (isPublication) state.config.history.push(PAGE.WORKSPACE.PUBLICATIONS(state.content.workspace_id)) 
+    else {
+      this.setState({ isVisible: false })
+      GLOBAL_dispatchEvent({ type: CUSTOM_EVENT.APP_CLOSED, data: {} })
+    }
   }
 
   handleSaveEditTitle = async newTitle => {
@@ -466,15 +472,18 @@ export class Thread extends React.Component {
 
   render () {
     const { props, state } = this
+    const isPublication = state.content.content_namespace === CONTENT_NAMESPACE.PUBLICATION
+    const publicationColor = '#661F98'
+    const color = isPublication ? publicationColor : state.config.hexcolor
 
     if (!state.isVisible) return null
 
     return (
-      <PopinFixed customClass={state.config.slug} customColor={state.config.hexcolor}>
+      <PopinFixed customClass={state.config.slug} customColor={color}>
         <PopinFixedHeader
           customClass={`${state.config.slug}__contentpage`}
-          customColor={state.config.hexcolor}
-          faIcon={state.config.faIcon}
+          customColor={color}
+          faIcon={isPublication ? 'fas fa-stream': state.config.faIcon}
           rawTitle={state.content.label}
           componentTitle={<div>{state.content.label}</div>}
           userRoleIdInWorkspace={state.loggedUser.userRoleIdInWorkspace}
@@ -542,7 +551,7 @@ export class Thread extends React.Component {
             {state.config.apiUrl ? (
               <Timeline
                 customClass={`${state.config.slug}__contentpage`}
-                customColor={state.config.hexcolor}
+                customColor={color}
                 loggedUser={state.loggedUser}
                 memberList={state.config.workspace && state.config.workspace.memberList}
                 apiUrl={state.config.apiUrl}
