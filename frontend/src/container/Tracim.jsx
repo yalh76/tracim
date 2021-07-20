@@ -103,6 +103,7 @@ export class Tracim extends React.Component {
       interruptMessage: null,
       interruptUsername: null
     }
+    this.audioCall = new Audio('/assets/call.ogg')
 
     this.liveMessageManager = new LiveMessageManager()
 
@@ -130,11 +131,44 @@ export class Tracim extends React.Component {
     ])
   }
 
-  handleInterrupt = (tlm) => {
-    this.setState({
-      interruptMessage: tlm.fields.message,
-      interruptUser: tlm.fields.author.public_name
-    })
+  handleInterrupt = async (tlm) => {
+    const { props } = this
+    const authorPublicName = tlm.fields.author.public_name
+    const isMainTab = this.liveMessageManager.eventSource !== null
+    if (document.visibilityState === 'visible' || isMainTab) {
+      const date = new Date()
+      this.setState({
+        interruptMessage: tlm.fields.message,
+        interruptUser: authorPublicName,
+        interruptHour: `${date.getHours()}:${date.getMinutes()}`
+      })
+    }
+
+    /* NOTE SGD - 2021-07-19 - Only the "main" Tracim tab/window will do those actions:
+       - playing a sound
+       - sending a desktop notification
+       - change the head title to include a bell in it
+    */
+    if (!isMainTab) return
+    this.audioCall.play()
+    this.handleSetHeadTitle({ title: props.system.headTitle }, true)
+    if (Notification.permission !== 'granted') {
+      await Notification.requestPermission()
+    }
+    if (Notification.permission === 'granted') {
+      new Notification(
+        `Tracim: ${authorPublicName} wants your attention.`,
+        { body: tlm.fields.message, requireInteraction: true }
+      )
+      // notification.onclose = this.handleCloseInterrupt
+    }
+  }
+
+  handleCloseInterrupt = () => {
+    const { props } = this
+    this.setState({ interruptMessage: null, interruptUser: null })
+    this.handleSetHeadTitle({ title: props.system.headTitle }, false)
+    this.audioCall.pause()
   }
 
   handleClickLogout = async () => {
@@ -207,9 +241,17 @@ export class Tracim extends React.Component {
     this.props.dispatch(appendBreadcrumbs(data.breadcrumbs))
   }
 
-  handleSetHeadTitle = data => {
+  handleSetHeadTitle = (data, interrupt = false) => {
     console.log('%c<Tracim> Custom event', 'color: #28a745', CUSTOM_EVENT.SET_HEAD_TITLE, data)
-    this.props.dispatch(setHeadTitle(data.title))
+    const bell = '🔔'
+    let newTitle = data.title
+    if (data.title.startsWith(bell)) {
+      newTitle = data.title.replace(bell, '')
+    }
+    if (interrupt) {
+      newTitle = `${bell} ${newTitle}`
+    }
+    this.props.dispatch(setHeadTitle(newTitle))
   }
 
   handleUserDisconnected = () => {
@@ -461,8 +503,8 @@ export class Tracim extends React.Component {
         />
         {state.interruptMessage && (
           <FlashMessage
-            flashMessage={[{ message: `${state.interruptUser}: ${state.interruptMessage}`, type: 'info' }]}
-            onRemoveFlashMessage={() => { this.setState({ interruptMessage: null, interruptUser: null }) }}
+            flashMessage={[{ message: `${state.interruptHour} - ${state.interruptUser} : ${state.interruptMessage}`, type: 'info' }]}
+            onRemoveFlashMessage={this.handleCloseInterrupt}
             t={props.t}
           />
         )}

@@ -32,4 +32,9 @@ def upgrade():
 
 
 def downgrade():
+    connection = op.get_bind()
+    connection.execute(
+        "DELETE FROM messages WHERE event_id IN (SELECT event_id FROM events WHERE entity_type='INTERRUPT')"
+    )
+    connection.execute("DELETE FROM events WHERE entity_type='INTERRUPT'")
     op.replace_enum("events", "entity_type", new_enum, old_enum, None)
