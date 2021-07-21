@@ -13,5 +13,7 @@ export const postThreadContent = (apiUrl, workspaceId, folderId, contentType, ne
     label: newContentName
   })
 
-export const putThreadRead = (user, apiUrl, workspaceId, contentId) =>
+export const putThreadRead = (user, apiUrl, workspaceId, contentId) => {
+  GLOBAL_dispatchEvent({ type: 'markedContentAsRead', data: { contentId } })
   baseFetch('PUT', `${apiUrl}/users/${user.userId}/workspaces/${workspaceId}/contents/${contentId}/read`)
+}

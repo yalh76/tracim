@@ -22,5 +22,7 @@ export const postHtmlDocContent = (apiUrl, workspaceId, folderId, contentType, n
     label: newContentName
   })
 
-export const putHtmlDocRead = (apiUrl, user, workspaceId, contentId) =>
-  baseFetch('PUT', `${apiUrl}/users/${user.userId}/workspaces/${workspaceId}/contents/${contentId}/read`)
+export const putHtmlDocRead = (apiUrl, user, workspaceId, contentId) => {
+  GLOBAL_dispatchEvent({ type: 'markedContentAsRead', data: { contentId } })
+  return baseFetch('PUT', `${apiUrl}/users/${user.userId}/workspaces/${workspaceId}/contents/${contentId}/read`)
+}

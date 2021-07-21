@@ -158,8 +158,10 @@ export const putRawFileContent = (apiUrl, workspaceId, contentId, filename, newC
   return baseFetch('PUT', `${apiUrl}/workspaces/${workspaceId}/files/${contentId}/raw/${filename}`, formData)
 }
 
-export const putMyselfFileRead = (apiUrl, workspaceId, contentId) =>
+export const putMyselfFileRead = (apiUrl, workspaceId, contentId) => {
+  GLOBAL_dispatchEvent({ type: 'markedContentAsRead', data: { contentId } })
   baseFetch('PUT', `${apiUrl}/users/me/workspaces/${workspaceId}/contents/${contentId}/read`)
+}
 
 export const getContent = (apiUrl, contentId) =>
   baseFetch('GET', `${apiUrl}/contents/${contentId}`)

@@ -29,24 +29,38 @@ const defaultNotificationsObject = {
 // See https://github.com/tracim/tracim/issues/3229
 export const serializeNotification = notification => {
   return {
+    ...notification,
     ...notification.fields,
     author: {
+      ...notification.fields.author,
       publicName: notification.fields.author.public_name,
       userId: notification.fields.author.user_id,
       hasAvatar: notification.fields.author.has_avatar,
       hasCover: notification.fields.author.has_cover
     },
-    user: notification.fields.user ? serialize(notification.fields.user, serializeUserProps) : null,
+    user: notification.fields.user ? {
+      ...notification.fields.user,
+      ...serialize(notification.fields.user, serializeUserProps)
+    } : null,
     subscription: notification.fields.subscription ? {
       ...notification.fields.subscription,
-      author: serialize(notification.fields.subscription.author, serializeUserProps)
+      author: {
+        ...notification.fields.subscription.author,
+        ...serialize(notification.fields.subscription.author, serializeUserProps)
+      }
     } : null,
-    content: notification.fields.content ? serialize(notification.fields.content, serializeContentProps) : null,
+    content: notification.fields.content ? {
+      ...notification.fields.content,
+      ...serialize(notification.fields.content, serializeContentProps)
+    } : null,
     created: notification.created,
     id: notification.event_id,
     read: notification.read,
     type: notification.event_type,
-    workspace: notification.fields.workspace ? serialize(notification.fields.workspace, serializeWorkspaceListProps) : null
+    workspace: notification.fields.workspace ? {
+      ...notification.fields.workspace,
+      ...serialize(notification.fields.workspace, serializeWorkspaceListProps)
+    } : null
   }
 }
 

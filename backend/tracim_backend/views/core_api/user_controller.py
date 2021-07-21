@@ -639,6 +639,11 @@ class UserController(Controller):
         )
         content_api.mark_read(request.current_content, do_flush=True)
 
+        event_api = EventApi(request.current_user, request.dbsession, app_config)
+        event_api.mark_user_messages_as_read(
+            request.candidate_user.user_id, [request.current_content.content_id]
+        )
+
     @hapic.with_api_doc(tags=[SWAGGER_TAG__USER_CONTENT_ENDPOINTS])
     @check_right(has_personal_access)
     @hapic.input_path(UserWorkspaceAndContentIdPathSchema())

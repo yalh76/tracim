@@ -114,6 +114,7 @@ export class Tracim extends React.Component {
     if (welcomeElement) welcomeElement.hidden = true
 
     props.registerCustomEventHandlerList([
+      { name: 'markedContentAsRead', handler: this.handleMarkedContentAsRead },
       { name: CUSTOM_EVENT.REDIRECT, handler: this.handleRedirect },
       { name: CUSTOM_EVENT.ADD_FLASH_MSG, handler: this.handleAddFlashMessage },
       { name: CUSTOM_EVENT.DISCONNECTED_FROM_API, handler: this.handleDisconnectedFromApi },
@@ -128,6 +129,20 @@ export class Tracim extends React.Component {
     props.registerLiveMessageHandlerList([
       { entityType: 'interrupt', coreEntityType: TLM_CET.CREATED, handler: this.handleInterrupt }
     ])
+  }
+
+  handleMarkedContentAsRead = (data) => {
+    const date = new Date().toISOString()
+    this.props.dispatch(setNotificationList(
+      this.props.notificationPage.list.map(
+        notification => (
+          (notification.content?.id === data.contentId || notification.content?.parentId === data.contentId)
+            ? { ...notification, read: date, fields: { ...notification, read: date } }
+            : { ...notification, fields: notification }
+        )
+      )
+    ))
+    this.loadNotificationNotRead(this.props.user.userId)
   }
 
   handleInterrupt = async (tlm) => {
