@@ -26,6 +26,7 @@ import {
   AVATAR_SIZE,
   CONTENT_TYPE,
   PROFILE,
+  Icon,
   displayDistanceDate,
   GenericButton,
   ListItemWrapper,
@@ -64,6 +65,20 @@ const getNotificationLabelAndId = (notification) => {
   return ((contentType === TLM_SUB.COMMENT) || (entityType === TLM_ENTITY.MENTION && notification.content.type === CONTENT_TYPE.COMMENT))
     ? [notification.content.parentLabel, notification.content.parentId]
     : [notification.content.label, notification.content.id]
+}
+
+function deduplicateWithoutSorting (l, key) {
+  for (let i = 0; i < l.length; i++) {
+    let j = i + 1
+    while (j < l.length) {
+      if (key ? (l[i][key] === l[j][key]) : (l[i] === l[j])) {
+        l.splice(j, 1)
+      } else {
+        j++
+      }
+    }
+  }
+  return l
 }
 
 function getCriterionValue (notification, criterion) {
@@ -551,7 +566,6 @@ export class NotificationWall extends React.Component {
   }
 
   buildNotificationGroups (notificationPage) {
-    console.log(notificationPage, notificationPage?.list)
     if (!notificationPage?.list) return []
 
     let notificationGroupList = [{
@@ -672,20 +686,26 @@ export class NotificationWall extends React.Component {
               )
             }
 
-            const authors = this.joinComma(list.filter(n => n.author).map(n => n.author.publicName))
+            const authors = deduplicateWithoutSorting(list.flatMap(n => (n.author ? [n.author] : [])), 'userId')
+            const authorsText = (
+              authors.length < 3
+                ? this.joinComma(authors.map(a => a.publicName))
+                : this.joinComma([authors[0].publicName, `${authors.length - 1} other ${authors.length - 1 === 1 ? 'person' : 'people'}`])
+            )
             const actions = this.joinComma(detailsList.filter(d => d.action).map(d => d.action))
 
             const mergedDetails = {
               text: (
-                authors +
+                authorsText +
                 ' ' +
                 actions +
                 ' ' +
-                this.joinComma(detailsList.map(d => d.sentenceEnding))
+                this.joinComma(deduplicateWithoutSorting(detailsList.map(d => d.sentenceEnding)))
               ),
               icon: (detailsList.find(d => d.icon) || {}).icon,
               url: (detailsList.find(d => d.url) || {}).url,
               isMention: detailsList.some(d => d.isMention),
+              authors,
               grouped
             }
 
@@ -742,6 +762,57 @@ export class NotificationWall extends React.Component {
       notificationDetails.grouped = [notificationDetails.grouped[notificationDetails.grouped.length - 1]]
     }
 
+    const authors = notificationDetails.authors || (notification.author ? [notification.author] : [])
+
+    const avatars = (
+      (authors.length === 1)
+        ? (
+          <Avatar
+            size={AVATAR_SIZE.MEDIUM}
+            apiUrl={FETCH_CONFIG.apiUrl}
+            user={notification.author}
+            style={{ marginRight: '5px' }}
+          />
+        )
+        : (
+          (authors.length === 2)
+            ? (
+              <div className='avatarGroupWrapper' style={{ textAlign: 'center', display: 'flex', height: '50px', alignItems: 'center' }}>
+                <div className='avatarGroup' style={{ display: 'inline-block', marginRight: '5px', width: '50px'}}>
+                  <Avatar
+                    size={AVATAR_SIZE.MINI}
+                    apiUrl={FETCH_CONFIG.apiUrl}
+                    user={authors[0]}
+                  />
+                  <Avatar
+                    size={AVATAR_SIZE.MINI}
+                    apiUrl={FETCH_CONFIG.apiUrl}
+                    user={authors[1]}
+                  />
+                </div>
+              </div>
+            )
+            : (
+              <div className='fakeManyAvatarsWrapper'>
+                <div
+                  className='fakeManyAvatars' style={{
+                    width: '50px',
+                    height: '50px',
+                    display: 'inline-block',
+                    textAlign: 'center',
+                    fontSize: '28px',
+                    border: '1px solid black',
+                    borderRadius: '50px',
+                    marginRight: '5px'
+                  }}
+                >
+                  <Icon icon='fas fa-fw fa-users' title='' />
+                </div>
+              </div>
+            )
+        )
+    )
+
     return (
       <ListItemWrapper
         isLast={notification === relatedNotifications[relatedNotifications.length - 1]}
@@ -757,14 +828,9 @@ export class NotificationWall extends React.Component {
           key={notification.id}
           title={notificationDetails.grouped && ('Grouped because: ' + relatedNotifications.length + ' times the ' + notificationDetails.grouped.map(criteria => 'same ' + criteria.filter(c => c).join('+')).join(', then '))}
         >
-          {icon}
+          <div style={{ display: 'none' }}>{icon}</div>
           <div className='notification__list__item__text'>
-            <Avatar
-              size={AVATAR_SIZE.MINI}
-              apiUrl={FETCH_CONFIG.apiUrl}
-              user={notification.author}
-              style={{ marginRight: '5px' }}
-            />
+            {avatars}
             <span
               dangerouslySetInnerHTML={{
                 __html: (

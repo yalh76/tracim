@@ -1,5 +1,13 @@
 @import "~tracim_frontend_lib/src/css/Variable.styl"
 
+.avatarGroup
+  .avatar-wrapper
+    display inline-block
+    .avatar
+      outline 1px solid offWhite
+    &:last-child
+      margin-left -5px
+
 .notification
   position fixed
   top headerHeight
@@ -49,6 +57,7 @@
         padding-right 10px
         font-size fontSizeSmall
         word-break break-word
+        align-items center
       &__circle
         margin-left auto
         margin-right 5px
