@@ -39,6 +39,17 @@ export class Timeline extends React.Component {
     }
   }
 
+  receiveForceScrollToBottomHandler = (forceScrollToBottom) => {
+    this.forceScrollToBottom = forceScrollToBottom
+  }
+
+  componentDidUpdate () {
+    const { props } = this
+    if (props.shouldScrollToBottom && props.isLastTimelineItemCurrentToken && props.newComment === '' && this.forceScrollToBottom) {
+      this.forceScrollToBottom()
+    }
+  }
+
   handleAllAppChangeLanguage = data => {
     console.log('%c<FrontendLib:Timeline> Custom event', 'color: #28a745', CUSTOM_EVENT.ALL_APP_CHANGE_LANGUAGE, data)
     i18n.changeLanguage(data)
@@ -148,8 +159,7 @@ export class Timeline extends React.Component {
 
         <ScrollToBottomWrapper
           customClass={classnames(`${props.customClass}__messagelist`, 'timeline__messagelist')}
-          shouldScrollToBottom={props.shouldScrollToBottom}
-          isLastItemAddedFromCurrentToken={props.isLastTimelineItemCurrentToken && props.newComment === ''}
+          forceScollToBottomHandler={this.receiveForceScrollToBottomHandler}
         >
           {props.timelineData.map(content => {
             switch (content.timelineType) {
