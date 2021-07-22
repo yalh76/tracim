@@ -3,10 +3,8 @@
 .avatarGroup
   .avatar-wrapper
     display inline-block
-    .avatar
-      outline 1px solid offWhite
     &:last-child
-      margin-left -5px
+      margin-left -10px
 
 .notification
   position fixed
@@ -94,6 +92,7 @@
       display none
   &__groups
     overflow auto
+    flex 1
 a + .notification__groups, a + .notification__list
   margin-left:1em
 .contentTitle

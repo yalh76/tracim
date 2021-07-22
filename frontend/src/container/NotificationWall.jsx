@@ -768,7 +768,7 @@ export class NotificationWall extends React.Component {
       (authors.length === 1)
         ? (
           <Avatar
-            size={AVATAR_SIZE.MEDIUM}
+            size={AVATAR_SIZE.SMALL}
             apiUrl={FETCH_CONFIG.apiUrl}
             user={notification.author}
             style={{ marginRight: '5px' }}
@@ -777,8 +777,8 @@ export class NotificationWall extends React.Component {
         : (
           (authors.length === 2)
             ? (
-              <div className='avatarGroupWrapper' style={{ textAlign: 'center', display: 'flex', height: '50px', alignItems: 'center' }}>
-                <div className='avatarGroup' style={{ display: 'inline-block', marginRight: '5px', width: '50px'}}>
+              <div className='avatarGroupWrapper' style={{ textAlign: 'center', display: 'flex', height: '30px', alignItems: 'center' }}>
+                <div className='avatarGroup' style={{ display: 'inline-block', marginRight: '5px', width: '30px'}}>
                   <Avatar
                     size={AVATAR_SIZE.MINI}
                     apiUrl={FETCH_CONFIG.apiUrl}
@@ -796,11 +796,11 @@ export class NotificationWall extends React.Component {
               <div className='fakeManyAvatarsWrapper'>
                 <div
                   className='fakeManyAvatars' style={{
-                    width: '50px',
-                    height: '50px',
+                    width: '30px',
+                    height: '30px',
                     display: 'inline-block',
                     textAlign: 'center',
-                    fontSize: '28px',
+                    fontSize: '18px',
                     border: '1px solid black',
                     borderRadius: '50px',
                     marginRight: '5px'
