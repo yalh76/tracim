@@ -48,7 +48,6 @@ const Comment = props => {
 
     async function onIntersection (entries, opts) {
       for (const entry of entries) {
-        console.log('INTERSECTION', arguments, entry, entry.intersectionRatio, INTERSECTION_THRESHOLD)
         if (entry.intersectionRatio >= INTERSECTION_THRESHOLD) {
           if (!to) {
             if (!isRead) {
