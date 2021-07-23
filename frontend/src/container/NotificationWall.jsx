@@ -130,6 +130,16 @@ function newGroup (notificationGroupList, minNotificationCountForGrouping) {
 }
 
 function matchCriteria (notificationA, notificationB, firstCriterion, secondCriterion) {
+  const [entityTypeA, eventTypeA, contentTypeA] = (notificationA?.type || '').split('.')
+  const [entityTypeB, eventTypeB, contentTypeB] = (notificationB?.type || '').split('.')
+
+  if (
+    (entityTypeA === TLM_ENTITY.MENTION && eventTypeA === TLM_EVENT.CREATED) ||
+    (entityTypeB === TLM_ENTITY.MENTION && eventTypeB === TLM_EVENT.CREATED)
+  ) {
+    return false // don't group mentions
+  }
+
   return (
     getCriterionValue(notificationA, firstCriterion) === getCriterionValue(notificationB, firstCriterion) &&
     getCriterionValue(notificationA, secondCriterion) === getCriterionValue(notificationB, secondCriterion)
@@ -233,7 +243,8 @@ export class NotificationWall extends React.Component {
       author: `<span title='${escapedAuthor}'>${escapedAuthor}</span>`,
       content: `<span title='${escapedContentLabel}' class='object__highlight'>${escapedContentLabel}</span>`,
       space: `<span title="${escapedWorkspaceLabel}" class='documentTitle__highlight'>${escapedWorkspaceLabel}</span>`,
-      interpolation: { escapeValue: false }
+      interpolation: { escapeValue: false },
+      mentionTarget: notification?.mention?.recipient === 'all' ? 'everybody' : 'you'
     }
 
     const userObjectIsMe = props.user.userId === notification?.user?.userId
@@ -321,9 +332,9 @@ export class NotificationWall extends React.Component {
         return {
           icon: 'far fa-comment',
           title: props.t('Mention'),
-          text: props.t('{{author}} mentioned you in a comment in {{content}}', i18nOpts),
+          text: props.t('{{author}} mentioned {{mentionTarget}} in a comment in {{content}}', i18nOpts),
           url: this.linkToComment(notification),
-          action: 'mentioned you in a comment',
+          action: 'mentioned {{mentionTarget}} in a comment',
           sentenceEnding: 'in ' + i18nOpts.content,
           isMention: true
         }
@@ -332,8 +343,8 @@ export class NotificationWall extends React.Component {
       return {
         icon: 'fas fa-at',
         title: props.t('Mention'),
-        text: props.t('{{author}} mentioned you in {{content}}', i18nOpts),
-        action: 'mentioned you',
+        text: props.t('{{author}} mentioned {{mentionTarget}} in {{content}}', i18nOpts),
+        action: 'mentioned {{mentionTarget}}',
         sentenceEnding: 'in ' + i18nOpts.content,
         url: contentUrl,
         isMention: true
