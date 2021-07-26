@@ -895,9 +895,11 @@ export class NotificationWall extends React.Component {
             <span className='notification__list__item__meta__date' title={formatAbsoluteDate(notification.created, props.user.lang)}>
               {shortDate(notification.created)}
             </span>
-            <span className='notification__list__item__meta__space'>
-            {relatedNotifications.length === 1 ? notification.workspace.label : notificationDetails.spaces}
-            </span>
+            {((relatedNotifications.length === 1 && notification.workspace) || notificationDetails.spaces) && (
+              <span className='notification__list__item__meta__space'>
+                {relatedNotifications.length === 1 ? notification.workspace.label : notificationDetails.spaces}
+              </span>
+            )}
           </div>
           <div className='notification__list__item__circle__wrapper'>
           {!read && <i onClick={(e) => this.handleClickNotification(e, relatedNotifications, notificationDetails, true)} className='notification__list__item__circle fas fa-circle' />}
