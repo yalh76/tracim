@@ -33,7 +33,7 @@ export class ScrollToBottomWrapper extends React.Component {
       <div
         className={className}
         ref={this.ref}
-        style={{ overflow: 'auto', display: 'flex', flexDirection: 'column-reverse' }}
+        style={{ display: 'flex', flexDirection: 'column-reverse' }}
       >
         <div
           className='ScrollToBottomContents'
