@@ -750,7 +750,7 @@ export class NotificationWall extends React.Component {
                   ? defaultActionUrl
                   : (
                     contents.length === 1
-                      ? PAGE.WORKSPACE.CONTENT(spaces[0].id, list[0].content.type, list[0].content.id)
+                      ? PAGE.WORKSPACE.CONTENT(spaces[0].id, contents[0].type, contents[0].id)
                       : (
                         spaces.length === 1
                           ? PAGE.WORKSPACE.DASHBOARD(spaces[0].id)
