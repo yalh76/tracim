@@ -73,8 +73,8 @@ export class Publications extends React.Component {
     super(props)
     props.setApiUrl(FETCH_CONFIG.apiUrl)
     props.registerCustomEventHandlerList([
-      { name: CUSTOM_EVENT.ALL_APP_CHANGE_LANGUAGE, handler: this.handleAllAppChangeLanguage },
-      { name: CUSTOM_EVENT.REFRESH_CONTENT_LIST, handler: this.loadReadStatus }
+      { name: CUSTOM_EVENT.ALL_APP_CHANGE_LANGUAGE, handler: this.handleAllAppChangeLanguage }// ,
+      // { name: CUSTOM_EVENT.REFRESH_CONTENT_LIST, handler: this.loadReadStatus }
     ])
 
     props.registerLiveMessageHandlerList([
@@ -114,20 +114,20 @@ export class Publications extends React.Component {
     this.buildBreadcrumbs()
     this.getPublicationList()
     if (this.props.currentWorkspace.memberList.length === 0) this.loadMemberList()
-    this.loadReadStatus()
+    // this.loadReadStatus()
     this.gotToCurrentPublication()
   }
 
-  loadReadStatus = async () => {
-    const { props } = this
-    const workspaceId = props.match.params.idws
-    const wsReadStatus = await props.dispatch(getMyselfWorkspaceReadStatusList(workspaceId))
-    switch (wsReadStatus.status) {
-      case 200: props.dispatch(setWorkspaceReadStatusList(wsReadStatus.json)); break
-      case 401: break
-      default: props.dispatch(newFlashMessage(props.t('Error while loading read status list'), 'warning'))
-    }
-  }
+  // loadReadStatus = async () => {
+  //   const { props } = this
+  //   const workspaceId = props.match.params.idws
+  //   const wsReadStatus = await props.dispatch(getMyselfWorkspaceReadStatusList(workspaceId))
+  //   switch (wsReadStatus.status) {
+  //     case 200: props.dispatch(setWorkspaceReadStatusList(wsReadStatus.json)); break
+  //     case 401: break
+  //     default: props.dispatch(newFlashMessage(props.t('Error while loading read status list'), 'warning'))
+  //   }
+  // }
 
   gotToCurrentPublication () {
     if (!this.props.match.params.idcts) return

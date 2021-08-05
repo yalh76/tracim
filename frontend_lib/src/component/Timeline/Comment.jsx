@@ -11,7 +11,7 @@ import DropdownMenu from '../DropdownMenu/DropdownMenu.jsx'
 import IconButton from '../Button/IconButton.jsx'
 import LinkPreview from '../LinkPreview/LinkPreview.jsx'
 import ProfileNavigation from '../../component/ProfileNavigation/ProfileNavigation.jsx'
-import { CUSTOM_EVENT } from '../../customEvent.js'
+// import { CUSTOM_EVENT } from '../../customEvent.js'
 import {
   ROLE,
   CONTENT_TYPE,
@@ -19,7 +19,7 @@ import {
   addExternalLinksIcons
 } from '../../helper.js'
 
-import { putMyselfFileRead } from '../../action.async.js'
+// import { putMyselfFileRead } from '../../action.async.js'
 
 import CommentFilePreview from './CommentFilePreview.jsx'
 
@@ -30,72 +30,72 @@ function areCommentActionsAllowed (loggedUser, commentAuthorId) {
   )
 }
 
-const INTERSECTION_THRESHOLD = 0.5
-const DELAY_MARK_AS_READ_MS = 5000
+// const INTERSECTION_THRESHOLD = 0.5
+// const DELAY_MARK_AS_READ_MS = 5000
 
 const Comment = props => {
-  const ref = React.useRef()
-  const [to, setTo] = React.useState(0)
-  const [isRead, setIsRead] = React.useState(props.currentWorkspace.contentReadStatusList && props.currentWorkspace.contentReadStatusList.includes(props.contentId))
-  const [isInitialized, setIsInitialized] = React.useState(false)
+  // const ref = React.useRef()
+  // const [to, setTo] = React.useState(0)
+  // const [isRead, setIsRead] = React.useState(props.currentWorkspace.contentReadStatusList && props.currentWorkspace.contentReadStatusList.includes(props.contentId))
+  // const [isInitialized, setIsInitialized] = React.useState(false)
 
-  React.useEffect(() => {
-    if (isRead || ref.current === null || isInitialized) {
-      return
-    }
+  // React.useEffect(() => {
+  //   if (isRead || ref.current === null || isInitialized) {
+  //     return
+  //   }
 
-    setIsInitialized(true)
+  //   setIsInitialized(true)
 
-    async function onIntersection (entries, opts) {
-      for (const entry of entries) {
-        if (entry.intersectionRatio >= INTERSECTION_THRESHOLD) {
-          if (!to) {
-            if (!isRead) {
-              setTo(setTimeout(async () => {
-                await putMyselfFileRead(props.apiUrl, props.workspaceId, props.contentId)
-                GLOBAL_dispatchEvent({ type: CUSTOM_EVENT.REFRESH_CONTENT_LIST, data: {} })
-              }, DELAY_MARK_AS_READ_MS))
-            }
-          }
-        } else if (to) {
-          clearTimeout(to)
-          setTo(0)
-        }
-      }
-    }
+  //   async function onIntersection (entries, opts) {
+  //     for (const entry of entries) {
+  //       if (entry.intersectionRatio >= INTERSECTION_THRESHOLD) {
+  //         if (!to) {
+  //           if (!isRead) {
+  //             setTo(setTimeout(async () => {
+  //               await putMyselfFileRead(props.apiUrl, props.workspaceId, props.contentId)
+  //               GLOBAL_dispatchEvent({ type: CUSTOM_EVENT.REFRESH_CONTENT_LIST, data: {} })
+  //             }, DELAY_MARK_AS_READ_MS))
+  //           }
+  //         }
+  //       } else if (to) {
+  //         clearTimeout(to)
+  //         setTo(0)
+  //       }
+  //     }
+  //   }
 
-    let observer = new window.IntersectionObserver(onIntersection, {
-      root: null, // default is the viewport
-      threshold: INTERSECTION_THRESHOLD // percentage of comment's visible area. Triggers "onIntersection"
-    })
+  //   let observer = new window.IntersectionObserver(onIntersection, {
+  //     root: null, // default is the viewport
+  //     threshold: INTERSECTION_THRESHOLD // percentage of comment's visible area. Triggers "onIntersection"
+  //   })
 
-    observer.observe(ref.current)
+  //   observer.observe(ref.current)
 
-    function customEventHandler ({ detail: { type, data } }) {
-      if (type === 'readstatus') {
-        const read = data.contentReadStatusList && data.contentReadStatusList.includes(props.contentId)
-        setIsRead(read)
-        if (read) {
-          cleanup()
-        }
-      }
-    }
+  //   function customEventHandler ({ detail: { type, data } }) {
+  //     if (type === 'readstatus') {
+  //       const read = data.contentReadStatusList && data.contentReadStatusList.includes(props.contentId)
+  //       setIsRead(read)
+  //       if (read) {
+  //         cleanup()
+  //       }
+  //     }
+  //   }
 
-    document.addEventListener(CUSTOM_EVENT.APP_CUSTOM_EVENT_LISTENER, customEventHandler)
+  //   document.addEventListener(CUSTOM_EVENT.APP_CUSTOM_EVENT_LISTENER, customEventHandler)
 
-    function cleanup () {
-      if (observer) {
-        observer.disconnect()
-        observer = null
-        if (to) {
-          clearTimeout(to)
-        }
-        document.removeEventListener(CUSTOM_EVENT.APP_CUSTOM_EVENT_LISTENER, customEventHandler)
-      }
-    }
+  //   function cleanup () {
+  //     if (observer) {
+  //       observer.disconnect()
+  //       observer = null
+  //       if (to) {
+  //         clearTimeout(to)
+  //       }
+  //       document.removeEventListener(CUSTOM_EVENT.APP_CUSTOM_EVENT_LISTENER, customEventHandler)
+  //     }
+  //   }
 
-    return cleanup
-  }, [ref])
+  //   return cleanup
+  // }, [ref])
 
   const styleSent = {
     borderColor: props.customColor
@@ -106,12 +106,15 @@ const Comment = props => {
   const actionsAllowed = areCommentActionsAllowed(props.loggedUser, props.author.user_id)
 
   return (
-    <div ref={ref} className={classnames(`${props.customClass}__messagelist__item`, 'timeline__messagelist__item')}>
+    <div
+      // ref={ref}
+      className={classnames(`${props.customClass}__messagelist__item`, 'timeline__messagelist__item')}
+    >
       <div
         className={classnames(`${props.customClass}`, 'comment', {
           sent: props.fromMe,
-          received: !props.fromMe,
-          read: isRead
+          received: !props.fromMe// ,
+          // read: isRead
         })}
         style={props.fromMe ? styleSent : {}}
       >
@@ -247,7 +250,7 @@ export default translate()(Comment)
 
 Comment.propTypes = {
   author: PropTypes.object.isRequired,
-  currentWorkspace: PropTypes.object.isRequired,
+  // currentWorkspace: PropTypes.object.isRequired,
   isPublication: PropTypes.bool.isRequired,
   loggedUser: PropTypes.object.isRequired,
   contentId: PropTypes.number.isRequired,
