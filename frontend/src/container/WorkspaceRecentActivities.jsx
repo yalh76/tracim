@@ -7,7 +7,7 @@ import {
   TracimComponent,
   permissiveNumberEqual,
   TLM_CORE_EVENT_TYPE as TLM_CET,
-  // CUSTOM_EVENT,
+  CUSTOM_EVENT,
   TLM_ENTITY_TYPE as TLM_ET
 } from 'tracim_frontend_lib'
 
@@ -15,12 +15,12 @@ import {
   setWorkspaceActivityList,
   setWorkspaceActivityNextPage,
   resetWorkspaceActivity,
-  // setWorkspaceReadStatusList,
-  // newFlashMessage,
+  setWorkspaceReadStatusList,
+  newFlashMessage,
   setWorkspaceActivityEventList
 } from '../action-creator.sync.js'
 
-// import { getMyselfWorkspaceReadStatusList } from '../action-creator.async.js'
+import { getMyselfWorkspaceReadStatusList } from '../action-creator.async.js'
 
 import ActivityList from '../component/Activity/ActivityList.jsx'
 import { withActivity, ACTIVITY_COUNT_PER_PAGE } from './withActivity.jsx'
@@ -31,20 +31,20 @@ export class WorkspaceRecentActivities extends React.Component {
   constructor (props) {
     super(props)
     props.registerGlobalLiveMessageHandler(this.handleTlm)
-  //   props.registerCustomEventHandlerList([
-  //     { name: CUSTOM_EVENT.REFRESH_CONTENT_LIST, handler: this.loadReadStatus }
-  //   ])
-  // }
+    props.registerCustomEventHandlerList([
+      { name: CUSTOM_EVENT.REFRESH_CONTENT_LIST, handler: this.loadReadStatus }
+    ])
+  }
 
-  // loadReadStatus = async () => {
-  //   const { props } = this
-  //   const workspaceId = props.currentWorkspace.id
-  //   const wsReadStatus = await props.dispatch(getMyselfWorkspaceReadStatusList(workspaceId))
-  //   switch (wsReadStatus.status) {
-  //     case 200: props.dispatch(setWorkspaceReadStatusList(wsReadStatus.json)); break
-  //     case 401: break
-  //     default: props.dispatch(newFlashMessage(props.t('Error while loading read status list'), 'warning'))
-  //   }
+  loadReadStatus = async () => {
+    const { props } = this
+    const workspaceId = props.currentWorkspace.id
+    const wsReadStatus = await props.dispatch(getMyselfWorkspaceReadStatusList(workspaceId))
+    switch (wsReadStatus.status) {
+      case 200: props.dispatch(setWorkspaceReadStatusList(wsReadStatus.json)); break
+      case 401: break
+      default: props.dispatch(newFlashMessage(props.t('Error while loading read status list'), 'warning'))
+    }
   }
 
   componentDidMount () {

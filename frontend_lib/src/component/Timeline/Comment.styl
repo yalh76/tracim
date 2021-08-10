@@ -8,10 +8,10 @@
   display flex
   flex-direction column
 
-  // &:not(.read)
-  //   background-color rgba(63, 159, 247, 0.20)
-  //   .comment__body__content__header__meta
-  //     font-weight bold
+  &:not(.read)
+    background-color rgba(63, 159, 247, 0.20)
+    .comment__body__content__header__meta
+      font-weight bold
   &.sent
     margin-left 5%
   &.received
@@ -45,16 +45,16 @@
         font-size 12px
         &__meta
           flex 1
-          // display flex
-          // font-size 16px
+          display flex
+          font-size 16px
           &__author
             overflow-wrap anywhere
             font-size 16px
             &:hover
               text-decoration underline
-          // &__date
-          //   flex 1
-          //   text-align right
+          &__date
+            flex 1
+            text-align right
         &__actions
           padding 0
           color grey
