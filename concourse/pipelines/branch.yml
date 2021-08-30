@@ -1,84 +1,84 @@
-# This pipeline "header" defines a pipeline which will build and test a Tracim pull-request.
-# It requires a ((github-webhook-token)) and a ((github-access-torken)) variables when used.
+# This pipeline "header" defines a pipeline which will build and test Tracim sources.
+# It requires a ((branch)), ((source_check_interval)) and ((github-access-token)) variables when used.
 # It should be concatenated with "build-jobs.yml" to produce a complete pipeline.
 
 ## YAML definitions re-used in plans
 
-# plan step to put the current job name as pending in github's PR
+# plan step to put the current job name as pending in github's commit status
 pending_status_notification: &pending_status_notification
   put: tracim-status-update
   resource: tracim-source
   inputs: [tracim-source]
-  params: {path: tracim-source, status: pending, context: $BUILD_JOB_NAME}
-  get_params: {skip_download: true}
+  params: {state: pending}
 
-# sync job statuses as success/failure/error in github's PR.
+# sync job statuses as success/failure/error in github's commit status
 status_notifications: &status_notifications
   on_success:
-    put: tracim-source
+    put: github-status-update
     inputs: [tracim-source]
-    params: {path: tracim-source, status: success, context: $BUILD_JOB_NAME}
-    get_params: {skip_download: true}
+    params: {state: success}
   on_failure:
     put: tracim-source
     inputs: [tracim-source]
-    params: {path: tracim-source, status: failure, context: $BUILD_JOB_NAME}
-    get_params: {skip_download: true}
+    params: {state: failure}
   on_abort:
     put: tracim-source
     inputs: [tracim-source]
-    params: {path: tracim-source, status: error, context: $BUILD_JOB_NAME}
-    get_params: {skip_download: true}
+    params: {state: error}
 ## END YAML definitions
 
 
 resource_types:
-- name: tracim-source
+- name: cogito
   type: registry-image
   source:
-    repository: aoldershaw/github-pr-resource
+    repository: pix4d/cogito
 
 resources:
 # the github's tracim-source
 - name: tracim-source
-  type: tracim-source
-  check_every: 30s
-  # TODO - S.G. - 2021/08/02
-  # The token is not used as one webhook would have to be created PER PR in github.
-  # This could be automated, but is not so easy.
-  webhook_token: ((github-webhook-token))
+  type: git
   source:
-    repository: tracim/tracim
-    access_token: ((github-access-token))
-    number: ((number))
+    uri: git@github.com:tracim/tracim
+    branch: ((branch))
+
 # docker image used for running tests.
 - name: test-image
   type: registry-image
   source:
     repository: algooci/tracim
 
+# resource to update github's commit status
+- name: github-status-update
+  type: cogito
+  source:
+    repo: tracim/tracim
+    owner: meerkat-bot
+    access_token: ((github-access-token))
+
 
 # Pipeline jobs:
-# 1. update this pipeline if the PR's file has changed
-# 2. run tests in parallel (backend, frontend, end-to-end)
-# Each check/test has its own status in the github's PR.
+# - run backend (lint -> quick tests -> full tests) checks
+# - run frontend (lint + unit tests) checks
+# - run end-to-end (cypress) checks
+#    All of these in parallel.
+# Each check has its own status in the github's commit.
 jobs:
 - name: reconfigure-self
   plan:
-  - get: tracim-source
-    trigger: true
+    - get: tracim-source
+      trigger: true
 
-  - task: build-pipeline
-    image: test-image
-    vars:
-      - pipeline: pull-request
-    file: tracim-source/concourse/tasks/build-pipeline.yml
+    - task: build-pipeline
+      image: test-image
+      vars:
+        - pipeline: branch
+      file: tracim-source/concourse/tasks/build-pipeline.yml
 
-  - set_pipeline: self
-    file: pipeline/pull-request.yml
-    vars:
-      github-webhook-token: ((github-webhook-token))
-      github-access-token: ((github-access-token))
+    - set_pipeline: self
+      file: pipeline/branch.yml
+      vars:
+        github-access-token: ((github-access-token))
 # Shared jobs definition
 # can be included/appended in a complete pipeline definition.
 # It must have access to:
