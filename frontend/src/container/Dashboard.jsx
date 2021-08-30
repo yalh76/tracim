@@ -17,7 +17,8 @@ import {
   buildHeadTitle,
   PAGE,
   removeAtInUsername,
-  SPACE_TYPE
+  SPACE_TYPE,
+  addExternalLinksIcons
 } from 'tracim_frontend_lib'
 import {
   getWorkspaceDetail,
@@ -507,7 +508,7 @@ export class Dashboard extends React.Component {
       hexcolor: '#999' // INFO - CH - 2019-04-08 - different color from sidebar because it is more readable here
     })
 
-    const description = props.curWs.description.trim()
+    const description = addExternalLinksIcons(props.curWs.description.trim())
 
     return (
       <div className='tracim__content fullWidthFullHeight'>
@@ -521,9 +522,6 @@ export class Dashboard extends React.Component {
             <PageContent>
               <div className='dashboard__workspace'>
                 <div className='dashboard__workspace__content'>
-
-                  <h3 className='dashboard__workspace__subtitle'>{props.t('About this space')}</h3>
-
                   <div className='dashboard__workspace__detail'>
                     {(description
                       ? (
@@ -539,13 +537,11 @@ export class Dashboard extends React.Component {
                       )
                     )}
                     <div className='dashboard__workspace__detail__buttons'>
-                      {userRoleIdInWorkspace >= ROLE.workspaceManager.id && (
-                        <IconButton
-                          icon='fas fa-fw fa-cog'
-                          text={props.t('Space settings')}
-                          onClick={this.handleClickOpenAdvancedDashboard}
-                        />
-                      )}
+                      <IconButton
+                        icon='fas fa-fw fa-cog'
+                        text={props.t('Space settings')}
+                        onClick={this.handleClickOpenAdvancedDashboard}
+                      />
                     </div>
                   </div>
                   {props.curWs && props.curWs.id && <WorkspaceRecentActivities workspaceId={props.curWs.id} />}

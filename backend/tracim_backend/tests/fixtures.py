@@ -297,7 +297,7 @@ def app_config(settings) -> CFG:
 
 
 @pytest.fixture
-def we_testapp(settings, hapic, session):
+def web_testapp(settings, hapic, session):
     DepotManager._clear()
     app = web({}, **settings)
     return TestApp(app)

@@ -62,15 +62,19 @@ import {
   getCoverBaseUrl,
   DATE_FNS_LOCALE,
   getFileDownloadUrl,
-  htmlToText
+  htmlToText,
+  addExternalLinksIcons
 } from './helper.js'
+
 import {
+  GROUP_MENTION_TRANSLATION_LIST,
   addClassToMentionsOfUser,
   getInvalidMentionList,
   handleInvalidMentionInComment,
   handleLinksBeforeSave,
   handleMentionsBeforeSave
 } from './mentionOrLink.js'
+
 import { TracimComponent } from './tracimComponent.js'
 import { CUSTOM_EVENT } from './customEvent.js'
 import {
@@ -81,7 +85,8 @@ import {
 
 import {
   LiveMessageManager,
-  LIVE_MESSAGE_STATUS
+  LIVE_MESSAGE_STATUS,
+  LIVE_MESSAGE_ERROR_CODE
 } from './LiveMessageManager.js'
 
 import { appContentFactory } from './appContentFactory.js'
@@ -395,6 +400,8 @@ export {
   putMyselfFileRead,
   getContentComment,
   getFileChildContent,
+  addExternalLinksIcons,
+  GROUP_MENTION_TRANSLATION_LIST,
   addClassToMentionsOfUser,
   getInvalidMentionList,
   handleMentionsBeforeSave,
@@ -409,6 +416,7 @@ export {
   sendGlobalFlashMessage,
   LiveMessageManager,
   LIVE_MESSAGE_STATUS,
+  LIVE_MESSAGE_ERROR_CODE,
   TextInput,
   getContent,
   DistanceDate,

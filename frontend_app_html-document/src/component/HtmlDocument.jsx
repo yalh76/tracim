@@ -12,8 +12,7 @@ import {
   HTMLContent,
   RefreshWarningMessage,
   TextAreaApp,
-  TRANSLATION_STATE,
-  TranslateButton
+  TRANSLATION_STATE
 } from 'tracim_frontend_lib'
 
 export const HtmlDocument = props => {
@@ -108,17 +107,6 @@ export const HtmlDocument = props => {
         )}
         {(props.mode === APP_FEATURE_MODE.VIEW || props.mode === APP_FEATURE_MODE.REVISION) && (
           <div>
-            <div className='html-document__contentpage__textnote__top'>
-              <TranslateButton
-                translationState={props.translationState}
-                targetLanguageList={props.translationTargetLanguageList}
-                targetLanguageCode={props.translationTargetLanguageCode}
-                onChangeTargetLanguageCode={props.onChangeTranslationTargetLanguageCode}
-                onClickTranslate={props.onClickTranslateDocument}
-                onClickRestore={props.onClickRestoreDocument}
-                dataCy='htmlDocumentTranslateButton'
-              />
-            </div>
             {/* need try to inject html in stateless component () => <span>{props.text}</span> */}
             <div className={noteClassName}>
               <HTMLContent isTranslated={isTranslated}>{props.text}</HTMLContent>
@@ -140,7 +128,9 @@ export const HtmlDocument = props => {
               </>
             }
             confirmLabel={props.t('Edit')}
+            confirmIcon='far fa-fw fa-edit'
             cancelLabel={props.t('Validate anyway')}
+            cancelIcon='fas fa-fw fa-check'
           />
         )}
 
@@ -153,8 +143,7 @@ export const HtmlDocument = props => {
                 autoCompleteCursorPosition={props.autoCompleteCursorPosition}
                 onClickAutoCompleteItem={props.onClickAutoCompleteItem}
                 style={{
-                  top: props.tinymcePosition.top +
-                    (props.tinymcePosition.isSelectionToTheTop ? props.tinymcePosition.selectionHeight : 0),
+                  top: props.tinymcePosition.isSelectionToTheTop ? props.tinymcePosition.bottom : props.tinymcePosition.top,
                   transform: !props.tinymcePosition.isSelectionToTheTop ? 'translateY(-100%)' : 'none',
                   position: props.tinymcePosition.isFullscreen ? 'fixed' : 'absolute',
                   zIndex: props.tinymcePosition.isFullscreen ? 1061 : 20
@@ -183,9 +172,6 @@ export default translate()(HtmlDocument)
 
 HtmlDocument.propTypes = {
   apiUrl: PropTypes.string.isRequired,
-  onChangeTranslationTargetLanguageCode: PropTypes.func.isRequired,
-  translationTargetLanguageList: PropTypes.arrayOf(PropTypes.object).isRequired,
-  translationTargetLanguageCode: PropTypes.string.isRequired,
   customColor: PropTypes.string,
   editionAuthor: PropTypes.string,
   wysiwygNewVersion: PropTypes.string,
@@ -207,10 +193,7 @@ HtmlDocument.propTypes = {
   onClickRefresh: PropTypes.func,
   onClickRestoreArchived: PropTypes.func,
   onClickRestoreDeleted: PropTypes.func,
-  onClickShowDraft: PropTypes.func,
-  onClickTranslateDocument: PropTypes.func,
-  onClickRestoreDocument: PropTypes.func,
-  translationState: PropTypes.oneOf(Object.values(TRANSLATION_STATE))
+  onClickShowDraft: PropTypes.func
 }
 
 HtmlDocument.defaultProps = {

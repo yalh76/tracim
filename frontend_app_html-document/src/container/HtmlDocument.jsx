@@ -47,7 +47,9 @@ import {
   TRANSLATION_STATE,
   handleTranslateHtmlContent,
   getDefaultTranslationState,
-  FAVORITE_STATE
+  FAVORITE_STATE,
+  addExternalLinksIcons,
+  PopinFixedRightPartContent
 } from 'tracim_frontend_lib'
 import { debug } from '../debug.js'
 import {
@@ -78,7 +80,6 @@ export class HtmlDocument extends React.Component {
         props.t('notes'),
         props.t('Write a note')
       ],
-      displayNewTagForm: false,
       rawContentBeforeEdit: '',
       timeline: [],
       newComment: '',
@@ -421,8 +422,9 @@ export class HtmlDocument extends React.Component {
     )
 
     const hasLocalStorageRawContent = !!localStorageRawContent
+    const rawContentWithExternalLinkIcons = addExternalLinksIcons(resHtmlDocument.body.raw_content)
 
-    const rawContentBeforeEdit = addClassToMentionsOfUser(resHtmlDocument.body.raw_content, state.loggedUser.username)
+    const rawContentBeforeEdit = addClassToMentionsOfUser(rawContentWithExternalLinkIcons, state.loggedUser.username)
     this.setState(previousState => {
       return {
         mode: modeToRender,
@@ -475,8 +477,6 @@ export class HtmlDocument extends React.Component {
       mode: APP_FEATURE_MODE.EDIT
     }))
   }
-
-  handleToggleAddTagForm = () => this.setState(prev => ({ displayNewTagForm: !prev.displayNewTagForm }))
 
   handleCloseNewVersion = () => {
     globalThis.tinymce.remove('#wysiwygNewVersion')
@@ -533,7 +533,7 @@ export class HtmlDocument extends React.Component {
 
     let newDocumentForApiWithMentionAndLink
     try {
-      newDocumentForApiWithMentionAndLink = handleLinksBeforeSave(newDocumentForApiWithMention)
+      newDocumentForApiWithMentionAndLink = await handleLinksBeforeSave(newDocumentForApiWithMention, state.config.apiUrl)
     } catch (e) {
       return Promise.reject(e.message || props.t('Error while saving the new version'))
     }
@@ -557,7 +557,7 @@ export class HtmlDocument extends React.Component {
             mode: APP_FEATURE_MODE.VIEW,
             content: {
               ...previousState.content,
-              raw_content: newDocumentForApiWithMentionAndLink
+              raw_content: addExternalLinksIcons(newDocumentForApiWithMentionAndLink)
             },
             oldInvalidMentionList: allInvalidMentionList,
             showInvalidMentionPopupInContent: false,
@@ -867,11 +867,6 @@ export class HtmlDocument extends React.Component {
     this.setState({ translationTargetLanguageCode })
   }
 
-  handleClickAutoComplete = () => this.setState({
-    autoCompleteFormNewTagActive: false,
-    autoCompleteClicked: true
-  })
-
   getMenuItemList = () => {
     const { props, state } = this
     const timelineObject = {
@@ -879,48 +874,52 @@ export class HtmlDocument extends React.Component {
       label: props.t('Timeline'),
       icon: 'fa-history',
       children: state.config.apiUrl ? (
-        <Timeline
-          customClass={`${state.config.slug}__contentpage__timeline`}
-          customColor={state.config.hexcolor}
-          apiUrl={state.config.apiUrl}
-          loggedUser={state.loggedUser}
-          timelineData={state.timeline}
-          memberList={state.config.workspace.memberList}
-          newComment={state.newComment}
-          newCommentAsFileList={state.newCommentAsFileList}
-          disableComment={state.mode === APP_FEATURE_MODE.REVISION || state.mode === APP_FEATURE_MODE.EDIT || !state.content.is_editable}
-          availableStatusList={state.config.availableStatuses}
-          wysiwyg={state.timelineWysiwyg}
-          onChangeNewComment={this.handleChangeNewComment}
-          onRemoveCommentAsFile={this.handleRemoveCommentAsFile}
-          onValidateCommentFileToUpload={this.handleAddCommentAsFile}
-          onClickValidateNewCommentBtn={this.handleClickValidateNewCommentBtn}
-          onClickWysiwygBtn={this.handleToggleWysiwyg}
-          onClickRevisionBtn={this.handleClickShowRevision}
-          shouldScrollToBottom={state.mode !== APP_FEATURE_MODE.REVISION}
-          isLastTimelineItemCurrentToken={state.isLastTimelineItemCurrentToken}
-          key='Timeline'
-          invalidMentionList={state.invalidMentionList}
-          onClickCancelSave={this.handleCancelSave}
-          onClickSaveAnyway={this.handleClickValidateAnywayNewComment}
-          onInitWysiwyg={this.handleInitTimelineCommentWysiwyg}
-          showInvalidMentionPopup={state.showInvalidMentionPopupInComment}
-          searchForMentionOrLinkInQuery={this.searchForMentionOrLinkInQuery}
-          workspaceId={state.content.workspace_id}
-          onClickTranslateComment={comment => props.handleTranslateComment(
-            comment,
-            state.content.workspace_id,
-            state.translationTargetLanguageCode,
-            this.setState.bind(this)
-          )}
-          onClickRestoreComment={comment => props.handleRestoreComment(comment, this.setState.bind(this))}
-          onClickEditComment={this.handleClickEditComment}
-          onClickDeleteComment={this.handleClickDeleteComment}
-          onClickOpenFileComment={this.handleClickOpenFileComment}
-          translationTargetLanguageList={state.config.system.config.translation_service__target_languages}
-          translationTargetLanguageCode={state.translationTargetLanguageCode}
-          onChangeTranslationTargetLanguageCode={this.handleChangeTranslationTargetLanguageCode}
-        />
+        <PopinFixedRightPartContent
+          label={props.t('Timeline')}
+        >
+          <Timeline
+            customClass={`${state.config.slug}__contentpage__timeline`}
+            customColor={state.config.hexcolor}
+            apiUrl={state.config.apiUrl}
+            loggedUser={state.loggedUser}
+            timelineData={state.timeline}
+            memberList={state.config.workspace.memberList}
+            newComment={state.newComment}
+            newCommentAsFileList={state.newCommentAsFileList}
+            disableComment={state.mode === APP_FEATURE_MODE.REVISION || state.mode === APP_FEATURE_MODE.EDIT || !state.content.is_editable}
+            availableStatusList={state.config.availableStatuses}
+            wysiwyg={state.timelineWysiwyg}
+            onChangeNewComment={this.handleChangeNewComment}
+            onRemoveCommentAsFile={this.handleRemoveCommentAsFile}
+            onValidateCommentFileToUpload={this.handleAddCommentAsFile}
+            onClickValidateNewCommentBtn={this.handleClickValidateNewCommentBtn}
+            onClickWysiwygBtn={this.handleToggleWysiwyg}
+            onClickRevisionBtn={this.handleClickShowRevision}
+            shouldScrollToBottom={state.mode !== APP_FEATURE_MODE.REVISION}
+            isLastTimelineItemCurrentToken={state.isLastTimelineItemCurrentToken}
+            key='Timeline'
+            invalidMentionList={state.invalidMentionList}
+            onClickCancelSave={this.handleCancelSave}
+            onClickSaveAnyway={this.handleClickValidateAnywayNewComment}
+            onInitWysiwyg={this.handleInitTimelineCommentWysiwyg}
+            showInvalidMentionPopup={state.showInvalidMentionPopupInComment}
+            searchForMentionOrLinkInQuery={this.searchForMentionOrLinkInQuery}
+            workspaceId={state.content.workspace_id}
+            onClickTranslateComment={comment => props.handleTranslateComment(
+              comment,
+              state.content.workspace_id,
+              state.translationTargetLanguageCode,
+              this.setState.bind(this)
+            )}
+            onClickRestoreComment={comment => props.handleRestoreComment(comment, this.setState.bind(this))}
+            onClickEditComment={this.handleClickEditComment}
+            onClickDeleteComment={this.handleClickDeleteComment}
+            onClickOpenFileComment={this.handleClickOpenFileComment}
+            translationTargetLanguageList={state.config.system.config.translation_service__target_languages}
+            translationTargetLanguageCode={state.translationTargetLanguageCode}
+            onChangeTranslationTargetLanguageCode={this.handleChangeTranslationTargetLanguageCode}
+          />
+        </PopinFixedRightPartContent>
       ) : null
     }
     const tag = {
@@ -928,16 +927,16 @@ export class HtmlDocument extends React.Component {
       label: props.t('Tags'),
       icon: 'fas fa-tag',
       children: (
-        <TagList
-          apiUrl={state.config.apiUrl}
-          workspaceId={state.content.workspace_id}
-          contentId={state.content.content_id}
-          displayNewTagForm={state.displayNewTagForm}
-          onClickAddTagBtn={this.handleToggleAddTagForm}
-          onClickCloseAddTagBtn={this.handleToggleAddTagForm}
-          searchedKnownTagList={props.searchedKnownTagList}
-          onClickAutoComplete={this.handleClickAutoComplete}
-        />
+        <PopinFixedRightPartContent
+          label={props.t('Tags')}
+        >
+          <TagList
+            apiUrl={state.config.apiUrl}
+            workspaceId={state.content.workspace_id}
+            contentId={state.content.content_id}
+            userRoleIdInWorkspace={state.loggedUser.userRoleIdInWorkspace}
+          />
+        </PopinFixedRightPartContent>
       )
     }
     return [timelineObject, tag]
@@ -1002,6 +1001,13 @@ export class HtmlDocument extends React.Component {
             dataCy: 'popinListItem__delete'
           }
           ]}
+          showTranslateButton={state.mode === APP_FEATURE_MODE.VIEW || state.mode === APP_FEATURE_MODE.REVISION}
+          translationState={state.translationState}
+          translationTargetLanguageList={state.config.system.config.translation_service__target_languages}
+          translationTargetLanguageCode={state.translationTargetLanguageCode}
+          onChangeTranslationTargetLanguageCode={this.handleChangeTranslationTargetLanguageCode}
+          onClickTranslateDocument={this.handleTranslateDocument}
+          onClickRestoreDocument={this.handleRestoreDocument}
         >
           {/*
             FIXME - GB - 2019-06-05 - we need to have a better way to check the state.config than using state.config.availableStatuses[3].slug
@@ -1040,12 +1046,6 @@ export class HtmlDocument extends React.Component {
             onClickCancelSave={this.handleCancelSave}
             onClickSaveAnyway={this.handleSaveHtmlDocument}
             showInvalidMentionPopup={state.showInvalidMentionPopupInContent}
-            onClickTranslateDocument={this.handleTranslateDocument}
-            onClickRestoreDocument={this.handleRestoreDocument}
-            translationState={state.translationState}
-            translationTargetLanguageList={state.config.system.config.translation_service__target_languages}
-            translationTargetLanguageCode={state.translationTargetLanguageCode}
-            onChangeTranslationTargetLanguageCode={this.handleChangeTranslationTargetLanguageCode}
             onClickRefresh={this.handleClickRefresh}
             onClickLastVersion={this.handleClickLastVersion}
           />
