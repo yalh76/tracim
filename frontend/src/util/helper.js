@@ -291,4 +291,32 @@ export const getRevisionTypeLabel = (revisionType, t) => {
   return revisionType
 }
 
+const isSubscriptionRequestOrRejection = (activity) => {
+  return (activity.entityType === TLM_ET.SHAREDSPACE_SUBSCRIPTION &&
+    DISPLAYED_SUBSCRIPTION_STATE_LIST.includes(activity.newestMessage.fields.subscription.state))
+}
+
+const isMemberCreatedOrModified = (activity) => {
+  const coreEventType = activity.newestMessage.event_type.split('.')[1]
+  return (activity.entityType === TLM_ET.SHAREDSPACE_MEMBER &&
+    DISPLAYED_MEMBER_CORE_EVENT_TYPE_LIST.includes(coreEventType))
+}
+
+const isNotPublicationOrInWorkspaceWithActivatedPublications = (activity) => {
+  if (activity.content.content_namespace !== CONTENT_NAMESPACE.PUBLICATION ||
+      !activity.newestMessage.fields.workspace) return true
+  const activityWorkspace = props.workspaceList.find(ws => ws.id === activity.newestMessage.fields.workspace.workspace_id)
+  if (!activityWorkspace) return true
+  return activityWorkspace.publicationEnabled
+}
+
+export const activityDisplayFilter = (activity) => {
+  return ENTITY_TYPE_COMPONENT_CONSTRUCTOR.has(activity.entityType) &&
+    (
+      (activity.entityType === TLM_ET.CONTENT && isNotPublicationOrInWorkspaceWithActivatedPublications(activity)) ||
+      isSubscriptionRequestOrRejection(activity) ||
+      isMemberCreatedOrModified(activity)
+    )
+}
+
 export const WELCOME_ELEMENT_ID = 'welcome'

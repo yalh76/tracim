@@ -1,7 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { translate } from 'react-i18next'
-import { CONTENT_NAMESPACE } from '../../util/helper.js'
+import {
+  CONTENT_NAMESPACE,
+  activityDisplayFilter
+} from '../../util/helper.js'
 import {
   BREADCRUMBS_TYPE,
   CONTENT_TYPE,
@@ -108,37 +111,6 @@ const ActivityList = (props) => {
       )
       : <span>{props.t('Unknown activity type')}</span>
     return <div className='activityList__item' data-cy='activityList__item' key={activity.id}>{component}</div>
-  }
-
-  // FIXME - MB - 2021-05-26 - this code is duplicated for activityDisplayFilter, in withActivity
-  // See this ticket https://github.com/tracim/tracim/issues/4677
-
-  const isSubscriptionRequestOrRejection = (activity) => {
-    return (activity.entityType === TLM_ET.SHAREDSPACE_SUBSCRIPTION &&
-      DISPLAYED_SUBSCRIPTION_STATE_LIST.includes(activity.newestMessage.fields.subscription.state))
-  }
-
-  const isMemberCreatedOrModified = (activity) => {
-    const coreEventType = activity.newestMessage.event_type.split('.')[1]
-    return (activity.entityType === TLM_ET.SHAREDSPACE_MEMBER &&
-      DISPLAYED_MEMBER_CORE_EVENT_TYPE_LIST.includes(coreEventType))
-  }
-
-  const isNotPublicationOrInWorkspaceWithActivatedPublications = (activity) => {
-    if (activity.content.content_namespace !== CONTENT_NAMESPACE.PUBLICATION ||
-        !activity.newestMessage.fields.workspace) return true
-    const activityWorkspace = props.workspaceList.find(ws => ws.id === activity.newestMessage.fields.workspace.workspace_id)
-    if (!activityWorkspace) return true
-    return activityWorkspace.publicationEnabled
-  }
-
-  const activityDisplayFilter = (activity) => {
-    return ENTITY_TYPE_COMPONENT_CONSTRUCTOR.has(activity.entityType) &&
-      (
-        (activity.entityType === TLM_ET.CONTENT && isNotPublicationOrInWorkspaceWithActivatedPublications(activity)) ||
-        isSubscriptionRequestOrRejection(activity) ||
-        isMemberCreatedOrModified(activity)
-      )
   }
 
   const activityList = props.activity.list.filter(activityDisplayFilter).map(renderActivityComponent)
