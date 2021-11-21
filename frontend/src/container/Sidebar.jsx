@@ -37,6 +37,8 @@ export class Sidebar extends React.Component {
     this.state = {
       activeWorkspaceId: NO_ACTIVE_SPACE_ID,
       foldedSpaceList: [],
+      showUserOptions: true,
+      showWorkspaceList: true,
       sidebarClose: isMobile
     }
 
@@ -119,7 +121,7 @@ export class Sidebar extends React.Component {
           <Icon
             icon={icon}
             title={label}
-            color='white'
+            color='#FDFDFD'
           />
           &nbsp;{label}
         </div>
@@ -204,25 +206,57 @@ export class Sidebar extends React.Component {
               <div id='sidebar__content__scrolltopmarker' style={{ visibility: 'hidden' }} ref={el => { this.workspaceListTop = el }} />
 
               <nav className={classnames('sidebar__content__navigation', { sidebarclose: state.sidebarClose })}>
-                {this.getSidebarItem(props.t('Recent activities'), 'far fa-fw fa-newspaper', PAGE.RECENT_ACTIVITIES)}
-                {this.getSidebarItem(props.t('Favorites'), 'far fa-fw fa-star', PAGE.FAVORITES)}
-                <ul className='sidebar__content__navigation__workspace'>
-                  {this.displaySpace(0, createSpaceTree(sortWorkspaceList(props.workspaceList)))}
-                </ul>
+                <li className='sidebar__content__navigation__item'>
+                  <IconButton
+                    customClass='transparentButton sidebar__content__navigation__item__foldChildren'
+                    icon={`fas fa-caret-${state.showUserOptions ? 'down' : 'right'}`}
+                    intent='link'
+                    mode='light'
+                    onClick={() => this.setState(prev => ({ showUserOptions: !prev.showUserOptions }))}
+                    title={state.showUserOptions ? props.t('Hide options') : props.t('Show options')}
+                  />
+
+                  {props.t('My options')}
+                </li>
+                {state.showUserOptions && (
+                  <div>
+                    {this.getSidebarItem(props.t('Recent activities'), 'far fa-fw fa-newspaper', PAGE.RECENT_ACTIVITIES)}
+                    {this.getSidebarItem(props.t('Favorites'), 'far fa-fw fa-star', PAGE.FAVORITES)}
+                  </div>
+                )}
+                <li className='sidebar__content__navigation__item'>
+                  <IconButton
+                    customClass='transparentButton sidebar__content__navigation__item__foldChildren'
+                    icon={`fas fa-caret-${state.showWorkspaceList ? 'down' : 'right'}`}
+                    intent='link'
+                    mode='light'
+                    onClick={() => this.setState(prev => ({ showWorkspaceList: !prev.showWorkspaceList }))}
+                    title={state.showWorkspaceList ? props.t('Hide spaces') : props.t('Show spaces')}
+                  />
+
+                  {props.t('Spaces')}
+                  {getUserProfile(props.user.profile).id >= PROFILE.manager.id && (
+                    <IconButton
+                      customClass='transparentButton sidebar__content__navigation__item__foldChildren'
+                      dataCy='sidebarCreateWorkspaceBtn'
+                      icon='fas fa-plus'
+                      intent='link'
+                      mode='light'
+                      onClick={this.handleClickNewWorkspace}
+                      title={props.t('Create a space')}
+                    />
+                  )}
+                </li>
+                {state.showWorkspaceList && (
+                  <ul className='sidebar__content__navigation__workspace'>
+                    {this.displaySpace(0, createSpaceTree(sortWorkspaceList(props.workspaceList)))}
+                  </ul>
+                )}
               </nav>
             </div>
 
             <div className='sidebar__footer'>
               <div className='sidebar__footer__buttons'>
-                {getUserProfile(props.user.profile).id >= PROFILE.manager.id && (
-                  <IconButton
-                    onClick={this.handleClickNewWorkspace}
-                    dataCy='sidebarCreateWorkspaceBtn'
-                    icon='fas fa-plus'
-                    text={props.t('Create a space')}
-                    mode='light'
-                  />
-                )}
                 {props.accessibleWorkspaceList.length > 0 && (
                   <IconButton
                     onClick={this.handleClickJoinWorkspace}
