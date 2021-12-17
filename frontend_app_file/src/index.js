@@ -1,4 +1,5 @@
 import React from 'react'
+import { Provider } from 'react-redux'
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
 import ReactDOM from 'react-dom'
@@ -25,9 +26,11 @@ const appInterface = {
       return
     }
     return ReactDOM.render(
-      <Router history={data.config.history}>
-        <File data={data} />
-      </Router>
+      <Provider store={data.loggedUser.storeFromFrontend}>
+        <Router history={data.config.history}>
+          <File data={data} />
+        </Router>
+      </Provider>
       , element
     )
   },

@@ -8,6 +8,7 @@ import { ROLE_LIST, CUSTOM_EVENT, CONTENT_TYPE } from 'tracim_frontend_lib'
 import { HACK_COLLABORA_CONTENT_TYPE } from '../../container/WorkspaceContent.jsx'
 import { newFlashMessage, readContentNotification } from '../../action-creator.sync.js'
 import { putContentNotificationAsRead } from '../../action-creator.async.js'
+import { store } from '../../store.js'
 
 // @FIXME Côme - 2018/07/31 - should this be in a component like AppFeatureManager ?
 export class OpenContentApp extends React.Component {
@@ -73,7 +74,7 @@ export class OpenContentApp extends React.Component {
     // unmounted by renderAppFeature
     renderAppFeature(
       contentInformation,
-      user,
+      { ...user, storeFromFrontend: store },
       findUserRoleIdInWorkspace(user.userId, currentWorkspace.memberList, ROLE_LIST),
       contentToOpen
     )

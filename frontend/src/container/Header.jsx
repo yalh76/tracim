@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Link, withRouter } from 'react-router-dom'
+import { Link, Route, withRouter } from 'react-router-dom'
 import i18n from '../util/i18n.js'
 import appFactory from '../util/appFactory.js'
 import { translate } from 'react-i18next'
@@ -124,6 +124,18 @@ export class Header extends React.Component {
                 id='customToolboxHeaderBtn'
                 className='header__menu__rightside__specificBtn'
               />
+
+              <li>
+                testRedux: {props.user.profileAvatarName}
+              </li>
+
+              <Route path={'/ui/:spaceUrl/:spaceId/:contentUrl/:contentType/:contenId/test_route'} render={() => {
+                return (
+                  <li>
+                    testRouter: /test_route MATCHED
+                  </li>
+                )
+              }} />
 
               {props.user.logged && (
                 <li className='search__nav'>

@@ -1,4 +1,6 @@
 import React from 'react'
+import { Route, withRouter } from 'react-router-dom'
+import { connect } from 'react-redux'
 import { translate } from 'react-i18next'
 import i18n from '../i18n.js'
 import FileComponent from '../component/FileComponent.jsx'
@@ -54,6 +56,7 @@ import {
   postShareLinksList
 } from '../action.async.js'
 import FileProperties from '../component/FileProperties.jsx'
+import { newFlashMessage, updateUserProfileAvatarName } from 'tracim/src/action-creator.sync.js'
 
 const ACTION_EDIT = 'edit'
 
@@ -1095,8 +1098,41 @@ export class File extends React.Component {
             state.content, state.loggedUser, this.setState.bind(this)
           )}
         >
+          <button
+            onClick={() => {
+              this.props.history.push(`${PAGE.WORKSPACE.CONTENT(
+                state.content.workspace_id,
+                CONTENT_TYPE.FILE,
+                state.content.content_id
+              )}/test_route`)
+            }}
+          >
+            CLICK ME Router
+          </button>
+
+          <button
+            onClick={() => {
+              const changeAvatar = avatarName => ({
+                type: 'Set/User/ProfileAvatarName',
+                newAvatarName: avatarName
+              })
+              props.dispatch(changeAvatar('test_redux'))
+            }}
+          >
+            CLICK ME Redux {props.user.profileAvatarName}
+          </button>
+
+          <Route path={'/ui/:spaceUrl/:spaceId/:contentUrl/:contenType/:contenId/test_route'} render={() => {
+            return (
+              <div>
+                testRouter: Router /test_route matched !
+              </div>
+            )
+          }} />
+
           {/* FIXME - GB - 2019-06-05 - we need to have a better way to check the state.config than using state.config.availableStatuses[3].slug
             https://github.com/tracim/tracim/issues/1840 */}
+          {/*}
           <FileComponent
             editionAuthor={state.editionAuthor}
             isRefreshNeeded={state.showRefreshWarning}
@@ -1137,6 +1173,7 @@ export class File extends React.Component {
             onClickRefresh={this.handleClickRefresh}
             onClickLastVersion={this.handleClickLastVersion}
           />
+          */}
 
           <PopinFixedRightPart
             customClass={`${state.config.slug}__contentpage`}
@@ -1149,4 +1186,5 @@ export class File extends React.Component {
   }
 }
 
-export default translate()(appContentFactory(TracimComponent(File)))
+const mapStateToProps = ({ user }) => ({ user })
+export default withRouter(translate()(connect(mapStateToProps)(appContentFactory(TracimComponent(File)))))
