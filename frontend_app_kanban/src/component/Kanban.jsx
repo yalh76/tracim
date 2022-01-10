@@ -58,9 +58,9 @@ export class Kanban extends React.Component {
       editedCardInfos: null,
       editedColumnInfos: null,
       isAutoCompleteActivated: false,
-      saveRequired: false,
-      saving: false
+      saveRequired: false
     }
+    this.isSaving = false
   }
 
   componentDidMount () {
@@ -75,7 +75,7 @@ export class Kanban extends React.Component {
   async componentDidUpdate (prevProps) {
     const { props, state } = this
     if (
-      (!state.saving && props.content.current_revision_id !== prevProps.content.current_revision_id) ||
+      (!this.isSaving && props.content.current_revision_id !== prevProps.content.current_revision_id) ||
       (props.isNewContentRevision && prevProps.isNewContentRevision !== props.isNewContentRevision)
     ) {
       this.loadBoardContent()
@@ -184,7 +184,7 @@ export class Kanban extends React.Component {
 
   async handleSave () {
     const { props, state } = this
-    this.setState({ saving: true })
+    this.isSaving = true
     const fetchResultSaveKanban = await handleFetchResult(
       await putRawFileContent(
         props.config.apiUrl,
@@ -206,7 +206,7 @@ export class Kanban extends React.Component {
           break
       }
     }
-    this.setState({ saving: false })
+    this.isSaving = false
   }
 
   handleRemoveColumn = (column) => {
