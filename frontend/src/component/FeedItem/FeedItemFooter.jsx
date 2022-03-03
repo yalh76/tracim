@@ -30,8 +30,8 @@ export class FeedItemFooter extends React.Component {
     const { content } = props
     const { workspaceId } = content
     return (
-      <div className='feedItemFooter'>
-        <div className='feedItemFooter__left'>
+      <div className='feedItem__footer'>
+        <div className='feedItem__footer__left'>
           <TranslateButton
             translationState={props.translationState}
             onClickTranslate={props.onClickTranslate}
@@ -45,7 +45,7 @@ export class FeedItemFooter extends React.Component {
             dataCy='commentTranslateButton'
           />
         </div>
-        <div className='feedItemFooter__right'>
+        <div className='feedItem__footer__right'>
           <EmojiReactions
             apiUrl={FETCH_CONFIG.apiUrl}
             loggedUser={{
@@ -59,7 +59,7 @@ export class FeedItemFooter extends React.Component {
             contentId={content.id}
             workspaceId={workspaceId}
           />
-          {props.isPublication && props.showTimeline && (
+          {props.isActuality && props.showTimeline && (
             <IconButton
               text={props.discussionToggleButtonLabel}
               textMobile={props.discussionToggleButtonLabelMobile}
@@ -88,7 +88,7 @@ FeedItemFooter.propTypes = {
   discussionToggleButtonLabel: PropTypes.string.isRequired,
   discussionToggleButtonLabelMobile: PropTypes.string,
   onClickToggleCommentList: PropTypes.func,
-  isPublication: PropTypes.bool.isRequired
+  isActuality: PropTypes.bool.isRequired
 }
 
 FeedItemFooter.defaultProps = {

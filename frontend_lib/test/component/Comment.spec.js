@@ -14,7 +14,7 @@ describe('<Comment />', () => {
     customClass: 'randomCustomClass',
     customColor: '#252525',
     author: { public_name: 'randomAuthor', user_id: 1, username: 'admin' },
-    isPublication: false,
+    isActuality: false,
     loggedUser: { public_name: 'randomUser' },
     text: 'randomText',
     contentId: 1337,

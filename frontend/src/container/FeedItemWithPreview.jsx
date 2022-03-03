@@ -29,6 +29,7 @@ import {
   Timeline,
   TracimComponent
 } from 'tracim_frontend_lib'
+import { CommentArea } from 'tracim_frontend_lib/src/component/Timeline/CommentArea'
 
 export class FeedItemWithPreview extends React.Component {
   constructor (props) {
@@ -292,7 +293,7 @@ export class FeedItemWithPreview extends React.Component {
 
     let previewTitle = ''
     if (props.inRecentActivities) {
-      previewTitle = props.isPublication
+      previewTitle = props.isActuality
         ? props.t('Show in news')
         : props.t('Open_action')
     } else {
@@ -305,7 +306,7 @@ export class FeedItemWithPreview extends React.Component {
     const commentToShow = (
       shouldShowComment
         ? (
-          props.isPublication
+          props.isActuality
             ? (
               props.content.type === CONTENT_TYPE.FILE
                 ? props.content
@@ -334,7 +335,7 @@ export class FeedItemWithPreview extends React.Component {
           breadcrumbsList={props.breadcrumbsList}
           contentAvailable={props.contentAvailable}
           content={props.content}
-          isPublication={props.isPublication}
+          isActuality={props.isActuality}
           eventList={props.eventList}
           lastModificationType={props.lastModificationType}
           lastModificationEntityType={props.lastModificationEntityType}
@@ -351,41 +352,42 @@ export class FeedItemWithPreview extends React.Component {
           <>
             {(shouldShowComment
               ? (commentToShow &&
-                <Comment
-                  isPublication
-                  customClass='feedItem__publication'
-                  apiUrl={FETCH_CONFIG.apiUrl}
-                  contentId={Number(props.content.id)}
-                  apiContent={props.content}
-                  workspaceId={Number(props.workspaceId)}
-                  author={commentToShow.author}
-                  loggedUser={loggedUser}
-                  created={commentToShow.created || commentToShow.created_raw || commentToShow.createdRaw}
-                  text={
-                    state.contentTranslationState === TRANSLATION_STATE.TRANSLATED
-                      ? state.translatedRawContent
-                      : commentToShow.raw_content
-                  }
-                  fromMe={props.user.userId === commentToShow.author.user_id}
-                  onClickTranslate={this.handleTranslateComment}
-                  onClickRestore={this.handleRestoreContentTranslation}
-                  translationState={state.contentTranslationState}
-                  translationTargetLanguageList={props.system.config.translation_service__target_languages}
-                  translationTargetLanguageCode={state.translationTargetLanguageCode}
-                  onChangeTranslationTargetLanguageCode={languageCode => {
-                    this.handleChangeTranslationTargetLanguageCode(languageCode)
-                    this.handleTranslateComment(languageCode)
-                  }}
-                  onClickToggleCommentList={this.handleClickToggleComments}
-                  discussionToggleButtonLabel={this.getDiscussionToggleButtonLabel()}
-                  threadLength={props.commentList.length}
-                  showTimeline={props.showTimeline}
-                />
+                <div className='feedItem__content'>
+                  <CommentArea
+                    customClass='feedItem__publication'
+                    apiUrl={FETCH_CONFIG.apiUrl}
+                    contentId={Number(props.content.id)}
+                    apiContent={props.content}
+                    workspaceId={Number(props.workspaceId)}
+                    author={commentToShow.author}
+                    loggedUser={loggedUser}
+                    created={commentToShow.created || commentToShow.created_raw || commentToShow.createdRaw}
+                    text={
+                      state.contentTranslationState === TRANSLATION_STATE.TRANSLATED
+                        ? state.translatedRawContent
+                        : commentToShow.raw_content
+                    }
+                    fromMe={props.user.userId === commentToShow.author.user_id}
+                    onClickTranslate={this.handleTranslateComment}
+                    onClickRestore={this.handleRestoreContentTranslation}
+                    translationState={state.contentTranslationState}
+                    translationTargetLanguageList={props.system.config.translation_service__target_languages}
+                    translationTargetLanguageCode={state.translationTargetLanguageCode}
+                    onChangeTranslationTargetLanguageCode={languageCode => {
+                      this.handleChangeTranslationTargetLanguageCode(languageCode)
+                      this.handleTranslateComment(languageCode)
+                    }}
+                    onClickToggleCommentList={this.handleClickToggleComments}
+                    discussionToggleButtonLabel={this.getDiscussionToggleButtonLabel()}
+                    threadLength={props.commentList.length}
+                    showTimeline={props.showTimeline}
+                  />
+                </div>
               )
               : (
                 <div className='feedItem__content' title={previewTitle}>
                   <Preview
-                    fallbackToAttachedFile={props.isPublication && props.content.type === CONTENT_TYPE.FILE}
+                    fallbackToAttachedFile={props.isActuality && props.content.type === CONTENT_TYPE.FILE}
                     content={
                       state.contentTranslationState === TRANSLATION_STATE.TRANSLATED
                         ? { ...props.content, translatedRawContent: state.translatedRawContent }
@@ -406,7 +408,7 @@ export class FeedItemWithPreview extends React.Component {
                     discussionToggleButtonLabel={this.getDiscussionToggleButtonLabel()}
                     discussionToggleButtonLabelMobile={props.commentList.length > 0 ? props.commentList.length.toString() : ''}
                     showTimeline={props.showTimeline}
-                    isPublication={props.isPublication}
+                    isActuality={props.isActuality}
                   />
                 </div>
               )
@@ -474,7 +476,7 @@ FeedItemWithPreview.propTypes = {
   contentAvailable: PropTypes.bool.isRequired,
   onClickCopyLink: PropTypes.func.isRequired,
   workspaceId: PropTypes.number.isRequired,
-  isPublication: PropTypes.bool.isRequired,
+  isActuality: PropTypes.bool.isRequired,
   inRecentActivities: PropTypes.bool.isRequired,
   allowEdition: PropTypes.bool,
   breadcrumbsList: PropTypes.array,

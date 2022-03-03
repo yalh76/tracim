@@ -136,7 +136,7 @@ export class NotificationWall extends React.Component {
       }</span>`
     }
 
-    const isPublication = notification.content && notification.content.contentNamespace === CONTENT_NAMESPACE.PUBLICATION
+    const isActuality = notification.content && notification.content.contentNamespace === CONTENT_NAMESPACE.PUBLICATION
 
     const contentUrl = notification.content ? PAGE.CONTENT(notification.content.id) : ''
 
@@ -152,7 +152,7 @@ export class NotificationWall extends React.Component {
           }
 
           return {
-            title: isPublication ? props.t('New publication') : props.t('New content'),
+            title: isActuality ? props.t('New publication') : props.t('New content'),
             text: props.t('{{author}} created {{content}}{{workspaceInfo}}', i18nOpts),
             url: contentUrl
           }
@@ -167,21 +167,21 @@ export class NotificationWall extends React.Component {
           }
 
           return {
-            title: isPublication ? props.t('Publication updated') : props.t('Content updated'),
+            title: isActuality ? props.t('Publication updated') : props.t('Content updated'),
             text: props.t('{{author}} updated {{content}}{{workspaceInfo}}', i18nOpts),
             url: contentUrl
           }
         }
         case TLM_EVENT.DELETED: {
           return {
-            title: isPublication ? props.t('Publication deleted') : props.t('Content deleted'),
+            title: isActuality ? props.t('Publication deleted') : props.t('Content deleted'),
             text: props.t('{{author}} deleted {{content}}{{workspaceInfo}}', i18nOpts),
             url: contentUrl
           }
         }
         case TLM_EVENT.UNDELETED: {
           return {
-            title: isPublication ? props.t('Publication restored') : props.t('Content restored'),
+            title: isActuality ? props.t('Publication restored') : props.t('Content restored'),
             text: props.t('{{author}} restored {{content}}{{workspaceInfo}}', i18nOpts),
             url: contentUrl
           }

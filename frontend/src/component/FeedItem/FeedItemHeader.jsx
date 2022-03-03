@@ -54,7 +54,7 @@ export class FeedItemHeader extends React.Component {
     const { props } = this
     return contentType === CONTENT_TYPE.FILE
       ? <FilenameWithExtension file={props.content} customClass='content__name' />
-      : <span className='feedItemHeader__label' data-cy='feedItemHeader__label' title={contentLabel}>{contentLabel}</span>
+      : <span className='feedItem__header__label' data-cy='feedItem__header__label' title={contentLabel}>{contentLabel}</span>
   }
 
   render () {
@@ -76,17 +76,17 @@ export class FeedItemHeader extends React.Component {
       { label: props.t(`No App for content-type ${contentType}`), faIcon: 'fas fa-question', hexcolor: '#000000' }
     )
 
-    const icon = (props.isPublication && contentType === CONTENT_TYPE.THREAD) ? 'fas fa-stream' : app.faIcon
+    const icon = (props.isActuality && contentType === CONTENT_TYPE.THREAD) ? 'fas fa-stream' : app.faIcon
 
     return (
-      <div className='feedItemHeader'>
+      <div className='feedItem__header'>
         <Icon
-          customClass='feedItemHeader__icon'
-          color={props.isPublication ? COLORS.PUBLICATION : app.hexcolor}
-          title={props.isPublication ? props.t('Publication') : app.label}
+          customClass='feedItem__header__icon'
+          color={props.isActuality ? COLORS.PUBLICATION : app.hexcolor}
+          title={props.isActuality ? props.t('Publication') : app.label}
           icon={`fa-fw ${icon}`}
         />
-        <div className='feedItemHeader__title'>
+        <div className='feedItem__header__title'>
           {props.titleLink
             ? <Link to={props.titleLink}>{this.getTitleComponent(contentType, contentLabel)}</Link>
             : <span>{this.getTitleComponent(contentType, contentLabel)}</span>}
@@ -97,7 +97,7 @@ export class FeedItemHeader extends React.Component {
 
         {showLastModification && (
           <TimedEvent
-            customClass='feedItemHeader__right'
+            customClass='feedItem__header__right'
             operation={this.getDisplayOperation(
               props.lastModificationType,
               props.lastModificationEntityType,
@@ -117,19 +117,19 @@ export class FeedItemHeader extends React.Component {
         )}
 
         {!props.contentAvailable && (
-          <span className='feedItemHeader__unavailable'>
+          <span className='feedItem__header__unavailable'>
             {props.t('This content is not available')}
           </span>
         )}
 
         {props.contentAvailable && (
           <DropdownMenu
-            buttonCustomClass='feedItemHeader__actionMenu'
+            buttonCustomClass='feedItem__header__actionMenu'
             buttonIcon='fas fa-ellipsis-v'
             buttonTooltip={props.t('Actions')}
           >
             <IconButton
-              customClass='feedItemHeader__actionMenu__item'
+              customClass='feedItem__header__actionMenu__item'
               icon='fas fa-link'
               onClick={props.onClickCopyLink}
               text={props.t('Copy content link')}
@@ -139,7 +139,7 @@ export class FeedItemHeader extends React.Component {
 
             {props.allowEdition && (
               <IconButton
-                customClass='feedItemHeader__actionMenu__item'
+                customClass='feedItem__header__actionMenu__item'
                 icon='fas fa-pencil-alt'
                 onClick={props.onClickEdit}
                 text={props.t('Edit')}
@@ -149,7 +149,7 @@ export class FeedItemHeader extends React.Component {
             )}
 
             <Link
-              className='feedItemHeader__actionMenu__item'
+              className='feedItem__header__actionMenu__item'
               title={props.t('Open as content')}
               to={PAGE.WORKSPACE.CONTENT(props.workspaceId, contentType, contentId)}
               key={`open-${contentId}`}
@@ -172,7 +172,7 @@ FeedItemHeader.propTypes = {
   contentAvailable: PropTypes.bool,
   onClickCopyLink: PropTypes.func.isRequired,
   workspaceId: PropTypes.number.isRequired,
-  isPublication: PropTypes.bool.isRequired,
+  isActuality: PropTypes.bool.isRequired,
   allowEdition: PropTypes.bool,
   breadcrumbsList: PropTypes.array,
   eventList: PropTypes.array,
@@ -190,7 +190,7 @@ FeedItemHeader.defaultProps = {
   allowEdition: false,
   breadcrumbsList: [],
   eventList: [],
-  isPublication: false,
+  isActuality: false,
   lastModificationEntityType: '',
   lastModificationSubEntityType: '',
   lastModificationType: '',

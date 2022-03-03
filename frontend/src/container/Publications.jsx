@@ -528,7 +528,7 @@ export class Publications extends React.Component {
     const { props, state } = this
     const userRoleIdInWorkspace = findUserRoleIdInWorkspace(props.user.userId, props.currentWorkspace.memberList, ROLE_LIST)
     const currentPublicationId = Number(props.match.params.idcts || 0)
-    const isPublicationListEmpty = props.publicationPage.list.length === 0
+    const isActualityListEmpty = props.publicationPage.list.length === 0
 
     return (
       <ScrollToBottomWrapper
@@ -580,7 +580,7 @@ export class Publications extends React.Component {
 
         {state.loading && <Loading />}
 
-        {!state.loading && isPublicationListEmpty && (
+        {!state.loading && isActualityListEmpty && (
           <div className='publications__empty'>
             {props.t('This space does not have any news yet, create the first news post using the area at the bottom of the page.')}
           </div>
@@ -597,7 +597,7 @@ export class Publications extends React.Component {
             ref={publication.id === currentPublicationId ? this.currentPublicationRef : undefined}
             memberList={props.currentWorkspace.memberList}
             onClickCopyLink={() => this.handleClickCopyLink(publication)}
-            isPublication
+            isActuality
             inRecentActivities={false}
             onClickEdit={() => this.handleClickEdit(publication)}
             showTimeline

@@ -22,7 +22,7 @@ require('./ActivityList.styl')
 const ENTITY_TYPE_COMPONENT_CONSTRUCTOR = new Map([
   [TLM_ET.CONTENT, (activity, breadcrumbsList, onCopyLinkClicked, onEventClicked) => {
     const [entityType, coreEventType, subEntityType] = activity.newestMessage.event_type.split('.')
-    const isPublication = activity.content.content_namespace === CONTENT_NAMESPACE.PUBLICATION
+    const isActuality = activity.content.content_namespace === CONTENT_NAMESPACE.PUBLICATION
     const openInAppLink = PAGE.WORKSPACE.CONTENT(activity.content.workspace_id, activity.content.content_type, activity.content.content_id)
     const titleLink = openInAppLink
     const previewLink = openInAppLink
@@ -30,7 +30,7 @@ const ENTITY_TYPE_COMPONENT_CONSTRUCTOR = new Map([
       ? (
         <ContentWithoutPreviewActivity
           activity={activity}
-          isPublication={isPublication}
+          isActuality={isActuality}
           key={activity.id}
           onClickCopyLink={onCopyLinkClicked}
           onEventClicked={onEventClicked}
@@ -48,7 +48,7 @@ const ENTITY_TYPE_COMPONENT_CONSTRUCTOR = new Map([
           commentList={activity.commentList}
           content={serialize(activity.content, serializeContentProps)}
           eventList={activity.eventList}
-          isPublication={isPublication}
+          isActuality={isActuality}
           inRecentActivities
           key={activity.id}
           lastModifier={activity.newestMessage.fields.author}

@@ -159,7 +159,6 @@ export class Timeline extends React.Component {
               case TIMELINE_TYPE.COMMENT_AS_FILE:
                 return (
                   <Comment
-                    isPublication={false}
                     customClass={`${props.customClass}__comment`}
                     customColor={props.customColor}
                     apiUrl={props.apiUrl}

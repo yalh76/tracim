@@ -55,7 +55,7 @@ export class CommentFilePreview extends React.Component {
         href={fileDownloadUrl}
         download
       >
-        {(!props.isPublication) && <AttachedFile fileName={filename} />}
+        {(!props.isActuality) && <AttachedFile fileName={filename} />}
         {(!this.state.fallbackPreview &&
           <img
             className={classnames(`${props.customClass}__body__text__asFile`, 'comment__body__text__asFile')}
@@ -74,5 +74,5 @@ export default translate()(CommentFilePreview)
 CommentFilePreview.propTypes = {
   apiUrl: PropTypes.string.isRequired,
   apiContent: PropTypes.object.isRequired,
-  isPublication: PropTypes.bool.isRequired
+  isActuality: PropTypes.bool.isRequired
 }

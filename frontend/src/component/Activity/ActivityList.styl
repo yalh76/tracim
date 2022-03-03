@@ -1,7 +1,5 @@
 @import '~tracim_frontend_lib/src/css/Variable.styl'
 
-previewHeight = 400px
-
 .activityList
   display flex
   flex-direction column
@@ -13,7 +11,7 @@ previewHeight = 400px
   &__placeholder
     text-align center
 
-  & .feedItem__preview
+  & .feedItem_2_preview
     box-sizing content-box
     overflow hidden
     max-height previewHeight
@@ -25,7 +23,7 @@ previewHeight = 400px
       background-repeat no-repeat
       background-position bottom
       position absolute
-      bottom 40px
+      bottom previewHeight / 4 // 40px
       height 25%
       width 100%
 

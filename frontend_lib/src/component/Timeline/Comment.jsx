@@ -41,37 +41,36 @@ const Comment = props => {
   return (
     <div className={classnames(`${props.customClass}__messagelist__item`, 'timeline__messagelist__item')}>
       <div
-        className={classnames(`${props.customClass}`, 'comment', {
+        className={classnames(`${props.customClass}`, {
+          comment: !props.isActuality,
           sent: props.fromMe,
           received: !props.fromMe
         })}
         style={props.fromMe ? styleSent : {}}
       >
         <div className={classnames(`${props.customClass}__body`, 'comment__body')}>
-          {!props.isPublication && (
-            <Avatar
-              size={AVATAR_SIZE.MEDIUM}
-              user={props.author}
-              apiUrl={props.apiUrl}
-            />
-          )}
-          <div className={classnames(`${props.customClass}__body__content`, 'comment__body__content')}>
-            {!props.isPublication && (
-              <div className={classnames(`${props.customClass}__body__content__header`, 'comment__body__content__header')}>
-                <div className={classnames(`${props.customClass}__body__content__header__meta`, 'comment__body__content__header__meta')}>
+          {!props.isActuality && (
+            <div className='comment__header'>
+              <Avatar
+                size={AVATAR_SIZE.MEDIUM}
+                user={props.author}
+                apiUrl={props.apiUrl}
+              />
+              <div className={'comment__header__information'}>
+                <div className={'comment__header__information__text'}>
                   <ProfileNavigation
                     user={{
                       userId: props.author.user_id,
                       publicName: props.author.public_name
                     }}
                   >
-                    <span className={classnames(`${props.customClass}__body__content__header__meta__author`, 'comment__body__content__header__meta__author')}>
+                    <span className={'comment__header__author'}>
                       {props.author.public_name}
                     </span>
                   </ProfileNavigation>
 
                   <div
-                    className={classnames(`${props.customClass}__body__content__header__meta__date`, 'comment__body__content__header__meta__date')}
+                    className={'comment__header__date'}
                     title={createdFormated}
                   >
                     {createdDistance}
@@ -80,7 +79,7 @@ const Comment = props => {
 
                 {(isFile || actionsAllowed) && (
                   <DropdownMenu
-                    buttonCustomClass='comment__body__content__header__actions'
+                    buttonCustomClass='comment__header__actions'
                     buttonIcon='fas fa-ellipsis-v'
                     buttonTooltip={props.t('Actions')}
                   >
@@ -125,7 +124,9 @@ const Comment = props => {
                   </DropdownMenu>
                 )}
               </div>
-            )}
+            </div>
+          )}
+          <div className={classnames(`${props.customClass}__body__content`, 'comment__body__content')}>
 
             <div className='comment__body__content__textAndPreview'>
               <div
@@ -140,7 +141,7 @@ const Comment = props => {
                       <CommentFilePreview
                         apiUrl={props.apiUrl}
                         apiContent={props.apiContent}
-                        isPublication={props.isPublication}
+                        isActuality={props.isActuality}
                       />
                     )
                     : (
@@ -176,7 +177,7 @@ const Comment = props => {
             workspaceId={props.workspaceId}
           />
 
-          {props.isPublication && props.showTimeline && (
+          {props.isActuality && props.showTimeline && (
             <IconButton
               text={props.discussionToggleButtonLabel}
               textMobile={props.threadLength > 0 ? props.threadLength : ''}
@@ -195,7 +196,7 @@ export default translate()(Comment)
 
 Comment.propTypes = {
   author: PropTypes.object.isRequired,
-  isPublication: PropTypes.bool.isRequired,
+  isActuality: PropTypes.bool,
   loggedUser: PropTypes.object.isRequired,
   contentId: PropTypes.number.isRequired,
   apiContent: PropTypes.object.isRequired,
@@ -224,6 +225,7 @@ Comment.defaultProps = {
   fromMe: false,
   translationState: TRANSLATION_STATE.DISABLED,
   discussionToggleButtonLabel: 'Comment',
+  isActuality: false,
   threadLength: 0,
   onClickEditComment: () => {},
   onClickOpenFileComment: () => {},

@@ -222,8 +222,8 @@ export class Thread extends React.Component {
 
   handleClickBtnCloseApp = () => {
     const { state } = this
-    const isPublication = state.content.content_namespace === CONTENT_NAMESPACE.PUBLICATION
-    if (isPublication) state.config.history.push(PAGE.WORKSPACE.PUBLICATIONS(state.content.workspace_id))
+    const isActuality = state.content.content_namespace === CONTENT_NAMESPACE.PUBLICATION
+    if (isActuality) state.config.history.push(PAGE.WORKSPACE.PUBLICATIONS(state.content.workspace_id))
     else {
       this.setState({ isVisible: false })
       GLOBAL_dispatchEvent({ type: CUSTOM_EVENT.APP_CLOSED, data: {} })
@@ -368,8 +368,8 @@ export class Thread extends React.Component {
 
   render () {
     const { props, state } = this
-    const isPublication = state.content.content_namespace === CONTENT_NAMESPACE.PUBLICATION
-    const color = isPublication ? COLORS.PUBLICATION : state.config.hexcolor
+    const isActuality = state.content.content_namespace === CONTENT_NAMESPACE.PUBLICATION
+    const color = isActuality ? COLORS.PUBLICATION : state.config.hexcolor
 
     if (!state.isVisible) return null
 
@@ -379,7 +379,7 @@ export class Thread extends React.Component {
           loading={state.loadingContent}
           customClass={`${state.config.slug}__contentpage`}
           customColor={color}
-          faIcon={isPublication ? 'fas fa-stream' : state.config.faIcon}
+          faIcon={isActuality ? 'fas fa-stream' : state.config.faIcon}
           rawTitle={state.content.label}
           componentTitle={<div>{state.content.label}</div>}
           userRoleIdInWorkspace={state.loggedUser.userRoleIdInWorkspace}
